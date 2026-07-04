@@ -1,4 +1,4 @@
-# The Mercury Project
+# The Mercury Project - This document is a work in progress
 
 ## CSE499 Senior Project
 
