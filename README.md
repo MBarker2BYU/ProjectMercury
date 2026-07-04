@@ -1,5 +1,10 @@
 # The Mercury Project - This document is a work in progress
 
+## Team Quotes
+
+- Matthew Barker: “Some people spend an entire lifetime wondering if they made a difference in the world. But, the Marines don't have that problem.”  
+  — Ronald Reagan
+
 ## CSE499 Senior Project
 
 Mercury is a proof-of-concept secure communications framework designed to demonstrate applied software engineering, modular architecture, defensive programming, and security-focused design.
