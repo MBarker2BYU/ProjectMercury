@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+  </Folder>
+  <Project Path="Mercury.Abstractions/Mercury.Abstractions.csproj" Id="57d0da9a-afbc-42df-80f3-e2bc8564593a" />
+</Solution>
