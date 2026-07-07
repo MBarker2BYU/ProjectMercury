@@ -15,7 +15,11 @@
 
 using Mercury.Abstractions;
 using Mercury.Abstractions.Cryptography;
+using Mercury.Abstractions.Detection;
+using Mercury.Abstractions.Envelope;
+using Mercury.Abstractions.Logging;
 using Mercury.Abstractions.Primitives;
+using Mercury.Abstractions.Transport;
 
 namespace Mercury.Core;
 
@@ -23,9 +27,25 @@ namespace Mercury.Core;
 /// Class MercuryClient.
 /// Implements the <see cref="IMercuryClient" />
 /// </summary>
+/// <param name="cryptoProvider">The crypto provider.</param>
+/// <param name="envelopeCodec">The envelope codec.</param>
+/// <param name="transport">The transport.</param>
+/// <param name="replayProtector">The replay protector.</param>
+/// <param name="logger">The logger.</param>
 /// <seealso cref="IMercuryClient" />
-internal class MercuryClient : IMercuryClient
+internal class MercuryClient(ICryptoProvider cryptoProvider, IEnvelopeCodec envelopeCodec, 
+    ITransport transport, IReplayProtector replayProtector, ILogger? logger = null) : IMercuryClient
 {
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MercuryClient"/> class.
+    /// </summary>
+    /// <param name="dependencies">The dependencies.</param>
+    internal MercuryClient(IMercuryClientDependencies dependencies)
+        :this(dependencies.CryptoProvider, dependencies.EnvelopeCodec, dependencies.Transport, 
+            dependencies.ReplayProtector, dependencies.EffectiveLogger)
+    {}
+
     /// <summary>
     /// Sends the asynchronous.
     /// </summary>
