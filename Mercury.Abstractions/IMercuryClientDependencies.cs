@@ -30,12 +30,12 @@ public interface IMercuryClientDependencies
     /// Gets the crypto.
     /// </summary>
     /// <value>The crypto.</value>
-    ICryptoProvider Crypto { get; }
+    ICryptoProvider CryptoProvider { get; }
     /// <summary>
-    /// Gets the codec.
+    /// Gets the envelope codec.
     /// </summary>
     /// <value>The codec.</value>
-    IEnvelopeCodec Codec { get; }
+    IEnvelopeCodec EnvelopeCodec { get; }
     /// <summary>
     /// Gets the transport.
     /// </summary>
@@ -45,7 +45,7 @@ public interface IMercuryClientDependencies
     /// Gets the replay.
     /// </summary>
     /// <value>The replay.</value>
-    IReplayProtector Replay { get; }
+    IReplayProtector ReplayProtector { get; }
     /// <summary>
     /// Gets the logger.
     /// </summary>
