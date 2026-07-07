@@ -1,25 +1,4 @@
-﻿// ***********************************************************************
-// Assembly       : Mercury.Core
-// Author           : Matthew D. Barker
-// Created          : 07-07-2026
-//
-// Last Modified By : Matthew D. Barker
-// Last Modified On : 07-07-2026
-// ***********************************************************************
-// <copyright file="IMercuryFactory.cs">
-//     Copyright (c) Matthew D. Barker. All rights reserved.
-//     Submitted in partial fulfillment of CSE499 Senior Capstone Project
-//     at Brigham Young University-Idaho.
-// </copyright>
-// ***********************************************************************
-
-using Mercury.Abstractions.Cryptography;
-using Mercury.Abstractions.Detection;
-using Mercury.Abstractions.Envelope;
-using Mercury.Abstractions.Logging;
-using Mercury.Abstractions.Transport;
-
-namespace Mercury.Abstractions.Factories;
+﻿namespace Mercury.Abstractions.Factories;
 
 /// <summary>
 /// Interface IMercuryFactory
@@ -36,7 +15,7 @@ public interface IMercuryFactory
     /// <param name="logger">The logger.</param>
     /// <returns>IMercuryClientDependencies.</returns>
     IMercuryClientDependencies BuildClientDependencies(ICryptoProvider cryptoProvider, IEnvelopeCodec envelopeCodec, ITransport transport, IReplayProtector replayProtector, ILogger? logger = null);
-
+    
     /// <summary>
     /// Builds the mercury client.
     /// </summary>
