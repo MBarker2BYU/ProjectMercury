@@ -13,6 +13,8 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Primitives;
+
 namespace Mercury.Abstractions.Transport;
 
 /// <summary>
@@ -20,5 +22,18 @@ namespace Mercury.Abstractions.Transport;
 /// </summary>
 public interface ITransport
 {
-    
+    /// <summary>
+    /// Sends the asynchronous.
+    /// </summary>
+    /// <param name="frame">The frame.</param>
+    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <returns>Task.</returns>
+    Task SendAsync(ReadOnlyMemory frame, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Receives the asynchronous.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
+    Task<ReadOnlyMemory> ReceiveAsync(CancellationToken cancellationToken = default);
 }

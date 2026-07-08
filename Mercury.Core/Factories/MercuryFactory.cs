@@ -19,7 +19,9 @@ using Mercury.Abstractions.Detection;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Factories;
 using Mercury.Abstractions.Logging;
+using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Transport;
+using Mercury.Core.Cryptography;
 
 namespace Mercury.Core.Factories;
 
@@ -35,8 +37,8 @@ public sealed class MercuryFactory : IMercuryFactory
     /// Gets the sm mercury factory.
     /// </summary>
     /// <value>The sm mercury factory.</value>
-    private static readonly Lazy<MercuryFactory> sm_MercuryFactory 
-        = new (() => new MercuryFactory());
+    private static readonly Lazy<MercuryFactory> sm_MercuryFactory
+        = new(() => new MercuryFactory());
 
     /// <summary>
     /// Gets the instance.
@@ -44,6 +46,8 @@ public sealed class MercuryFactory : IMercuryFactory
     /// <value>The instance.</value>
     public static MercuryFactory Instance => sm_MercuryFactory.Value;
 
+
+    #region MercuryClient
 
     /// <summary>
     /// Builds the client dependencies.
@@ -66,4 +70,23 @@ public sealed class MercuryFactory : IMercuryFactory
     /// <returns>IMercuryClient.</returns>
     public IMercuryClient BuildClient(IMercuryClientDependencies dependencies)
         => new MercuryClient(dependencies);
+
+    #endregion
+
+    #region Cryptography
+
+    /// <summary>
+    /// Builds the crypto context.
+    /// </summary>
+    /// <param name="encryption">The encryption.</param>
+    /// <param name="signature">The signature.</param>
+    /// <param name="senderKeyId">The sender key identifier.</param>
+    /// <param name="recipientKeyId">The recipient key identifier.</param>
+    /// <returns>ICryptoContext.</returns>
+    public ICryptoContext BuildCryptoContext(AlgorithmId encryption, AlgorithmId signature, KeyId senderKeyId,
+        KeyId recipientKeyId)
+        => new CryptoContext(encryption, signature, senderKeyId, recipientKeyId);
+
+    #endregion
+
 }

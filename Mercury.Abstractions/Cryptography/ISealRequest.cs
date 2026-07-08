@@ -4,41 +4,45 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-07-2026
+// Last Modified On : 07-04-2026
 // ***********************************************************************
-// <copyright file="ILogger.cs">
+// <copyright file="ISealRequest.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
 // </copyright>
 // ***********************************************************************
 
-namespace Mercury.Abstractions.Logging;
+using Mercury.Abstractions.Primitives;
+
+namespace Mercury.Abstractions.Cryptography;
 
 /// <summary>
-/// Interface ILogger
+/// Interface ISealRequest
 /// </summary>
-public interface ILogger
+public interface ISealRequest
 {
     /// <summary>
-    /// Traces the specified message.
+    /// Gets the crypto context.
     /// </summary>
-    /// <param name="message">The message.</param>
-    void Trace(string message);
+    /// <value>The crypto context.</value>
+    ICryptoContext CryptoContext { get; }
+
     /// <summary>
-    /// Information the specified message.
+    /// Gets the payload.
     /// </summary>
-    /// <param name="message">The message.</param>
-    void Info(string message);
+    /// <value>The payload.</value>
+    ReadOnlyMemory Payload { get; }
+
     /// <summary>
-    /// Warns the specified message.
+    /// Gets the header meta.
     /// </summary>
-    /// <param name="message">The message.</param>
-    void Warn(string message);
+    /// <value>The header meta.</value>
+    Metadata? HeaderMeta { get; }
+
     /// <summary>
-    /// Errors the specified message.
+    /// Gets the footer meta.
     /// </summary>
-    /// <param name="message">The message.</param>
-    /// <param name="ex">The ex.</param>
-    void Error(string message, Exception? ex = null);
+    /// <value>The footer meta.</value>
+    Metadata? FooterMeta { get; }
 }

@@ -4,41 +4,42 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-07-2026
+// Last Modified On : 07-04-2026
 // ***********************************************************************
-// <copyright file="ILogger.cs">
+// <copyright file="ISecureEnvelope.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
 // </copyright>
 // ***********************************************************************
 
-namespace Mercury.Abstractions.Logging;
+using Mercury.Abstractions.Primitives;
+
+namespace Mercury.Abstractions.Envelope;
 
 /// <summary>
-/// Interface ILogger
+/// Interface ISecureEnvelope
 /// </summary>
-public interface ILogger
+public interface ISecureEnvelope
 {
     /// <summary>
-    /// Traces the specified message.
+    /// Gets the framework version.
     /// </summary>
-    /// <param name="message">The message.</param>
-    void Trace(string message);
+    /// <value>The framework version.</value>
+    FrameworkVersion FrameworkVersion { get; }
     /// <summary>
-    /// Information the specified message.
+    /// Gets the header.
     /// </summary>
-    /// <param name="message">The message.</param>
-    void Info(string message);
+    /// <value>The header.</value>
+    IEnvelopeHeader Header { get; }
     /// <summary>
-    /// Warns the specified message.
+    /// Gets the payload.
     /// </summary>
-    /// <param name="message">The message.</param>
-    void Warn(string message);
+    /// <value>The payload.</value>
+    ReadOnlyMemory Payload { get; }
     /// <summary>
-    /// Errors the specified message.
+    /// Gets the footer.
     /// </summary>
-    /// <param name="message">The message.</param>
-    /// <param name="ex">The ex.</param>
-    void Error(string message, Exception? ex = null);
+    /// <value>The footer.</value>
+    IEnvelopeFooter Footer { get; }
 }

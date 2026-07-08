@@ -20,6 +20,8 @@ using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Logging;
 using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Transport;
+using Mercury.Core.Cryptography;
+using Mercury.Core.Logging;
 
 namespace Mercury.Core;
 
@@ -46,6 +48,11 @@ internal class MercuryClient(ICryptoProvider cryptoProvider, IEnvelopeCodec enve
             dependencies.ReplayProtector, dependencies.EffectiveLogger)
     {}
 
+    public Task SendAsync(ICryptoContext cryptoContext, ReadOnlyMemory payload, Metadata? headerMeta,
+        Metadata? footerMeta,
+        CancellationToken cancellationToken = default)
+        => InternalSendAsync((CryptoContext)cryptoContext, payload, headerMeta, footerMeta, cancellationToken);
+
     /// <summary>
     /// Sends the asynchronous.
     /// </summary>
@@ -54,9 +61,33 @@ internal class MercuryClient(ICryptoProvider cryptoProvider, IEnvelopeCodec enve
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task.</returns>
     /// <exception cref="NotImplementedException"></exception>
-    public Task SendAsync(ICryptoContext cryptoContext, ReadOnlyMemory payload, CancellationToken cancellationToken = default)
+    public Task SendAsync(ICryptoContext cryptoContext, ReadOnlyMemory payload,
+        CancellationToken cancellationToken = default)
+        => InternalSendAsync((CryptoContext)cryptoContext, payload, null, null, cancellationToken);
+
+    private async Task InternalSendAsync(CryptoContext cryptoContext, ReadOnlyMemory payload, Metadata? headerMeta, Metadata? footerMeta, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if(payload.IsEmpty)
+            throw new ArgumentException("Payload must not be empty.", nameof(payload));
+
+        var request = new SealRequest(
+            cryptoContext,
+            payload,
+            headerMeta is null
+                ? null
+                : new Metadata(headerMeta),
+            footerMeta is null
+                ? null
+                : new Metadata(footerMeta)
+        );
+
+        var envelope = await m_CryptoProvider.SealAsync(request, cancellationToken).ConfigureAwait(false);
+
+        var frame = m_EnvelopeCodec.Encode(envelope);
+
+        await m_Transport.SendAsync(frame, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -69,4 +100,26 @@ internal class MercuryClient(ICryptoProvider cryptoProvider, IEnvelopeCodec enve
     {
         throw new NotImplementedException();
     }
+
+    /// <summary>
+    /// The crypto
+    /// </summary>
+    private readonly ICryptoProvider m_CryptoProvider = cryptoProvider;
+    /// <summary>
+    /// The codec
+    /// </summary>
+    private readonly IEnvelopeCodec m_EnvelopeCodec = envelopeCodec;
+    /// <summary>
+    /// The transport
+    /// </summary>
+    private readonly ITransport m_Transport = transport;
+    /// <summary>
+    /// The replay
+    /// </summary>
+    private readonly IReplayProtector m_ReplayProtector = replayProtector;
+
+    /// <summary>
+    /// The log
+    /// </summary>
+    private readonly ILogger m_Logger = logger ?? Logger.Instance;
 }

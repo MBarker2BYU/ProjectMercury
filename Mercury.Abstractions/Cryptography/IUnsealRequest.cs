@@ -1,12 +1,12 @@
 ﻿// ***********************************************************************
 // Assembly       : Mercury.Abstractions
 // Author           : Matthew D. Barker
-// Created          : 07-02-2026
+// Created          : 07-07-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-04-2026
+// Last Modified On : 07-07-2026
 // ***********************************************************************
-// <copyright file="IReplayProtector.cs">
+// <copyright file="IUnsealRequest.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
@@ -15,18 +15,16 @@
 
 using Mercury.Abstractions.Envelope;
 
-namespace Mercury.Abstractions.Detection;
+namespace Mercury.Abstractions.Cryptography;
 
 /// <summary>
-/// Interface IReplayProtector
+/// Interface IUnsealRequest
 /// </summary>
-public interface IReplayProtector
+public interface IUnsealRequest
 {
     /// <summary>
-    /// Tries to accept asynchronous.
+    /// Gets the secure envelope.
     /// </summary>
-    /// <param name="header">The header.</param>
-    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>Task&lt;System.Boolean&gt;.</returns>
-    Task<bool> TryAcceptAsync(IEnvelopeHeader header,CancellationToken cancellationToken = default);
+    /// <value>The secure envelope.</value>
+    ISecureEnvelope SecureEnvelope { get; }
 }

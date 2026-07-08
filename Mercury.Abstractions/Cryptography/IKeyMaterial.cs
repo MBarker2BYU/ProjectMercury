@@ -6,27 +6,35 @@
 // Last Modified By : Matthew D. Barker
 // Last Modified On : 07-04-2026
 // ***********************************************************************
-// <copyright file="IReplayProtector.cs">
+// <copyright file="IKeyMaterial.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
 // </copyright>
 // ***********************************************************************
 
-using Mercury.Abstractions.Envelope;
+using Mercury.Abstractions.Primitives;
 
-namespace Mercury.Abstractions.Detection;
+namespace Mercury.Abstractions.Cryptography;
 
 /// <summary>
-/// Interface IReplayProtector
+/// Interface IKeyMaterial
 /// </summary>
-public interface IReplayProtector
+public interface IKeyMaterial
 {
     /// <summary>
-    /// Tries to accept asynchronous.
+    /// Gets the key identifier.
     /// </summary>
-    /// <param name="header">The header.</param>
-    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>Task&lt;System.Boolean&gt;.</returns>
-    Task<bool> TryAcceptAsync(IEnvelopeHeader header,CancellationToken cancellationToken = default);
+    /// <value>The key identifier.</value>
+    KeyId KeyId { get; }
+    /// <summary>
+    /// Gets the public key.
+    /// </summary>
+    /// <value>The public key.</value>
+    ReadOnlyMemory PublicKey { get; }
+    /// <summary>
+    /// Gets the private key.
+    /// </summary>
+    /// <value>The private key.</value>
+    ReadOnlyMemory PrivateKey { get; }
 }

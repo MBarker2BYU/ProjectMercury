@@ -1,12 +1,12 @@
 ﻿// ***********************************************************************
-// Assembly       : Mercury.Abstractions
+// Assembly       : Mercury.Core
 // Author           : Matthew D. Barker
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
 // Last Modified On : 07-04-2026
 // ***********************************************************************
-// <copyright file="IReplayProtector.cs">
+// <copyright file="EnvelopeFooter.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
@@ -14,19 +14,21 @@
 // ***********************************************************************
 
 using Mercury.Abstractions.Envelope;
+using Mercury.Abstractions.Primitives;
 
-namespace Mercury.Abstractions.Detection;
+namespace Mercury.Core.Envelope;
 
 /// <summary>
-/// Interface IReplayProtector
+/// Class EnvelopeFooter.
+/// Implements the <see cref="IEnvelopeFooter" />
 /// </summary>
-public interface IReplayProtector
+/// <param name="Meta">The meta.</param>
+/// <seealso cref="IEnvelopeFooter" />
+public class EnvelopeFooter(Metadata? Meta) : IEnvelopeFooter
 {
     /// <summary>
-    /// Tries to accept asynchronous.
+    /// Gets the meta.
     /// </summary>
-    /// <param name="header">The header.</param>
-    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>Task&lt;System.Boolean&gt;.</returns>
-    Task<bool> TryAcceptAsync(IEnvelopeHeader header,CancellationToken cancellationToken = default);
+    /// <value>The meta.</value>
+    public Metadata? Meta { get; } = Meta ?? new Metadata();
 }

@@ -13,6 +13,8 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Envelope;
+
 namespace Mercury.Abstractions.Cryptography;
 
 /// <summary>
@@ -20,5 +22,25 @@ namespace Mercury.Abstractions.Cryptography;
 /// </summary>
 public interface ICryptoProvider
 {
-    
+    /// <summary>
+    /// Gets the name.
+    /// </summary>
+    /// <value>The name.</value>
+    string Name { get; }
+
+    /// <summary>
+    /// Seals the asynchronous.
+    /// </summary>
+    /// <param name="sealRequest">The seal request.</param>
+    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <returns>Task&lt;ISecureEnvelope&gt;.</returns>
+    Task<ISecureEnvelope> SealAsync(ISealRequest sealRequest, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Unseals the asynchronous.
+    /// </summary>
+    /// <param name="unsealRequest">The unseal request.</param>
+    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <returns>Task&lt;IMercuryResult&gt;.</returns>
+    Task<IMercuryResult> UnsealAsync(IUnsealRequest unsealRequest, CancellationToken cancellationToken = default);
 }
