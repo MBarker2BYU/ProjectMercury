@@ -26,9 +26,9 @@ public interface ITransport
     /// Sends the asynchronous.
     /// </summary>
     /// <param name="frame">The frame.</param>
-    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <param name="can">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task.</returns>
-    Task SendAsync(ReadOnlyMemory frame, CancellationToken cancellationToken = default);
+    Task SendAsync(ReadOnlyMemory frame, CancellationToken can = default);
 
     /// <summary>
     /// Receives the asynchronous.
