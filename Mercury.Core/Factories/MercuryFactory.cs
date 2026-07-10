@@ -15,6 +15,8 @@
 
 using Mercury.Abstractions;
 using Mercury.Abstractions.Factories;
+using Mercury.Abstractions.Transport;
+using Mercury.Core.Transport;
 
 namespace Mercury.Core.Factories;
 
@@ -38,9 +40,14 @@ public sealed class MercuryFactory : IMercuryFactory
     public static MercuryFactory Instance => sm_MercuryFactory.Value;
 
     /// <summary>
+    /// The transport
+    /// </summary>
+    private readonly ITransport m_Transport = new LoopbackTransport();
+
+    /// <summary>
     /// Builds the client.
     /// </summary>
     /// <returns>IMercuryClient.</returns>
     public IMercuryClient BuildClient()
-        => new MercuryClient();
+        => new MercuryClient(m_Transport);
 }

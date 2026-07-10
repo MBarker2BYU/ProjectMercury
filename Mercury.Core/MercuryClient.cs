@@ -17,6 +17,7 @@ using Mercury.Abstractions;
 using Mercury.Abstractions.Primitives;
 using System.Collections.Concurrent;
 using Mercury.Abstractions.Enums;
+using Mercury.Abstractions.Transport;
 
 namespace Mercury.Core;
 
@@ -25,11 +26,11 @@ namespace Mercury.Core;
 /// Implements the <see cref="IMercuryClient" />
 /// </summary>
 /// <seealso cref="IMercuryClient" />
-internal sealed class MercuryClient : IMercuryClient
+internal sealed class MercuryClient(ITransport transport) : IMercuryClient
 {
 
-    private readonly ConcurrentQueue<byte[]> m_Queue = new();
-    private readonly SemaphoreSlim m_Signal = new(0);
+    private readonly ITransport m_Transport = transport
+                                              ?? throw new ArgumentNullException(nameof(transport));
 
     /// <summary>
     /// Sends the asynchronous.
@@ -40,12 +41,9 @@ internal sealed class MercuryClient : IMercuryClient
     /// <exception cref="NotImplementedException"></exception>
     public Task SendAsync(ReadOnlyMemory payload, CancellationToken cancellationToken = default)
     {
-        var copy = (byte[])payload.Clone();
-
-        m_Queue.Enqueue(copy);
-        m_Signal.Release();
-
-        return Task.CompletedTask;
+        return m_Transport.SendAsync(
+            payload,
+            cancellationToken);
     }
 
     /// <summary>
@@ -56,15 +54,28 @@ internal sealed class MercuryClient : IMercuryClient
     /// <exception cref="NotImplementedException"></exception>
     public async Task<IMercuryResult> ReceiveAsync(CancellationToken cancellationToken = default)
     {
-        await m_Signal.WaitAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        if (m_Queue.TryDequeue(out byte[] payload))
+        try
         {
-            return new MercuryResult(true, new ReadOnlyMemory(payload), FailureReason.None);
-        }
+            var payload = await m_Transport
+                .ReceiveAsync(cancellationToken)
+                .ConfigureAwait(false);
 
-        return new MercuryResult(false, null, FailureReason.InternalError,
-            "The loopback queue was signaled without a payload.");
+            return new MercuryResult(
+                true,
+                payload,
+                FailureReason.None);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            return new MercuryResult(
+                false,
+                ReadOnlyMemory.Empty,
+                FailureReason.InternalError,
+                exception.Message);
+        }
     }
 }
