@@ -48,19 +48,30 @@ public sealed class MercuryFactory : IMercuryFactory
         new SecureEnvelopeFactory();
 
     /// <summary>
+    /// Builds the dependencies.
+    /// </summary>
+    /// <param name="cryptoProvider">The crypto provider.</param>
+    /// <param name="transport">The transport.</param>
+    /// <returns>IMercuryClientDependencies.</returns>
+    public IMercuryClientDependencies BuildDependencies(ICryptoProvider cryptoProvider, ITransport transport)
+        => new MercuryClientDependencies(cryptoProvider, transport);
+
+    /// <summary>
     /// Builds the client.
     /// </summary>
     /// <returns>IMercuryClient.</returns>
     public IMercuryClient BuildClient()
-        => new MercuryClient(new PassThroughCryptoProvider(nameof(PassThroughCryptoProvider))
-            , new LoopbackTransport(), m_SecureEnvelopeFactory);
-    
+    {
+        var dependencies = BuildDependencies(new PassThroughCryptoProvider(nameof(PassThroughCryptoProvider)), new LoopbackTransport());
+
+        return BuildClient(dependencies);
+    }
+
     /// <summary>
     /// Builds the client.
     /// </summary>
-    /// <param name="transport">The transport.</param>
+    /// <param name="mercuryClientDependencies"></param>
     /// <returns>IMercuryClient.</returns>
-    public IMercuryClient BuildClient(ITransport transport)
-        => new MercuryClient(new PassThroughCryptoProvider(nameof(PassThroughCryptoProvider))
-            , transport, m_SecureEnvelopeFactory);
+    public IMercuryClient BuildClient(IMercuryClientDependencies mercuryClientDependencies)
+        => new MercuryClient(mercuryClientDependencies, m_SecureEnvelopeFactory);
 }

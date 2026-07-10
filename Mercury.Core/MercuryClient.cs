@@ -27,17 +27,19 @@ namespace Mercury.Core;
 /// Implements the <see cref="IMercuryClient" />
 /// </summary>
 /// <seealso cref="IMercuryClient" />
-internal sealed class MercuryClient(ICryptoProvider cryptoProvider, ITransport transport, ISecureEnvelopeFactory secureEnvelopeFactory) : IMercuryClient
+internal sealed class MercuryClient(IMercuryClientDependencies dependencies, ISecureEnvelopeFactory secureEnvelopeFactory) : IMercuryClient
 {
 
-    private readonly ICryptoProvider m_CryptoProvider = cryptoProvider
-                                                        ?? throw new ArgumentNullException(nameof(cryptoProvider));
+    private readonly ICryptoProvider m_CryptoProvider = dependencies.CryptoProvider
+                                                        ?? throw new ArgumentNullException(nameof(dependencies.CryptoProvider));
 
-    private readonly ITransport m_Transport = transport
-                                              ?? throw new ArgumentNullException(nameof(transport));
+    private readonly ITransport m_Transport = dependencies.Transport
+                                              ?? throw new ArgumentNullException(nameof(dependencies.Transport));
 
     private readonly ISecureEnvelopeFactory m_SecureEnvelopeFactory = secureEnvelopeFactory
                                                                       ?? throw new ArgumentNullException(nameof(secureEnvelopeFactory));
+
+    
 
     /// <summary>
     /// Sends the asynchronous.

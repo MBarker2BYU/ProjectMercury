@@ -13,6 +13,7 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Transport;
 
 namespace Mercury.Abstractions.Factories;
@@ -21,6 +22,15 @@ namespace Mercury.Abstractions.Factories;
 /// </summary>
 public interface IMercuryFactory
 {
+
+    /// <summary>
+    /// Builds the dependencies.
+    /// </summary>
+    /// <param name="cryptoProvider">The crypto provider.</param>
+    /// <param name="transport">The transport.</param>
+    /// <returns>IMercuryClientDependencies.</returns>
+    IMercuryClientDependencies BuildDependencies(ICryptoProvider cryptoProvider, ITransport transport);
+
     /// <summary>
     /// Builds the client.
     /// </summary>
@@ -30,7 +40,7 @@ public interface IMercuryFactory
     /// <summary>
     /// Builds the client.
     /// </summary>
-    /// <param name="transport">The transport.</param>
+    /// <param name="mercuryClientDependencies"></param>
     /// <returns>IMercuryClient.</returns>
-    IMercuryClient BuildClient(ITransport transport);
+    IMercuryClient BuildClient(IMercuryClientDependencies mercuryClientDependencies);
 }

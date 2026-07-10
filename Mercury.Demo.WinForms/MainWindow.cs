@@ -21,8 +21,11 @@ namespace Mercury.Demo.WinForms
         {
             var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
 
-            m_AlphaClient = MercuryFactory.Instance.BuildClient(alphaTransport);
-            m_BravoClient = MercuryFactory.Instance.BuildClient(bravoTransport);
+            var alphaDependencies = MercuryFactory.Instance.BuildDependencies(null, alphaTransport);
+            var bravoDependencies = MercuryFactory.Instance.BuildDependencies(null, bravoTransport);
+
+            m_AlphaClient = MercuryFactory.Instance.BuildClient(alphaDependencies);
+            m_BravoClient = MercuryFactory.Instance.BuildClient(bravoDependencies);
 
         }
 
