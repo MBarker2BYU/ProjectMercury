@@ -28,7 +28,7 @@ namespace Mercury.Core;
 /// <param name="failureReason">The failure reason.</param>
 /// <param name="message"></param>
 /// <seealso cref="IMercuryResult" />
-public class MercuryResult(bool success, ReadOnlyMemory payload, FailureReason failureReason, string? message = null) : IMercuryResult
+internal class MercuryResult(bool success, ReadOnlyMemory payload, FailureReason failureReason, string? message = null) : IMercuryResult
 {
     /// <summary>
     /// Gets a value indicating whether this <see cref="T:Mercury.Abstractions.IMercuryResult" /> is success.

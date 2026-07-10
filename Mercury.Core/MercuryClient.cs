@@ -4,7 +4,7 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-09-2026
+// Last Modified On : 07-10-2026
 // ***********************************************************************
 // <copyright file="MercuryClient.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -16,9 +16,9 @@
 using Mercury.Abstractions;
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
+using Mercury.Abstractions.Factories;
 using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Transport;
-using Mercury.Core.Envelope;
 
 namespace Mercury.Core;
 
@@ -27,7 +27,7 @@ namespace Mercury.Core;
 /// Implements the <see cref="IMercuryClient" />
 /// </summary>
 /// <seealso cref="IMercuryClient" />
-internal sealed class MercuryClient(ICryptoProvider cryptoProvider, ITransport transport) : IMercuryClient
+internal sealed class MercuryClient(ICryptoProvider cryptoProvider, ITransport transport, ISecureEnvelopeFactory secureEnvelopeFactory) : IMercuryClient
 {
 
     private readonly ICryptoProvider m_CryptoProvider = cryptoProvider
@@ -35,6 +35,9 @@ internal sealed class MercuryClient(ICryptoProvider cryptoProvider, ITransport t
 
     private readonly ITransport m_Transport = transport
                                               ?? throw new ArgumentNullException(nameof(transport));
+
+    private readonly ISecureEnvelopeFactory m_SecureEnvelopeFactory = secureEnvelopeFactory
+                                                                      ?? throw new ArgumentNullException(nameof(secureEnvelopeFactory));
 
     /// <summary>
     /// Sends the asynchronous.
@@ -50,7 +53,8 @@ internal sealed class MercuryClient(ICryptoProvider cryptoProvider, ITransport t
                 .ProtectAsync(payload, cancellationToken)
                 .ConfigureAwait(false);
 
-        var secureEnvelope = new SecureEnvelope(protectedPayload);
+        var secureEnvelope =
+            m_SecureEnvelopeFactory.Build(protectedPayload);
 
         await m_Transport
             .SendAsync(secureEnvelope, cancellationToken)

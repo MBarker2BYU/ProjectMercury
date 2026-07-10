@@ -53,9 +53,15 @@ public sealed class MercuryFactory : IMercuryFactory
     private readonly ITransport m_Transport = new LoopbackTransport();
 
     /// <summary>
+    /// The secure envelope factory
+    /// </summary>
+    private readonly ISecureEnvelopeFactory m_SecureEnvelopeFactory =
+        new SecureEnvelopeFactory();
+
+    /// <summary>
     /// Builds the client.
     /// </summary>
     /// <returns>IMercuryClient.</returns>
     public IMercuryClient BuildClient()
-        => new MercuryClient(m_CryptoProvider, m_Transport);
+        => new MercuryClient(m_CryptoProvider, m_Transport, m_SecureEnvelopeFactory);
 }
