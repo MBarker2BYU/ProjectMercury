@@ -45,6 +45,13 @@ public readonly struct ReadOnlyMemory(byte[]? data)
     }
 
     /// <summary>
+    /// Clones this instance.
+    /// </summary>
+    /// <returns>System.Byte[].</returns>
+    public byte[] Clone()
+            => ToArray();
+
+    /// <summary>
     /// Slices the specified start.
     /// </summary>
     /// <param name="start">The start.</param>

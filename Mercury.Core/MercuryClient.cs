@@ -15,6 +15,9 @@
 
 using Mercury.Abstractions;
 using Mercury.Abstractions.Primitives;
+using System.Collections.Concurrent;
+using System.Security.Authentication.ExtendedProtection;
+using Mercury.Abstractions.Enums;
 
 namespace Mercury.Core;
 
@@ -25,6 +28,10 @@ namespace Mercury.Core;
 /// <seealso cref="IMercuryClient" />
 internal sealed class MercuryClient : IMercuryClient
 {
+
+    private readonly ConcurrentQueue<byte[]> m_Queue = new();
+    private readonly SemaphoreSlim m_Signal = new(0);
+
     /// <summary>
     /// Sends the asynchronous.
     /// </summary>
@@ -34,7 +41,12 @@ internal sealed class MercuryClient : IMercuryClient
     /// <exception cref="NotImplementedException"></exception>
     public Task SendAsync(ReadOnlyMemory payload, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var copy = (byte[])payload.Clone();
+
+        m_Queue.Enqueue(copy);
+        m_Signal.Release();
+
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -43,8 +55,17 @@ internal sealed class MercuryClient : IMercuryClient
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task&lt;IMercuryResult&gt;.</returns>
     /// <exception cref="NotImplementedException"></exception>
-    public Task<IMercuryResult> ReceiveAsync(CancellationToken cancellationToken = default)
+    public async Task<IMercuryResult> ReceiveAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        await m_Signal.WaitAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (m_Queue.TryDequeue(out byte[] payload))
+        {
+            return new MercuryResult(true, new ReadOnlyMemory(payload), FailureReason.None);
+        }
+
+        return new MercuryResult(false, null, FailureReason.InternalError,
+            "The loopback queue was signaled without a payload.");
     }
 }
