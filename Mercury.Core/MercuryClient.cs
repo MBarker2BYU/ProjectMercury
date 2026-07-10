@@ -16,7 +16,6 @@
 using Mercury.Abstractions;
 using Mercury.Abstractions.Primitives;
 using System.Collections.Concurrent;
-using System.Security.Authentication.ExtendedProtection;
 using Mercury.Abstractions.Enums;
 
 namespace Mercury.Core;
