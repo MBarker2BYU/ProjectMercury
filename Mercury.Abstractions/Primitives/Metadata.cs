@@ -99,7 +99,15 @@ public sealed class Metadata : IReadOnlyDictionary<string, string>
     /// <param name="value">When this method returns, the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
     /// <returns>true if the object that implements the <see cref="T:System.Collections.Generic.IReadOnlyDictionary`2"></see> interface contains an element that has the specified key; otherwise, false.</returns>
     public bool TryGetValue(string key, out string value)
-        => m_Metadata.TryGetValue(key, out value!);
+    {
+        if (m_Metadata.TryGetValue(key, out value))
+        {
+            return true;
+        }
+
+        value = string.Empty;
+        return false;
+    }
 
     /// <summary>
     /// Gets the <see cref="System.String"/> with the specified key.
