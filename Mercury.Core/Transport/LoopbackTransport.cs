@@ -45,7 +45,7 @@ internal sealed class LoopbackTransport : ITransport
         ReadOnlyMemory payload,
         CancellationToken cancellationToken = default)
     {
-        var copy = (byte[])payload.Clone();
+        var copy = payload.ToArray();
 
         m_Queue.Enqueue(copy);
         m_Signal.Release();

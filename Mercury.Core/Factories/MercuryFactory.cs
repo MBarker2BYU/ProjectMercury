@@ -14,8 +14,10 @@
 // ***********************************************************************
 
 using Mercury.Abstractions;
+using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Factories;
 using Mercury.Abstractions.Transport;
+using Mercury.Core.Cryptography;
 using Mercury.Core.Transport;
 
 namespace Mercury.Core.Factories;
@@ -40,6 +42,12 @@ public sealed class MercuryFactory : IMercuryFactory
     public static MercuryFactory Instance => sm_MercuryFactory.Value;
 
     /// <summary>
+    /// The crypto provider
+    /// </summary>
+    private readonly ICryptoProvider m_CryptoProvider =
+        new PassThroughCryptoProvider(nameof(PassThroughCryptoProvider));
+
+    /// <summary>
     /// The transport
     /// </summary>
     private readonly ITransport m_Transport = new LoopbackTransport();
@@ -49,5 +57,5 @@ public sealed class MercuryFactory : IMercuryFactory
     /// </summary>
     /// <returns>IMercuryClient.</returns>
     public IMercuryClient BuildClient()
-        => new MercuryClient(m_Transport);
+        => new MercuryClient(m_CryptoProvider, m_Transport);
 }

@@ -14,9 +14,9 @@
 // ***********************************************************************
 
 using Mercury.Abstractions;
-using Mercury.Abstractions.Primitives;
-using System.Collections.Concurrent;
+using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
+using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Transport;
 
 namespace Mercury.Core;
@@ -26,8 +26,11 @@ namespace Mercury.Core;
 /// Implements the <see cref="IMercuryClient" />
 /// </summary>
 /// <seealso cref="IMercuryClient" />
-internal sealed class MercuryClient(ITransport transport) : IMercuryClient
+internal sealed class MercuryClient(ICryptoProvider cryptoProvider, ITransport transport) : IMercuryClient
 {
+
+    private readonly ICryptoProvider m_CryptoProvider = cryptoProvider
+                                                        ?? throw new ArgumentNullException(nameof(cryptoProvider));
 
     private readonly ITransport m_Transport = transport
                                               ?? throw new ArgumentNullException(nameof(transport));
@@ -39,11 +42,16 @@ internal sealed class MercuryClient(ITransport transport) : IMercuryClient
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task.</returns>
     /// <exception cref="NotImplementedException"></exception>
-    public Task SendAsync(ReadOnlyMemory payload, CancellationToken cancellationToken = default)
+    public async Task SendAsync(ReadOnlyMemory payload, CancellationToken cancellationToken = default)
     {
-        return m_Transport.SendAsync(
-            payload,
-            cancellationToken);
+        var protectedPayload =
+            await m_CryptoProvider
+                .ProtectAsync(payload, cancellationToken)
+                .ConfigureAwait(false);
+
+        await m_Transport
+            .SendAsync(protectedPayload, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
@@ -56,9 +64,17 @@ internal sealed class MercuryClient(ITransport transport) : IMercuryClient
     {
         try
         {
-            var payload = await m_Transport
-                .ReceiveAsync(cancellationToken)
-                .ConfigureAwait(false);
+            var protectedPayload =
+                await m_Transport
+                    .ReceiveAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+            var payload =
+                await m_CryptoProvider
+                    .UnprotectAsync(
+                        protectedPayload,
+                        cancellationToken)
+                    .ConfigureAwait(false);
 
             return new MercuryResult(
                 true,
