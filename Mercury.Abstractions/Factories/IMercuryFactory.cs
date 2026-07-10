@@ -13,6 +13,8 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Transport;
+
 namespace Mercury.Abstractions.Factories;
 /// <summary>
 /// Interface IMercuryFactory
@@ -24,4 +26,11 @@ public interface IMercuryFactory
     /// </summary>
     /// <returns>IMercuryClient.</returns>
     IMercuryClient BuildClient();
+
+    /// <summary>
+    /// Builds the client.
+    /// </summary>
+    /// <param name="transport">The transport.</param>
+    /// <returns>IMercuryClient.</returns>
+    IMercuryClient BuildClient(ITransport transport);
 }

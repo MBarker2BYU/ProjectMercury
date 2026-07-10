@@ -1,7 +1,10 @@
 using System.Diagnostics;
+using System.Text;
 using Mercury.Abstractions;
 using Mercury.Abstractions.Primitives;
+using Mercury.Abstractions.Transport;
 using Mercury.Core.Factories;
+using Mercury.Transport.InMemory;
 
 namespace Mercury.Demo.WinForms
 {
@@ -10,8 +13,23 @@ namespace Mercury.Demo.WinForms
         public MainWindow()
         {
             InitializeComponent();
+
+            InitTransport();
         }
-        
+
+        private void InitTransport()
+        {
+            var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
+
+            m_AlphaClient = MercuryFactory.Instance.BuildClient(alphaTransport);
+            m_BravoClient = MercuryFactory.Instance.BuildClient(bravoTransport);
+
+        }
+
+        private IMercuryClient m_AlphaClient;
+        private IMercuryClient m_BravoClient;
+
+
         private async void button1_Click(object sender, EventArgs e)
         {
             var result = TestClient();
@@ -35,5 +53,27 @@ namespace Mercury.Demo.WinForms
             return await result;
         }
 
+        private async void btnAlphaToBravo_Click(object sender, EventArgs e)
+        {
+            const string message = @"Alpha One to Bravo Actual";
+
+            await m_AlphaClient.SendAsync(Encoding.UTF8.GetBytes(message));
+
+            var mercuryResult = await m_BravoClient.ReceiveAsync();
+
+            Debug.WriteLine($"{Encoding.UTF8.GetString(mercuryResult.Payload.ToArray())}");
+
+        }
+
+        private async void btnBravoToAlpha_Click(object sender, EventArgs e)
+        {
+            const string message = @"Bravo Actual to Alpha One";
+
+            await m_BravoClient.SendAsync(Encoding.UTF8.GetBytes(message));
+
+            var mercuryResult = await m_AlphaClient.ReceiveAsync();
+
+            Debug.WriteLine($"{Encoding.UTF8.GetString(mercuryResult.Payload.ToArray())}");
+        }
     }
 }

@@ -40,18 +40,7 @@ public sealed class MercuryFactory : IMercuryFactory
     /// </summary>
     /// <value>The instance.</value>
     public static MercuryFactory Instance => sm_MercuryFactory.Value;
-
-    /// <summary>
-    /// The crypto provider
-    /// </summary>
-    private readonly ICryptoProvider m_CryptoProvider =
-        new PassThroughCryptoProvider(nameof(PassThroughCryptoProvider));
-
-    /// <summary>
-    /// The transport
-    /// </summary>
-    private readonly ITransport m_Transport = new LoopbackTransport();
-
+    
     /// <summary>
     /// The secure envelope factory
     /// </summary>
@@ -63,5 +52,15 @@ public sealed class MercuryFactory : IMercuryFactory
     /// </summary>
     /// <returns>IMercuryClient.</returns>
     public IMercuryClient BuildClient()
-        => new MercuryClient(m_CryptoProvider, m_Transport, m_SecureEnvelopeFactory);
+        => new MercuryClient(new PassThroughCryptoProvider(nameof(PassThroughCryptoProvider))
+            , new LoopbackTransport(), m_SecureEnvelopeFactory);
+    
+    /// <summary>
+    /// Builds the client.
+    /// </summary>
+    /// <param name="transport">The transport.</param>
+    /// <returns>IMercuryClient.</returns>
+    public IMercuryClient BuildClient(ITransport transport)
+        => new MercuryClient(new PassThroughCryptoProvider(nameof(PassThroughCryptoProvider))
+            , transport, m_SecureEnvelopeFactory);
 }
