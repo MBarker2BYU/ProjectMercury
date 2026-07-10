@@ -13,6 +13,8 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Primitives;
+
 namespace Mercury.Abstractions.Cryptography;
 
 /// <summary>
@@ -20,5 +22,24 @@ namespace Mercury.Abstractions.Cryptography;
 /// </summary>
 public interface ICryptoContext
 {
-    
+    /// <summary>
+    /// Gets the encryption.
+    /// </summary>
+    /// <value>The encryption.</value>
+    public AlgorithmId Encryption { get; } 
+    /// <summary>
+    /// Gets the signature.
+    /// </summary>
+    /// <value>The signature.</value>
+    public AlgorithmId Signature { get; }
+    /// <summary>
+    /// Gets the sender key identifier.
+    /// </summary>
+    /// <value>The sender key identifier.</value>
+    public KeyId SenderKeyId { get; }
+    /// <summary>
+    /// Gets the recipient key identifier.
+    /// </summary>
+    /// <value>The recipient key identifier.</value>
+    public KeyId RecipientKeyId { get; }
 }

@@ -4,7 +4,7 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-04-2026
+// Last Modified On : 07-08-2026
 // ***********************************************************************
 // <copyright file="IMercuryResult.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -43,5 +43,10 @@ public interface IMercuryResult
     /// Gets the failure reason.
     /// </summary>
     /// <value>The failure reason.</value>
-    FailureReason FailureReason { get; } 
+    FailureReason FailureReason { get; }
+    /// <summary>
+    /// Gets the message.
+    /// </summary>
+    /// <value>The message.</value>
+    string? ResultMessage { get; }
 }
