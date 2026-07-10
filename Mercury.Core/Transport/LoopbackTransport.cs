@@ -14,7 +14,7 @@
 // ***********************************************************************
 
 using System.Collections.Concurrent;
-using Mercury.Abstractions.Primitives;
+using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Transport;
 
 namespace Mercury.Core.Transport;
@@ -29,7 +29,7 @@ internal sealed class LoopbackTransport : ITransport
     /// <summary>
     /// The m queue
     /// </summary>
-    private readonly ConcurrentQueue<byte[]> m_Queue = new();
+    private readonly ConcurrentQueue<ISecureEnvelope> m_Queue = new();
     /// <summary>
     /// The m signal
     /// </summary>
@@ -38,16 +38,19 @@ internal sealed class LoopbackTransport : ITransport
     /// <summary>
     /// Sends the asynchronous.
     /// </summary>
-    /// <param name="payload">The payload.</param>
+    /// <param name="secureEnvelope"></param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task.</returns>
     public Task SendAsync(
-        ReadOnlyMemory payload,
+        ISecureEnvelope secureEnvelope,
         CancellationToken cancellationToken = default)
     {
-        var copy = payload.ToArray();
+        if (secureEnvelope == null)
+        {
+            throw new ArgumentNullException(nameof(secureEnvelope));
+        }
 
-        m_Queue.Enqueue(copy);
+        m_Queue.Enqueue(secureEnvelope);
         m_Signal.Release();
 
         return Task.CompletedTask;
@@ -57,20 +60,21 @@ internal sealed class LoopbackTransport : ITransport
     /// Receives the asynchronous.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>A Task&lt;ReadOnlyMemory&gt; representing the asynchronous operation.</returns>
+    /// <returns>A Task&lt;ISecureEnvelope&gt; representing the asynchronous operation.</returns>
     /// <exception cref="InvalidOperationException">The loopback transport was signaled without a payload.</exception>
-    public async Task<ReadOnlyMemory> ReceiveAsync(
+    public async Task<ISecureEnvelope> ReceiveAsync(
         CancellationToken cancellationToken = default)
     {
-        await m_Signal.WaitAsync(cancellationToken)
+        await m_Signal
+            .WaitAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        if (m_Queue.TryDequeue(out var payload))
+        if (m_Queue.TryDequeue(out var secureEnvelope))
         {
-            return new ReadOnlyMemory(payload);
+            return secureEnvelope;
         }
 
         throw new InvalidOperationException(
-            "The loopback transport was signaled without a payload.");
+            "The loopback transport was signaled without a secure envelope.");
     }
 }

@@ -13,6 +13,8 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Envelope;
+
 namespace Mercury.Abstractions.Transport;
 
 using Primitives;
@@ -25,15 +27,15 @@ public interface ITransport
     /// <summary>
     /// Sends the asynchronous.
     /// </summary>
-    /// <param name="payload">The payload.</param>
+    /// <param name="secureEnvelope"></param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task.</returns>
-    Task SendAsync(ReadOnlyMemory payload, CancellationToken cancellationToken = default);
+    Task SendAsync(ISecureEnvelope secureEnvelope, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Receives the asynchronous.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
-    Task<ReadOnlyMemory> ReceiveAsync(CancellationToken cancellationToken = default);
+    /// <returns>Task&lt;ISecureEnvelope&gt;.</returns>
+    Task<ISecureEnvelope> ReceiveAsync(CancellationToken cancellationToken = default);
 }
