@@ -48,8 +48,8 @@ public readonly struct ReadOnlyMemory(byte[]? data)
     /// Clones this instance.
     /// </summary>
     /// <returns>System.Byte[].</returns>
-    public byte[] Clone()
-            => ToArray();
+    public ReadOnlyMemory Clone()
+            => new ReadOnlyMemory(ToArray());
 
     /// <summary>
     /// Slices the specified start.
