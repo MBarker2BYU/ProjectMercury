@@ -1,10 +1,31 @@
-﻿using Mercury.Abstractions.Primitives;
+﻿// ***********************************************************************
+// Assembly       : Mercury.Tests
+// Author           : Matthew D. Barker
+// Created          : 07-02-2026
+//
+// Last Modified By : Matthew D. Barker
+// Last Modified On : 07-09-2026
+// ***********************************************************************
+// <copyright file="PrimitiveTests.cs">
+//     Copyright (c) Matthew D. Barker. All rights reserved.
+//     Submitted in partial fulfillment of CSE499 Senior Capstone Project
+//     at Brigham Young University-Idaho.
+// </copyright>
+// ***********************************************************************
+
+using Mercury.Abstractions.Primitives;
 using MercuryReadOnlyMemory = Mercury.Abstractions.Primitives.ReadOnlyMemory;
 
 namespace Mercury.Tests;
 
+/// <summary>
+/// Class PrimitiveTests. This class cannot be inherited.
+/// </summary>
 public sealed class PrimitiveTests
 {
+    /// <summary>
+    /// Defines the test method AlgorithmId_Constructor_StoresValue.
+    /// </summary>
     [Fact]
     public void AlgorithmId_Constructor_StoresValue()
     {
@@ -14,6 +35,9 @@ public sealed class PrimitiveTests
         Assert.Equal("AES-GCM", algorithmId.ToString());
     }
 
+    /// <summary>
+    /// Defines the test method AlgorithmId_ImplicitConversion_StoresValue.
+    /// </summary>
     [Fact]
     public void AlgorithmId_ImplicitConversion_StoresValue()
     {
@@ -23,6 +47,9 @@ public sealed class PrimitiveTests
         Assert.Equal("ChaCha20-Poly1305", algorithmId.ToString());
     }
 
+    /// <summary>
+    /// Defines the test method AlgorithmId_ToString_WithNullValue_ReturnsEmptyString.
+    /// </summary>
     [Fact]
     public void AlgorithmId_ToString_WithNullValue_ReturnsEmptyString()
     {
@@ -31,6 +58,9 @@ public sealed class PrimitiveTests
         Assert.Equal(string.Empty, algorithmId.ToString());
     }
 
+    /// <summary>
+    /// Defines the test method KeyId_Constructor_StoresValue.
+    /// </summary>
     [Fact]
     public void KeyId_Constructor_StoresValue()
     {
@@ -40,6 +70,9 @@ public sealed class PrimitiveTests
         Assert.Equal("sender-key-1", keyId.ToString());
     }
 
+    /// <summary>
+    /// Defines the test method KeyId_ImplicitConversion_StoresValue.
+    /// </summary>
     [Fact]
     public void KeyId_ImplicitConversion_StoresValue()
     {
@@ -49,6 +82,9 @@ public sealed class PrimitiveTests
         Assert.Equal("recipient-key-1", keyId.ToString());
     }
 
+    /// <summary>
+    /// Defines the test method KeyId_ToString_WithNullValue_ReturnsEmptyString.
+    /// </summary>
     [Fact]
     public void KeyId_ToString_WithNullValue_ReturnsEmptyString()
     {
@@ -57,6 +93,9 @@ public sealed class PrimitiveTests
         Assert.Equal(string.Empty, keyId.ToString());
     }
 
+    /// <summary>
+    /// Defines the test method FrameworkVersion_Constructor_StoresMajorAndMinor.
+    /// </summary>
     [Fact]
     public void FrameworkVersion_Constructor_StoresMajorAndMinor()
     {
@@ -67,6 +106,9 @@ public sealed class PrimitiveTests
         Assert.Equal("2.5", version.ToString());
     }
 
+    /// <summary>
+    /// Defines the test method FrameworkVersion_V1_ReturnsOneZero.
+    /// </summary>
     [Fact]
     public void FrameworkVersion_V1_ReturnsOneZero()
     {
@@ -77,15 +119,20 @@ public sealed class PrimitiveTests
         Assert.Equal("1.0", version.ToString());
     }
 
+    /// <summary>
+    /// Defines the test method Metadata_DefaultConstructor_IsEmpty.
+    /// </summary>
     [Fact]
     public void Metadata_DefaultConstructor_IsEmpty()
     {
         var metadata = new Metadata();
 
         Assert.Empty(metadata);
-        Assert.Equal(0, metadata.Count);
     }
 
+    /// <summary>
+    /// Defines the test method Metadata_Constructor_CopiesValidSourceValues.
+    /// </summary>
     [Fact]
     public void Metadata_Constructor_CopiesValidSourceValues()
     {
@@ -102,6 +149,9 @@ public sealed class PrimitiveTests
         Assert.Equal("123", metadata["correlation"]);
     }
 
+    /// <summary>
+    /// Defines the test method Metadata_Constructor_SkipsBlankKeys.
+    /// </summary>
     [Fact]
     public void Metadata_Constructor_SkipsBlankKeys()
     {
@@ -120,6 +170,9 @@ public sealed class PrimitiveTests
         Assert.False(metadata.ContainsKey(" "));
     }
 
+    /// <summary>
+    /// Defines the test method Metadata_Constructor_ConvertsNullValuesToEmptyString.
+    /// </summary>
     [Fact]
     public void Metadata_Constructor_ConvertsNullValuesToEmptyString()
     {
@@ -133,6 +186,9 @@ public sealed class PrimitiveTests
         Assert.Equal(string.Empty, metadata["null-value"]);
     }
 
+    /// <summary>
+    /// Defines the test method Metadata_Constructor_DefensivelyCopiesSource.
+    /// </summary>
     [Fact]
     public void Metadata_Constructor_DefensivelyCopiesSource()
     {
@@ -148,6 +204,9 @@ public sealed class PrimitiveTests
         Assert.Equal("original", metadata["key"]);
     }
 
+    /// <summary>
+    /// Defines the test method Metadata_Add_AddsValue.
+    /// </summary>
     [Fact]
     public void Metadata_Add_AddsValue()
     {
@@ -160,6 +219,9 @@ public sealed class PrimitiveTests
         Assert.Equal("test", metadata["purpose"]);
     }
 
+    /// <summary>
+    /// Defines the test method Metadata_Add_SkipsBlankKey.
+    /// </summary>
     [Fact]
     public void Metadata_Add_SkipsBlankKey()
     {
@@ -174,6 +236,9 @@ public sealed class PrimitiveTests
         Assert.Equal("kept", metadata["valid"]);
     }
 
+    /// <summary>
+    /// Defines the test method Metadata_Indexer_MissingKey_ReturnsEmptyString.
+    /// </summary>
     [Fact]
     public void Metadata_Indexer_MissingKey_ReturnsEmptyString()
     {
@@ -182,6 +247,9 @@ public sealed class PrimitiveTests
         Assert.Equal(string.Empty, metadata["missing"]);
     }
 
+    /// <summary>
+    /// Defines the test method Metadata_TryGetValue_ExistingKey_ReturnsTrueAndValue.
+    /// </summary>
     [Fact]
     public void Metadata_TryGetValue_ExistingKey_ReturnsTrueAndValue()
     {
@@ -196,6 +264,9 @@ public sealed class PrimitiveTests
         Assert.Equal("value", value);
     }
 
+    /// <summary>
+    /// Defines the test method Metadata_TryGetValue_MissingKey_ReturnsFalseAndEmptyString.
+    /// </summary>
     [Fact]
     public void Metadata_TryGetValue_MissingKey_ReturnsFalseAndEmptyString()
     {
@@ -207,6 +278,9 @@ public sealed class PrimitiveTests
         Assert.Equal(string.Empty, value);
     }
 
+    /// <summary>
+    /// Defines the test method Metadata_UsesOrdinalKeyComparison.
+    /// </summary>
     [Fact]
     public void Metadata_UsesOrdinalKeyComparison()
     {
@@ -219,6 +293,9 @@ public sealed class PrimitiveTests
         Assert.False(metadata.ContainsKey("key"));
     }
 
+    /// <summary>
+    /// Defines the test method ReadOnlyMemory_Empty_HasZeroLength.
+    /// </summary>
     [Fact]
     public void ReadOnlyMemory_Empty_HasZeroLength()
     {
@@ -229,6 +306,9 @@ public sealed class PrimitiveTests
         Assert.Empty(memory.ToArray());
     }
 
+    /// <summary>
+    /// Defines the test method ReadOnlyMemory_Constructor_CopiesInputArray.
+    /// </summary>
     [Fact]
     public void ReadOnlyMemory_Constructor_CopiesInputArray()
     {
@@ -240,7 +320,10 @@ public sealed class PrimitiveTests
 
         Assert.Equal(new byte[] { 1, 2, 3 }, memory.ToArray());
     }
-    
+
+    /// <summary>
+    /// Defines the test method ReadOnlyMemory_ToArray_ReturnsCopy.
+    /// </summary>
     [Fact]
     public void ReadOnlyMemory_ToArray_ReturnsCopy()
     {
@@ -254,6 +337,9 @@ public sealed class PrimitiveTests
         Assert.Equal(new byte[] { 1, 2, 3 }, second);
     }
 
+    /// <summary>
+    /// Defines the test method ReadOnlyMemory_Slice_ReturnsRequestedBytes.
+    /// </summary>
     [Fact]
     public void ReadOnlyMemory_Slice_ReturnsRequestedBytes()
     {
@@ -264,6 +350,9 @@ public sealed class PrimitiveTests
         Assert.Equal(new byte[] { 20, 30, 40 }, slice.ToArray());
     }
 
+    /// <summary>
+    /// Defines the test method ReadOnlyMemory_Slice_WithZeroLength_ReturnsEmpty.
+    /// </summary>
     [Fact]
     public void ReadOnlyMemory_Slice_WithZeroLength_ReturnsEmpty()
     {
@@ -275,6 +364,11 @@ public sealed class PrimitiveTests
         Assert.Empty(slice.ToArray());
     }
 
+    /// <summary>
+    /// Defines the test method ReadOnlyMemory_Slice_InvalidRange_Throws.
+    /// </summary>
+    /// <param name="start">The start.</param>
+    /// <param name="length">The length.</param>
     [Theory]
     [InlineData(-1, 1)]
     [InlineData(0, -1)]
@@ -287,6 +381,9 @@ public sealed class PrimitiveTests
         Assert.Throws<ArgumentOutOfRangeException>(() => memory.Slice(start, length));
     }
 
+    /// <summary>
+    /// Defines the test method ReadOnlyMemory_ImplicitConversion_FromByteArray_CopiesData.
+    /// </summary>
     [Fact]
     public void ReadOnlyMemory_ImplicitConversion_FromByteArray_CopiesData()
     {

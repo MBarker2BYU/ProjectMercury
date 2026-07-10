@@ -1,34 +1,32 @@
 ﻿// ***********************************************************************
-// Assembly       : Mercury.Core
+// Assembly       : Mercury.Provider.ChaCha20
 // Author           : Matthew D. Barker
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-04-2026
+// Last Modified On : 07-08-2026
 // ***********************************************************************
-// <copyright file="EnvelopeFooter.cs">
+// <copyright file="IChaChaKeyProvider.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
 // </copyright>
 // ***********************************************************************
 
-using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
 
-namespace Mercury.Core.Envelope;
+namespace Mercury.Provider.ChaCha20.Interfaces;
 
 /// <summary>
-/// Class EnvelopeFooter.
-/// Implements the <see cref="IEnvelopeFooter" />
+/// Interface IChaChaKeyProvider
 /// </summary>
-/// <param name="Meta">The meta.</param>
-/// <seealso cref="IEnvelopeFooter" />
-public class EnvelopeFooter(Metadata? Meta) : IEnvelopeFooter
+public interface IChaChaKeyProvider
 {
     /// <summary>
-    /// Gets the meta.
+    /// Gets the key asynchronous.
     /// </summary>
-    /// <value>The meta.</value>
-    public Metadata? Meta { get; } = Meta ?? new Metadata();
+    /// <param name="keyId">The key identifier.</param>
+    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
+    Task<ReadOnlyMemory> GetKeyAsync(KeyId keyId, CancellationToken cancellationToken = default);
 }

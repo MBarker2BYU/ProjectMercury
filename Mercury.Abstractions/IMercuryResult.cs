@@ -14,7 +14,6 @@
 // ***********************************************************************
 
 using Mercury.Abstractions.Enums;
-using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
 
 namespace Mercury.Abstractions;
@@ -35,11 +34,6 @@ public interface IMercuryResult
     /// <value>The payload.</value>
     ReadOnlyMemory Payload { get; }
     /// <summary>
-    /// Gets the validated envelope.
-    /// </summary>
-    /// <value>The validated envelope.</value>
-    ISecureEnvelope? ValidatedEnvelope { get; }
-    /// <summary>
     /// Gets the failure reason.
     /// </summary>
     /// <value>The failure reason.</value>
@@ -48,5 +42,5 @@ public interface IMercuryResult
     /// Gets the message.
     /// </summary>
     /// <value>The message.</value>
-    string? ResultMessage { get; }
+    string? Message { get; }
 }

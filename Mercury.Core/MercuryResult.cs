@@ -4,7 +4,7 @@
 // Created          : 07-07-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-08-2026
+// Last Modified On : 07-09-2026
 // ***********************************************************************
 // <copyright file="MercuryResult.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -15,7 +15,6 @@
 
 using Mercury.Abstractions;
 using Mercury.Abstractions.Enums;
-using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
 
 namespace Mercury.Core;
@@ -26,10 +25,10 @@ namespace Mercury.Core;
 /// </summary>
 /// <param name="success">if set to <c>true</c> [success].</param>
 /// <param name="payload">The payload.</param>
-/// <param name="validatedEnvelope">The validated envelope.</param>
 /// <param name="failureReason">The failure reason.</param>
+/// <param name="message"></param>
 /// <seealso cref="IMercuryResult" />
-public class MercuryResult(bool success, ReadOnlyMemory payload, ISecureEnvelope? validatedEnvelope, FailureReason failureReason) : IMercuryResult
+public class MercuryResult(bool success, ReadOnlyMemory payload, FailureReason failureReason, string? message = null) : IMercuryResult
 {
     /// <summary>
     /// Gets a value indicating whether this <see cref="T:Mercury.Abstractions.IMercuryResult" /> is success.
@@ -42,13 +41,13 @@ public class MercuryResult(bool success, ReadOnlyMemory payload, ISecureEnvelope
     /// <value>The payload.</value>
     public ReadOnlyMemory Payload { get; } = payload;
     /// <summary>
-    /// Gets the validated envelope.
-    /// </summary>
-    /// <value>The validated envelope.</value>
-    public ISecureEnvelope? ValidatedEnvelope { get; } = validatedEnvelope;
-    /// <summary>
     /// Gets the failure reason.
     /// </summary>
     /// <value>The failure reason.</value>
     public FailureReason FailureReason { get; } = failureReason;
+    /// <summary>
+    /// Gets the message.
+    /// </summary>
+    /// <value>The message.</value>
+    public string? Message { get; } = message;
 }
