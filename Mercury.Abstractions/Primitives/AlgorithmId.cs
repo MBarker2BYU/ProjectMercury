@@ -21,6 +21,13 @@ namespace Mercury.Abstractions.Primitives;
 /// <param name="value">The value.</param>
 public readonly struct AlgorithmId(string value)
 {
+
+    /// <summary>
+    /// Gets an empty copy.
+    /// </summary>
+    /// <value>The empty.</value>
+    public static AlgorithmId Empty => new(string.Empty);
+
     /// <summary>
     /// Gets the value.
     /// </summary>
@@ -39,5 +46,6 @@ public readonly struct AlgorithmId(string value)
     /// </summary>
     /// <param name="value">The value.</param>
     /// <returns>The result of the conversion.</returns>
-    public static implicit operator AlgorithmId(string value) => new(value);
+    public static implicit operator AlgorithmId(string value) 
+        => new(value);
 }

@@ -22,6 +22,12 @@ namespace Mercury.Abstractions.Primitives;
 public readonly struct KeyId(string value)
 {
     /// <summary>
+    /// Gets an empty copy.
+    /// </summary>
+    /// <value>The empty.</value>
+    public static KeyId Empty => new(string.Empty);
+
+    /// <summary>
     /// Gets the value.
     /// </summary>
     /// <value>The value.</value>
@@ -39,6 +45,7 @@ public readonly struct KeyId(string value)
     /// </summary>
     /// <param name="value">The value.</param>
     /// <returns>The result of the conversion.</returns>
-    public static implicit operator KeyId(string value) => new(value);
+    public static implicit operator KeyId(string value) 
+        => new(value);
 }
 

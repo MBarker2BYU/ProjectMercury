@@ -13,7 +13,6 @@
 // </copyright>
 // ***********************************************************************
 
-using Mercury.Abstractions;
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
@@ -21,6 +20,12 @@ using Mercury.Abstractions.Services;
 
 namespace Mercury.Core.Cryptography;
 
+/// <summary>
+/// Class PassThroughCryptoProvider. This class cannot be inherited.
+/// Implements the <see cref="ICryptoProvider" />
+/// </summary>
+/// <param name="name">The name.</param>
+/// <seealso cref="ICryptoProvider" />
 internal sealed class PassThroughCryptoProvider(string name) : ICryptoProvider
 {
     /// <summary>
@@ -29,6 +34,13 @@ internal sealed class PassThroughCryptoProvider(string name) : ICryptoProvider
     /// <value>The name.</value>
     public string Name { get; } = name;
 
+    /// <summary>
+    /// Protects the asynchronous.
+    /// </summary>
+    /// <param name="payload">The payload.</param>
+    /// <param name="envelopeService">The envelope service.</param>
+    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
     public Task<ICryptoProviderResult> ProtectAsync(
         ReadOnlyMemory payload,
         IEnvelopeService envelopeService,
@@ -41,6 +53,13 @@ internal sealed class PassThroughCryptoProvider(string name) : ICryptoProvider
         return Task.FromResult<ICryptoProviderResult>(envelopeService.PackEnvelope(header, payload, footer));
     }
 
+    /// <summary>
+    /// Unprotects the asynchronous.
+    /// </summary>
+    /// <param name="secureEnvelope">The secure envelope.</param>
+    /// <param name="envelopeService">The envelope service.</param>
+    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
     public Task<ICryptoProviderResult> UnprotectAsync(
         ISecureEnvelope secureEnvelope,
         IEnvelopeService envelopeService,
