@@ -16,8 +16,9 @@
 using Mercury.Abstractions;
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
-using Mercury.Abstractions.Factories;
+using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
+using Mercury.Abstractions.Services;
 using Mercury.Abstractions.Transport;
 
 namespace Mercury.Core;
@@ -27,7 +28,7 @@ namespace Mercury.Core;
 /// Implements the <see cref="IMercuryClient" />
 /// </summary>
 /// <seealso cref="IMercuryClient" />
-internal sealed class MercuryClient(IMercuryClientDependencies dependencies, ISecureEnvelopeFactory secureEnvelopeFactory) : IMercuryClient
+internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEnvelopeService envelopeService) : IMercuryClient
 {
 
     private readonly ICryptoProvider m_CryptoProvider = dependencies.CryptoProvider
@@ -36,8 +37,8 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, ISe
     private readonly ITransport m_Transport = dependencies.Transport
                                               ?? throw new ArgumentNullException(nameof(dependencies.Transport));
 
-    private readonly ISecureEnvelopeFactory m_SecureEnvelopeFactory = secureEnvelopeFactory
-                                                                      ?? throw new ArgumentNullException(nameof(secureEnvelopeFactory));
+    private readonly IEnvelopeService m_EnvelopeService = envelopeService
+                                                          ?? throw new ArgumentNullException(nameof(envelopeService));
 
     
 
@@ -50,16 +51,21 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, ISe
     /// <exception cref="NotImplementedException"></exception>
     public async Task SendAsync(ReadOnlyMemory payload, CancellationToken cancellationToken = default)
     {
-        var protectedPayload =
+        var providerResult =
             await m_CryptoProvider
-                .ProtectAsync(payload, cancellationToken)
+                .ProtectAsync(payload, m_EnvelopeService, cancellationToken)
                 .ConfigureAwait(false);
 
-        var secureEnvelope =
-            m_SecureEnvelopeFactory.Build(protectedPayload);
+        if (!providerResult.Success ||
+            providerResult.ValidatedEnvelope == null)
+        {
+            throw new InvalidOperationException(
+                providerResult.Message ??
+                "The crypto provider failed to create a secure envelope.");
+        }
 
         await m_Transport
-            .SendAsync(secureEnvelope, cancellationToken)
+            .SendAsync(providerResult.ValidatedEnvelope, cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -71,24 +77,25 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, ISe
     /// <exception cref="NotImplementedException"></exception>
     public async Task<IMercuryResult> ReceiveAsync(CancellationToken cancellationToken = default)
     {
+
+        ISecureEnvelope? secureEnvelope = null;
+        
         try
         {
-            var secureEnvelope =
+            secureEnvelope =
                 await m_Transport
                     .ReceiveAsync(cancellationToken)
                     .ConfigureAwait(false);
 
-            var payload =
+            var cryptoProviderResult =
                 await m_CryptoProvider
                     .UnprotectAsync(
-                        secureEnvelope.Payload,
+                        secureEnvelope,
+                        m_EnvelopeService,
                         cancellationToken)
                     .ConfigureAwait(false);
 
-            return new MercuryResult(
-                true,
-                payload,
-                FailureReason.None);
+            return new MercuryResult(cryptoProviderResult);
         }
         catch (OperationCanceledException)
         {
@@ -99,6 +106,7 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, ISe
             return new MercuryResult(
                 false,
                 ReadOnlyMemory.Empty,
+                secureEnvelope,
                 FailureReason.InternalError,
                 exception.Message);
         }

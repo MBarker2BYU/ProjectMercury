@@ -23,8 +23,19 @@ namespace Mercury.Abstractions.Envelope;
 public interface ISecureEnvelope
 {
     /// <summary>
+    /// Gets the header.
+    /// </summary>
+    /// <value>The header.</value>
+    IEnvelopeHeader Header { get; }
+
+    /// <summary>
     /// Gets the payload.
     /// </summary>
     /// <value>The payload.</value>
     ReadOnlyMemory Payload { get; }
+    /// <summary>
+    /// Gets the footer.
+    /// </summary>
+    /// <value>The footer.</value>
+    IEnvelopeFooter Footer { get; }
 }

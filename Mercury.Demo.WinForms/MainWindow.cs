@@ -14,7 +14,7 @@ namespace Mercury.Demo.WinForms
         {
             InitializeComponent();
 
-            InitTransport();
+            //InitTransport();
         }
 
         private void InitTransport()
@@ -58,25 +58,25 @@ namespace Mercury.Demo.WinForms
 
         private async void btnAlphaToBravo_Click(object sender, EventArgs e)
         {
-            const string message = @"Alpha One to Bravo Actual";
+            //const string message = @"Alpha One to Bravo Actual";
 
-            await m_AlphaClient.SendAsync(Encoding.UTF8.GetBytes(message));
+            //await m_AlphaClient.SendAsync(Encoding.UTF8.GetBytes(message));
 
-            var mercuryResult = await m_BravoClient.ReceiveAsync();
+            //var mercuryResult = await m_BravoClient.ReceiveAsync();
 
-            Debug.WriteLine($"{Encoding.UTF8.GetString(mercuryResult.Payload.ToArray())}");
+            //Debug.WriteLine($"{Encoding.UTF8.GetString(mercuryResult.Payload.ToArray())}");
 
         }
 
         private async void btnBravoToAlpha_Click(object sender, EventArgs e)
         {
-            const string message = @"Bravo Actual to Alpha One";
+            //const string message = @"Bravo Actual to Alpha One";
 
-            await m_BravoClient.SendAsync(Encoding.UTF8.GetBytes(message));
+            //await m_BravoClient.SendAsync(Encoding.UTF8.GetBytes(message));
 
-            var mercuryResult = await m_AlphaClient.ReceiveAsync();
+            //var mercuryResult = await m_AlphaClient.ReceiveAsync();
 
-            Debug.WriteLine($"{Encoding.UTF8.GetString(mercuryResult.Payload.ToArray())}");
+            //Debug.WriteLine($"{Encoding.UTF8.GetString(mercuryResult.Payload.ToArray())}");
         }
     }
 }

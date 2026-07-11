@@ -13,7 +13,9 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
+using Mercury.Abstractions.Services;
 
 namespace Mercury.Abstractions.Cryptograph;
 
@@ -32,15 +34,17 @@ public interface ICryptoProvider
     /// Protects the asynchronous.
     /// </summary>
     /// <param name="payload">The payload.</param>
+    /// <param name="envelopeService"></param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
-    Task<ReadOnlyMemory> ProtectAsync(ReadOnlyMemory payload, CancellationToken cancellationToken = default);
+    Task<ICryptoProviderResult> ProtectAsync(ReadOnlyMemory payload, IEnvelopeService envelopeService, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Unprotects the asynchronous.
     /// </summary>
-    /// <param name="payload">The payload.</param>
+    /// <param name="secureEnvelope"></param>
+    /// <param name="envelopeService"></param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
-    Task<ReadOnlyMemory> UnprotectAsync(ReadOnlyMemory payload, CancellationToken cancellationToken = default);
+    Task<ICryptoProviderResult> UnprotectAsync(ISecureEnvelope secureEnvelope, IEnvelopeService envelopeService, CancellationToken cancellationToken = default);
 }

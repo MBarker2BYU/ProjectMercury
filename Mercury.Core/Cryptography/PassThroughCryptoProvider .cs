@@ -13,8 +13,11 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions;
 using Mercury.Abstractions.Cryptograph;
+using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
+using Mercury.Abstractions.Services;
 
 namespace Mercury.Core.Cryptography;
 
@@ -26,17 +29,25 @@ internal sealed class PassThroughCryptoProvider(string name) : ICryptoProvider
     /// <value>The name.</value>
     public string Name { get; } = name;
 
-    public Task<ReadOnlyMemory> ProtectAsync(
+    public Task<ICryptoProviderResult> ProtectAsync(
         ReadOnlyMemory payload,
+        IEnvelopeService envelopeService,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(payload.Clone());
+        //Do Crypto Here
+        var header = envelopeService.BuildEnvelopeHeader();
+        var footer = envelopeService.BuildEnvelopeFooter();
+
+        return Task.FromResult<ICryptoProviderResult>(envelopeService.PackEnvelope(header, payload, footer));
     }
 
-    public Task<ReadOnlyMemory> UnprotectAsync(
-        ReadOnlyMemory payload,
+    public Task<ICryptoProviderResult> UnprotectAsync(
+        ISecureEnvelope secureEnvelope,
+        IEnvelopeService envelopeService,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(payload.Clone());
+        //Do Crypto Here
+
+        return Task.FromResult<ICryptoProviderResult>(envelopeService.UnpackEnvelope(secureEnvelope));
     }
 }

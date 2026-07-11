@@ -24,8 +24,10 @@ namespace Mercury.Core.Envelope;
 /// </summary>
 /// <param name="payload">The payload.</param>
 /// <seealso cref="ISecureEnvelope" />
-internal sealed class SecureEnvelope(ReadOnlyMemory payload) : ISecureEnvelope
+internal sealed class SecureEnvelope(IEnvelopeHeader header, ReadOnlyMemory payload, IEnvelopeFooter footer) : ISecureEnvelope
 {
+    public IEnvelopeHeader Header { get; } = header;
+
     /// <summary>
     /// Gets the payload.
     /// </summary>
@@ -33,4 +35,6 @@ internal sealed class SecureEnvelope(ReadOnlyMemory payload) : ISecureEnvelope
     public ReadOnlyMemory Payload { get; } = !payload.IsEmpty 
         ? payload 
         : throw new ArgumentException("The secure envelope cannot be created with an empty payload.", nameof(payload));
+
+    public IEnvelopeFooter Footer { get; } = footer;
 }

@@ -14,7 +14,9 @@
 // ***********************************************************************
 
 using Mercury.Abstractions;
+using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
+using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
 
 namespace Mercury.Core;
@@ -28,8 +30,17 @@ namespace Mercury.Core;
 /// <param name="failureReason">The failure reason.</param>
 /// <param name="message"></param>
 /// <seealso cref="IMercuryResult" />
-internal class MercuryResult(bool success, ReadOnlyMemory payload, FailureReason failureReason, string? message = null) : IMercuryResult
+internal class MercuryResult(bool success, ReadOnlyMemory payload,  ISecureEnvelope? secureEnvelope, FailureReason failureReason, string? message = null) : IMercuryResult
 {
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MercuryResult"/> class.
+    /// </summary>
+    /// <param name="cryptoProviderResult">The crypto provider result.</param>
+    public MercuryResult(ICryptoProviderResult cryptoProviderResult) : this(cryptoProviderResult.Success, 
+        cryptoProviderResult.Payload, cryptoProviderResult.ValidatedEnvelope, cryptoProviderResult.FailureReason, cryptoProviderResult.Message)
+    {}
+
     /// <summary>
     /// Gets a value indicating whether this <see cref="T:Mercury.Abstractions.IMercuryResult" /> is success.
     /// </summary>
@@ -40,6 +51,9 @@ internal class MercuryResult(bool success, ReadOnlyMemory payload, FailureReason
     /// </summary>
     /// <value>The payload.</value>
     public ReadOnlyMemory Payload { get; } = payload;
+
+    public ISecureEnvelope? ValidatedEnvelope { get; } = secureEnvelope;
+
     /// <summary>
     /// Gets the failure reason.
     /// </summary>

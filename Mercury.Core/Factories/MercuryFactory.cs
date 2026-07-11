@@ -16,8 +16,10 @@
 using Mercury.Abstractions;
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Factories;
+using Mercury.Abstractions.Services;
 using Mercury.Abstractions.Transport;
 using Mercury.Core.Cryptography;
+using Mercury.Core.Services;
 using Mercury.Core.Transport;
 
 namespace Mercury.Core.Factories;
@@ -40,12 +42,12 @@ public sealed class MercuryFactory : IMercuryFactory
     /// </summary>
     /// <value>The instance.</value>
     public static MercuryFactory Instance => sm_MercuryFactory.Value;
-    
+
     /// <summary>
     /// The secure envelope factory
     /// </summary>
-    private readonly ISecureEnvelopeFactory m_SecureEnvelopeFactory =
-        new SecureEnvelopeFactory();
+    private static readonly IEnvelopeService sm_EnvelopeService =
+        EnvelopeService.Instance;
 
     /// <summary>
     /// Builds the dependencies.
@@ -73,5 +75,5 @@ public sealed class MercuryFactory : IMercuryFactory
     /// <param name="mercuryClientDependencies"></param>
     /// <returns>IMercuryClient.</returns>
     public IMercuryClient BuildClient(IMercuryClientDependencies mercuryClientDependencies)
-        => new MercuryClient(mercuryClientDependencies, m_SecureEnvelopeFactory);
+        => new MercuryClient(mercuryClientDependencies, sm_EnvelopeService);
 }
