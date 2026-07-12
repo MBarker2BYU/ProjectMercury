@@ -4,7 +4,7 @@
 // Created          : 07-07-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-07-2026
+// Last Modified On : 07-12-2026
 // ***********************************************************************
 // <copyright file="KeyId.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -37,7 +37,8 @@ public readonly struct KeyId(string value) : IEquatable<KeyId>
     /// Gets the value.
     /// </summary>
     /// <value>The value.</value>
-    public string Value { get; } = value;
+    public string Value { get; } = !value.Contains("|") ? 
+        value : throw new ArgumentException("The pipe '|' is an invalid character.");
 
     /// <summary>
     /// Returns a <see cref="System.String" /> that represents this instance.
@@ -77,8 +78,6 @@ public readonly struct KeyId(string value) : IEquatable<KeyId>
     /// </summary>
     /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
     public override int GetHashCode()
-    {
-        return Value.GetHashCode();
-    }
+        => (Value ?? string.Empty).GetHashCode();
 }
 

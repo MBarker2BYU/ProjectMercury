@@ -4,7 +4,7 @@
 // Created          : 07-07-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-07-2026
+// Last Modified On : 07-12-2026
 // ***********************************************************************
 // <copyright file="AlgorithmId.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -13,13 +13,15 @@
 // </copyright>
 // ***********************************************************************
 
+using System.ComponentModel;
+
 namespace Mercury.Abstractions.Primitives;
 
 /// <summary>
 /// Struct AlgorithmId
 /// </summary>
 /// <param name="value">The value.</param>
-public readonly struct AlgorithmId(string value)
+public readonly struct AlgorithmId(string value) : IEquatable<AlgorithmId>
 {
     /// <summary>
     /// Gets the none.
@@ -43,7 +45,8 @@ public readonly struct AlgorithmId(string value)
     /// Gets the value.
     /// </summary>
     /// <value>The value.</value>
-    public string Value { get; } = value;
+    public string Value { get; } =  !value.Contains("|") ? 
+        value : throw new ArgumentException("The pipe '|' is an invalid character.");
 
     /// <summary>
     /// Returns a <see cref="System.String" /> that represents this instance.
@@ -83,7 +86,5 @@ public readonly struct AlgorithmId(string value)
     /// </summary>
     /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
     public override int GetHashCode()
-    {
-        return Value.GetHashCode();
-    }
+        => (Value ?? string.Empty).GetHashCode();
 }
