@@ -18,8 +18,10 @@ using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Logging;
+using Mercury.Abstractions.Replay;
 using Mercury.Abstractions.Transport;
 using Mercury.Core.Codecs;
+using Mercury.Core.Replay;
 using Mercury.Core.Services;
 
 namespace Mercury.Core;
@@ -32,7 +34,7 @@ namespace Mercury.Core;
 /// <param name="envelopeCodec">The envelope codec.</param>
 /// <param name="transport">The transport.</param>
 /// <seealso cref="IMercuryClientDependencies" />
-public sealed class MercuryClientDependencies(ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport, IMercuryLogger? logger = null) : IMercuryClientDependencies
+public sealed class MercuryClientDependencies(ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport, IReplayProtector? replayProtector = null, IMercuryLogger? logger = null) : IMercuryClientDependencies
 {
     /// <summary>
     /// Gets the crypto provider.
@@ -54,6 +56,13 @@ public sealed class MercuryClientDependencies(ICryptoProvider cryptoProvider, En
     /// <value>The transport.</value>
     public ITransport Transport { get; } = transport
                                            ?? throw new ArgumentNullException(nameof(transport));
+
+    /// <summary>
+    /// Gets the replay protector.
+    /// </summary>
+    /// <value>The replay protector.</value>
+    public IReplayProtector ReplayProtector { get; } = 
+        replayProtector ?? new InMemoryReplayProtector();
 
     /// <summary>
     /// Gets the logger.

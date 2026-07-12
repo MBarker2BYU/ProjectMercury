@@ -4,7 +4,7 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-10-2026
+// Last Modified On : 07-12-2026
 // ***********************************************************************
 // <copyright file="MercuryClient.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -19,6 +19,7 @@ using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Logging;
 using Mercury.Abstractions.Primitives;
+using Mercury.Abstractions.Replay;
 using Mercury.Abstractions.Services;
 using Mercury.Abstractions.Transport;
 using Mercury.Core.Cryptography;
@@ -57,10 +58,16 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
     private readonly IEnvelopeCodec m_EnvelopeCodec = dependencies.EnvelopeCodec;
 
     /// <summary>
+    /// The replay protector
+    /// </summary>
+    private readonly IReplayProtector m_ReplayProtector = dependencies.ReplayProtector
+                                                          ?? throw new ArgumentNullException(nameof(dependencies.ReplayProtector));
+
+    /// <summary>
     /// The client logger
     /// </summary>
-    private readonly IMercuryLogger m_Logger =
-        dependencies.Logger ?? NoOpMercuryLogger.Instance;
+    private readonly IMercuryLogger m_Logger = dependencies.Logger 
+                                               ?? NoOpMercuryLogger.Instance;
 
     /// <summary>
     /// Sends the asynchronous.
@@ -186,9 +193,7 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
                     FailureReason.DecodeFailed,
                     ex.Message);
             }
-
-            // Replay Protection
-
+            
             IOpenRequest openRequest = new OpenRequest(secureEnvelope);
 
             var cryptoProviderResult =
@@ -196,8 +201,25 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
                     .OpenAsync(openRequest, m_EnvelopeService, cancellationToken)
                     .ConfigureAwait(false);
 
-            return new MercuryResult(
-                cryptoProviderResult);
+            if (!cryptoProviderResult.Success || cryptoProviderResult.ValidatedEnvelope == null)
+            {
+                return new MercuryResult(cryptoProviderResult);
+            }
+
+            // Replay Protection
+            var replayAccepted =
+                await m_ReplayProtector
+                    .TryAcceptAsync(cryptoProviderResult.ValidatedEnvelope.Header, cancellationToken)
+                    .ConfigureAwait(false);
+
+            if (!replayAccepted)
+            {
+                return new MercuryResult(false, ReadOnlyMemory.Empty,
+                    cryptoProviderResult.ValidatedEnvelope, FailureReason.ReplayDetected,
+                    "Replay detected.");
+            }
+
+            return new MercuryResult(cryptoProviderResult);
         }
         catch (OperationCanceledException)
         {

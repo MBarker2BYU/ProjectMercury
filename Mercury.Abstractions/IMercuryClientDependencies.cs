@@ -16,6 +16,7 @@
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Logging;
+using Mercury.Abstractions.Replay;
 using Mercury.Abstractions.Transport;
 
 namespace Mercury.Abstractions;
@@ -41,6 +42,11 @@ public interface IMercuryClientDependencies
     /// </summary>
     /// <value>The transport.</value>
     ITransport Transport { get; }
+    /// <summary>
+    /// Gets the replay protector.
+    /// </summary>
+    /// <value>The replay protector.</value>
+    IReplayProtector ReplayProtector { get; }
 
     /// <summary>
     /// Gets the logger.

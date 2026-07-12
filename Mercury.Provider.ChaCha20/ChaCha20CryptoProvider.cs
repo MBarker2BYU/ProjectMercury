@@ -136,20 +136,21 @@ public sealed class ChaCha20CryptoProvider : ICryptoProvider
 
             var ciphertext = new byte[payload.Length];
 
-            var additionalAuthenticatedData = BuildAdditionalAuthenticatedData(
-                    request.CryptoContext.SenderKeyId, request.CryptoContext.RecipientKeyId, sm_AlgorithmId.Value);
+            var replayToken = RandomNumberGenerator.GetBytes(16);
+            var replayTokenMemory = new ReadOnlyMemory(replayToken);
+
+            var additionalAuthenticatedData = BuildAdditionalAuthenticatedData(request.CryptoContext.SenderKeyId, 
+                request.CryptoContext.RecipientKeyId, sm_AlgorithmId, replayTokenMemory);
 
             using (var chaCha20 = new ChaCha20Poly1305(key))
             {
                 chaCha20.Encrypt(nonce, payload, ciphertext, authenticationTag, additionalAuthenticatedData);
             }
-
-            var replayToken = RandomNumberGenerator.GetBytes(16);
-
+            
             var header =
                 envelopeService.BuildEnvelopeHeader(new KeyId(Guid.NewGuid().ToString("N")), DateTimeOffset.UtcNow,
                     request.CryptoContext.SenderKeyId, request.CryptoContext.RecipientKeyId, sm_AlgorithmId,
-                    AlgorithmId.Empty, new ReadOnlyMemory(replayToken), request.HeaderMeta.Clone());
+                    AlgorithmId.Empty, replayTokenMemory, request.HeaderMeta.Clone());
 
             var footer =
                 envelopeService.BuildEnvelopeFooter(request.FooterMeta.Clone());
@@ -271,7 +272,7 @@ public sealed class ChaCha20CryptoProvider : ICryptoProvider
 
         var additionalAuthenticatedData =
             BuildAdditionalAuthenticatedData(secureEnvelope.Header.SenderKeyId, secureEnvelope.Header.RecipientKeyId,
-                secureEnvelope.Header.Encryption.Value);
+                secureEnvelope.Header.Encryption, secureEnvelope.Header.ReplayToken);
 
         using var chaCha20 = new ChaCha20Poly1305(key);
         chaCha20.Decrypt(nonce, ciphertext, authenticationTag,
@@ -337,27 +338,32 @@ public sealed class ChaCha20CryptoProvider : ICryptoProvider
 
         if (key.Length != 32)
         {
-            throw new InvalidOperationException($"ChaCha20-Poly1305 requires a 32-byte key. Actual: {key.Length} bytes.");
+            throw new CryptographicException(
+                $"ChaCha20-Poly1305 requires a 32-byte key. Actual: {key.Length} bytes.");
         }
     }
 
     /// <summary>
     /// Builds the additional authenticated data.
     /// </summary>
-    /// <param name="senderKeyId">
-    /// The sender key identifier.
-    /// </param>
-    /// <param name="recipientKeyId">
-    /// The recipient key identifier.
-    /// </param>
-    /// <param name="algorithmName">
-    /// The algorithm name.
-    /// </param>
-    /// <returns>The additional authenticated data.</returns>
-    private static byte[] BuildAdditionalAuthenticatedData(KeyId senderKeyId,
-        KeyId recipientKeyId, string algorithmName)
+    /// <param name="senderKeyId">The sender key identifier.</param>
+    /// <param name="recipientKeyId">The recipient key identifier.</param>
+    /// <param name="encryption">The encryption.</param>
+    /// <param name="replayToken">The replay token.</param>
+    /// <returns>System.Byte[].</returns>
+    /// <exception cref="ArgumentException">Replay token cannot be empty. - replayToken</exception>
+    private static byte[] BuildAdditionalAuthenticatedData(KeyId senderKeyId, KeyId recipientKeyId, AlgorithmId encryption, ReadOnlyMemory replayToken)
     {
-        var value = $"{senderKeyId.Value}|{recipientKeyId.Value}|{algorithmName}";
+        if (replayToken.IsEmpty)
+        {
+            throw new ArgumentException("Replay token cannot be empty.", nameof(replayToken));
+        }
+
+        var replayTokenValue =
+            Convert.ToBase64String(replayToken.ToArray());
+
+        var value =
+            $"{senderKeyId.Value}|{recipientKeyId.Value}|{encryption.Value}|{replayTokenValue}";
 
         return Encoding.UTF8.GetBytes(value);
     }
