@@ -85,6 +85,12 @@ public sealed class InMemoryDuplexTransport : ITransport
     }
 
     /// <summary>
+    /// Gets a value indicating whether the transport is connected.
+    /// </summary>
+    /// <value><c>true</c> if the transport is connected; otherwise, <c>false</c>.</value>
+    public bool IsConnected => true;
+
+    /// <summary>
     /// Sends the asynchronous.
     /// </summary>
     /// <param name="frame"></param>
@@ -103,9 +109,7 @@ public sealed class InMemoryDuplexTransport : ITransport
         }
 
         await m_Outbound
-            .WriteAsync(
-                frame.ToArray(),
-                cancellationToken)
+            .WriteAsync(frame.ToArray(), cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -118,8 +122,8 @@ public sealed class InMemoryDuplexTransport : ITransport
         CancellationToken cancellationToken = default)
     {
             var frame = await m_Inbound
-            .ReadAsync(cancellationToken)
-            .ConfigureAwait(false);
+                .ReadAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return new ReadOnlyMemory(frame);
     }

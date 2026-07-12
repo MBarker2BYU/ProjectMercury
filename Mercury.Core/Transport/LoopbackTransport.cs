@@ -36,6 +36,12 @@ internal sealed class LoopbackTransport : ITransport
     private readonly SemaphoreSlim m_Signal = new(0);
 
     /// <summary>
+    /// Gets a value indicating whether the transport is connected.
+    /// </summary>
+    /// <value><c>true</c> if the transport is connected; otherwise, <c>false</c>.</value>
+    public bool IsConnected => true;
+
+    /// <summary>
     /// Sends the asynchronous.
     /// </summary>
     /// <param name="frame"></param>
@@ -49,7 +55,7 @@ internal sealed class LoopbackTransport : ITransport
 
         if (frame.IsEmpty)
         {
-            throw new ArgumentException("Sending empty frames is not allowed.",nameof(frame));
+            throw new ArgumentException("Sending empty frames is not allowed.", nameof(frame));
         }
 
         m_Queue.Enqueue(frame.Clone());

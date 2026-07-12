@@ -144,6 +144,15 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     }
 
     /// <summary>
+    /// Gets a value indicating whether the underlying socket is connected.
+    /// </summary>
+    /// <remarks>
+    /// This reflects the last known socket state. A remote disconnect may not
+    /// be detected until the next send or receive operation.
+    /// </remarks>
+    public bool IsConnected => m_Client.Connected;
+
+    /// <summary>
     /// Sends one complete frame.
     /// </summary>
     /// <param name="frame">The frame.</param>

@@ -23,6 +23,14 @@ namespace Mercury.Abstractions.Transport;
 public interface ITransport
 {
     /// <summary>
+    /// Gets a value indicating whether the transport is connected.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if the transport is connected; otherwise, <c>false</c>.
+    /// </value>
+    bool IsConnected { get; }
+
+    /// <summary>
     /// Sends the asynchronous.
     /// </summary>
     /// <param name="frame"></param>
