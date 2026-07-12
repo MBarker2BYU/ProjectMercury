@@ -24,20 +24,19 @@ namespace Mercury.Core.Cryptography;
 /// Class PassThroughCryptoProvider. This class cannot be inherited.
 /// Implements the <see cref="ICryptoProvider" />
 /// </summary>
-/// <param name="name">The name.</param>
 /// <seealso cref="ICryptoProvider" />
-internal sealed class PassThroughCryptoProvider(string name) : ICryptoProvider
+internal sealed class PassThroughCryptoProvider : ICryptoProvider
 {
     /// <summary>
     /// Gets the name.
     /// </summary>
     /// <value>The name.</value>
-    public string Name { get; } = name;
+    public string Name => "pass-through";
 
     /// <summary>
     /// Seals the asynchronous.
     /// </summary>
-    /// <param name="payload">The payload.</param>
+    /// <param name="sealRequest">The protect request.</param>
     /// <param name="envelopeService">The envelope service.</param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task&lt;ICryptoProviderResult&gt;.</returns>
@@ -56,7 +55,7 @@ internal sealed class PassThroughCryptoProvider(string name) : ICryptoProvider
     /// <summary>
     /// Opens the asynchronous.
     /// </summary>
-    /// <param name="secureEnvelope">The secure envelope.</param>
+    /// <param name="openRequest">The unprotect request.</param>
     /// <param name="envelopeService">The envelope service.</param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task&lt;ICryptoProviderResult&gt;.</returns>

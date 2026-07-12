@@ -14,6 +14,7 @@
 // ***********************************************************************
 
 using Mercury.Abstractions;
+using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
@@ -142,4 +143,26 @@ public sealed class EnvelopeService : IEnvelopeService
         return new MercuryResult(true, secureEnvelope.Payload,
             secureEnvelope, FailureReason.None);
     }
+
+    /// <summary>
+    /// Builds the crypto provider result.
+    /// </summary>
+    /// <param name="success">if set to <c>true</c> [success].</param>
+    /// <param name="payload">The payload.</param>
+    /// <param name="validatedEnvelope">The validated envelope.</param>
+    /// <param name="failureReason">The failure reason.</param>
+    /// <param name="message">The message.</param>
+    /// <returns>ICryptoProviderResult.</returns>
+    public ICryptoProviderResult BuildCryptoProviderResult(
+        bool success,
+        ReadOnlyMemory payload,
+        ISecureEnvelope? validatedEnvelope,
+        FailureReason failureReason,
+        string? message = null)
+        => new MercuryResult(
+            success,
+            payload,
+            validatedEnvelope,
+            failureReason,
+            message);
 }

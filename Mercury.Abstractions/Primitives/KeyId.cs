@@ -28,6 +28,12 @@ public readonly struct KeyId(string value)
     public static KeyId Empty => new(string.Empty);
 
     /// <summary>
+    /// Gets a value indicating whether this instance is empty.
+    /// </summary>
+    /// <value><c>true</c> if this instance is empty; otherwise, <c>false</c>.</value>
+    public bool IsEmpty => string.IsNullOrWhiteSpace(Value);
+
+    /// <summary>
     /// Gets the value.
     /// </summary>
     /// <value>The value.</value>

@@ -1,10 +1,12 @@
-using System.Diagnostics;
-using System.Text;
 using Mercury.Abstractions;
 using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Primitives;
 using Mercury.Core.Factories;
+using Mercury.Provider.AesGcm;
 using Mercury.Transport.InMemory;
+using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Mercury.Demo.WinForms
 {
@@ -16,6 +18,9 @@ namespace Mercury.Demo.WinForms
     /// <seealso cref="System.Windows.Forms.Form" />
     public partial class MainWindow : Form
     {
+        internal const string ALPHA_NODE = "Alpha Node";
+        internal const string BRAVO_NODE = "Bravo Node";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
@@ -30,8 +35,19 @@ namespace Mercury.Demo.WinForms
         {
             var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
 
-            var alphaDependencies = MercuryFactory.Instance.BuildDependencies(EnvelopeCodec.Json, alphaTransport);
-            var bravoDependencies = MercuryFactory.Instance.BuildDependencies(EnvelopeCodec.Json, bravoTransport);
+            var keys = new Dictionary<KeyId, byte[]>
+            {
+                [ALPHA_NODE] = RandomNumberGenerator.GetBytes(32),
+                [BRAVO_NODE] = RandomNumberGenerator.GetBytes(32)
+            };
+
+            var keyProvider = new AesKeyProviderDictionary(keys);
+            
+            var alphaAesGcm = new AesGcmCryptoProvider(keyProvider);
+            var bravoAesGcm = new AesGcmCryptoProvider(keyProvider);
+
+            var alphaDependencies = MercuryFactory.Instance.BuildDependencies(alphaAesGcm, EnvelopeCodec.Json, alphaTransport);
+            var bravoDependencies = MercuryFactory.Instance.BuildDependencies(bravoAesGcm, EnvelopeCodec.Json, bravoTransport);
 
             m_AlphaClient = MercuryFactory.Instance.BuildClient(alphaDependencies);
             m_BravoClient = MercuryFactory.Instance.BuildClient(bravoDependencies);
@@ -57,8 +73,9 @@ namespace Mercury.Demo.WinForms
         private static async Task<IMercuryResult> TestClient()
         {
             var mercuryClient = MercuryFactory.Instance.BuildClient();
+            var cryptoContext = MercuryFactory.Instance.BuildCryptoContext(ALPHA_NODE, BRAVO_NODE);
 
-            await mercuryClient.SendAsync(new ReadOnlyMemory([1, 2, 3]));
+            await mercuryClient.SendAsync(cryptoContext, new ReadOnlyMemory([1, 2, 3]));
 
             var result = mercuryClient.ReceiveAsync();
 
@@ -69,7 +86,9 @@ namespace Mercury.Demo.WinForms
         {
             const string message = @"Alpha One to Bravo Actual";
 
-            await m_AlphaClient.SendAsync(Encoding.UTF8.GetBytes(message));
+            var cryptoContext = MercuryFactory.Instance.BuildCryptoContext(ALPHA_NODE, BRAVO_NODE);
+
+            await m_AlphaClient.SendAsync(cryptoContext,Encoding.UTF8.GetBytes(message));
 
             var mercuryResult = await m_BravoClient.ReceiveAsync();
 
@@ -81,7 +100,9 @@ namespace Mercury.Demo.WinForms
         {
             const string message = @"Bravo Actual to Alpha One";
 
-            await m_BravoClient.SendAsync(Encoding.UTF8.GetBytes(message));
+            var cryptoContext = MercuryFactory.Instance.BuildCryptoContext( BRAVO_NODE, ALPHA_NODE);
+
+            await m_BravoClient.SendAsync(cryptoContext, Encoding.UTF8.GetBytes(message));
 
             var mercuryResult = await m_AlphaClient.ReceiveAsync();
 

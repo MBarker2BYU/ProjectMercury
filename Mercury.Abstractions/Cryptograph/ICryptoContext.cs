@@ -4,9 +4,9 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-09-2026
+// Last Modified On : 07-11-2026
 // ***********************************************************************
-// <copyright file="ISealRequest.cs">
+// <copyright file="ICryptoContext.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
@@ -18,28 +18,18 @@ using Mercury.Abstractions.Primitives;
 namespace Mercury.Abstractions.Cryptograph;
 
 /// <summary>
-/// Defines the data supplied to a crypto provider for one protection operation.
+/// Interface ICryptoContext
 /// </summary>
-public interface ISealRequest
+public interface ICryptoContext
 {
     /// <summary>
-    /// Gets the crypto context.
+    /// Gets the sender key identifier.
     /// </summary>
-    /// <value>The crypto context.</value>
-    ICryptoContext CryptoContext { get; }
-
+    /// <value>The sender key identifier.</value>
+    KeyId SenderKeyId { get; }
     /// <summary>
-    /// Gets the payload to protect.
+    /// Gets the recipient key identifier.
     /// </summary>
-    ReadOnlyMemory Payload { get; }
-
-    /// <summary>
-    /// Gets the envelope header metadata.
-    /// </summary>
-    Metadata HeaderMeta { get; }
-
-    /// <summary>
-    /// Gets the envelope footer metadata.
-    /// </summary>
-    Metadata FooterMeta { get; }
+    /// <value>The recipient key identifier.</value>
+    KeyId RecipientKeyId { get; }
 }

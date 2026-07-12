@@ -22,12 +22,20 @@ namespace Mercury.Core.Cryptography;
 /// Class SealRequest. This class cannot be inherited.
 /// Implements the <see cref="ISealRequest" />
 /// </summary>
+/// <param name="cryptoContext"></param>
 /// <param name="payload">The payload.</param>
 /// <param name="headerMeta">The header meta.</param>
 /// <param name="footerMeta">The footer meta.</param>
 /// <seealso cref="ISealRequest" />
-internal sealed class SealRequest(ReadOnlyMemory payload, Metadata headerMeta, Metadata footerMeta) : ISealRequest
+internal sealed class SealRequest(ICryptoContext cryptoContext, ReadOnlyMemory payload, Metadata headerMeta, Metadata footerMeta) : ISealRequest
 {
+    /// <summary>
+    /// Gets the crypto context.
+    /// </summary>
+    /// <value>The crypto context.</value>
+    public ICryptoContext CryptoContext { get; } = cryptoContext 
+                                                   ?? throw new ArgumentNullException(nameof(cryptoContext));
+
     /// <summary>
     /// Gets the payload to protect.
     /// </summary>
@@ -37,10 +45,11 @@ internal sealed class SealRequest(ReadOnlyMemory payload, Metadata headerMeta, M
     /// Gets the envelope header metadata.
     /// </summary>
     /// <value>The header meta.</value>
-    public Metadata HeaderMeta { get; } = headerMeta;
+    public Metadata HeaderMeta { get; } = headerMeta 
+                                          ?? new Metadata();
     /// <summary>
     /// Gets the envelope footer metadata.
     /// </summary>
     /// <value>The footer meta.</value>
-    public Metadata FooterMeta { get; } = footerMeta;
+    public Metadata FooterMeta { get; } = footerMeta ?? new Metadata();
 }

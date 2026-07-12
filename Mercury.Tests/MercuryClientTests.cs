@@ -27,11 +27,11 @@ public class MercuryClientTests
     {
         var client =
             MercuryFactory.Instance.BuildClient();
+        var cryptoContext = MercuryFactory.Instance.BuildCryptoContext("Alpha", "Bravo");
 
         var expected = new byte[] { 1, 2, 3, 4 };
 
-        await client.SendAsync(
-            new ReadOnlyMemory(expected));
+        await client.SendAsync(cryptoContext, new ReadOnlyMemory(expected));
 
         var result =
             await client.ReceiveAsync();

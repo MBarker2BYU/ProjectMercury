@@ -13,6 +13,8 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Cryptograph;
+using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
 
@@ -73,4 +75,11 @@ public interface IEnvelopeService
     /// <param name="secureEnvelope">The secure envelope.</param>
     /// <returns>IMercuryResult.</returns>
     IMercuryResult UnpackEnvelope(ISecureEnvelope? secureEnvelope);
+
+    ICryptoProviderResult BuildCryptoProviderResult(
+        bool success,
+        ReadOnlyMemory payload,
+        ISecureEnvelope? validatedEnvelope,
+        FailureReason failureReason,
+        string? message = null);
 }

@@ -17,6 +17,7 @@ using Mercury.Abstractions;
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Factories;
+using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Services;
 using Mercury.Abstractions.Transport;
 using Mercury.Core.Cryptography;
@@ -50,7 +51,19 @@ public sealed class MercuryFactory : IMercuryFactory
     private static readonly IEnvelopeService sm_EnvelopeService =
         EnvelopeService.Instance;
 
+    /// <summary>
+    /// The sm envelope codec
+    /// </summary>
     private static readonly EnvelopeCodec sm_EnvelopeCodec = EnvelopeCodec.Json;
+
+    /// <summary>
+    /// Builds the crypto context.
+    /// </summary>
+    /// <param name="senderKeyId">The sender key identifier.</param>
+    /// <param name="recipientKeyId">The recipient key identifier.</param>
+    /// <returns>ICryptoContext.</returns>
+    public ICryptoContext BuildCryptoContext(KeyId senderKeyId, KeyId recipientKeyId)
+        => new CryptoContext(senderKeyId, recipientKeyId);
         
     /// <summary>
     /// Builds the dependencies.
@@ -70,7 +83,7 @@ public sealed class MercuryFactory : IMercuryFactory
     /// <returns>IMercuryClientDependencies.</returns>
     [Obsolete("Remove prior to release", false)]
     public IMercuryClientDependencies BuildDependencies(EnvelopeCodec envelopeCodec, ITransport transport)
-        => new MercuryClientDependencies(new PassThroughCryptoProvider(nameof(PassThroughCryptoProvider)), envelopeCodec, transport);
+        => new MercuryClientDependencies(new PassThroughCryptoProvider(), envelopeCodec, transport);
 
     /// <summary>
     /// Builds the client.
@@ -79,7 +92,7 @@ public sealed class MercuryFactory : IMercuryFactory
     [Obsolete("Remove prior to release", false)]
     public IMercuryClient BuildClient()
     {
-        var dependencies = BuildDependencies(new PassThroughCryptoProvider(nameof(PassThroughCryptoProvider)), sm_EnvelopeCodec, new LoopbackTransport());
+        var dependencies = BuildDependencies(new PassThroughCryptoProvider(), sm_EnvelopeCodec, new LoopbackTransport());
 
         return BuildClient(dependencies);
     }

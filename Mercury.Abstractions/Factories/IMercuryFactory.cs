@@ -15,7 +15,7 @@
 
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
-using Mercury.Abstractions.Envelope;
+using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Transport;
 
 namespace Mercury.Abstractions.Factories;
@@ -24,6 +24,15 @@ namespace Mercury.Abstractions.Factories;
 /// </summary>
 public interface IMercuryFactory
 {
+
+    /// <summary>
+    /// Builds the crypto context.
+    /// </summary>
+    /// <param name="senderKeyId">The sender key identifier.</param>
+    /// <param name="recipientKeyId">The recipient key identifier.</param>
+    /// <returns>ICryptoContext.</returns>
+    ICryptoContext BuildCryptoContext(KeyId senderKeyId, KeyId recipientKeyId);
+
     /// <summary>
     /// Builds the dependencies.
     /// </summary>

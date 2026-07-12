@@ -13,6 +13,7 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Primitives;
 
 namespace Mercury.Abstractions;
@@ -25,10 +26,11 @@ public interface IMercuryClient
     /// <summary>
     /// Sends the asynchronous.
     /// </summary>
+    /// <param name="cryptoContext"></param>
     /// <param name="payload">The payload.</param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task.</returns>
-    Task SendAsync(ReadOnlyMemory payload, CancellationToken cancellationToken = default);
+    Task SendAsync(ICryptoContext cryptoContext, ReadOnlyMemory payload, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Receives the asynchronous.
