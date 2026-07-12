@@ -5,7 +5,7 @@
   </Folder>
   <Project Path="Mercury.Abstractions/Mercury.Abstractions.csproj" Id="57d0da9a-afbc-42df-80f3-e2bc8564593a" />
   <Project Path="Mercury.Core/Mercury.Core.csproj" Id="d243c8e6-429c-4712-8b75-6d1079359a13" />
-  <Project Path="Mercury.Demo.WinForms/Mercury.Demo.WinForms.csproj" Id="51b29b8c-03b6-45f5-a2b1-7d92365e761a" />
+  <Project Path="Mercury.Demo.WinForms/Mercury.Demo.WinForms.csproj" />
   <Project Path="Mercury.Provider.AesGcm/Mercury.Provider.AesGcm.csproj" Id="45bf741c-66d1-473d-b5be-fe7a82998fba" />
   <Project Path="Mercury.Provider.ChaCha20/Mercury.Provider.ChaCha20.csproj" Id="6f0184bd-6ed9-4ab6-8e7b-0bfc75605a44" />
   <Project Path="Mercury.Tests/Mercury.Tests.csproj" Id="2e4db06a-46b2-4be1-a459-02fcd553564f" />
