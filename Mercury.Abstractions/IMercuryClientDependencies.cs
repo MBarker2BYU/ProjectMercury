@@ -14,8 +14,8 @@
 // ***********************************************************************
 
 using Mercury.Abstractions.Cryptograph;
-using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Envelope;
+using Mercury.Abstractions.Logging;
 using Mercury.Abstractions.Transport;
 
 namespace Mercury.Abstractions;
@@ -41,4 +41,10 @@ public interface IMercuryClientDependencies
     /// </summary>
     /// <value>The transport.</value>
     ITransport Transport { get; }
+
+    /// <summary>
+    /// Gets the logger.
+    /// </summary>
+    /// <value>The logger.</value>
+    IMercuryLogger Logger { get; }
 }

@@ -17,6 +17,7 @@ using Mercury.Abstractions;
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Envelope;
+using Mercury.Abstractions.Logging;
 using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Services;
 using Mercury.Abstractions.Transport;
@@ -54,6 +55,12 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
     /// The envelope codec
     /// </summary>
     private readonly IEnvelopeCodec m_EnvelopeCodec = dependencies.EnvelopeCodec;
+
+    /// <summary>
+    /// The client logger
+    /// </summary>
+    private readonly IMercuryLogger m_Logger =
+        dependencies.Logger ?? NoOpMercuryLogger.Instance;
 
     /// <summary>
     /// Sends the asynchronous.
