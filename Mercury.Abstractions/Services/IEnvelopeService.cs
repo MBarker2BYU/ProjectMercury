@@ -76,6 +76,15 @@ public interface IEnvelopeService
     /// <returns>IMercuryResult.</returns>
     IMercuryResult UnpackEnvelope(ISecureEnvelope? secureEnvelope);
 
+    /// <summary>
+    /// Builds the crypto provider result.
+    /// </summary>
+    /// <param name="success">if set to <c>true</c> [success].</param>
+    /// <param name="payload">The payload.</param>
+    /// <param name="validatedEnvelope">The validated envelope.</param>
+    /// <param name="failureReason">The failure reason.</param>
+    /// <param name="message">The message.</param>
+    /// <returns>ICryptoProviderResult.</returns>
     ICryptoProviderResult BuildCryptoProviderResult(
         bool success,
         ReadOnlyMemory payload,

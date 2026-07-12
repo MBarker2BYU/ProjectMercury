@@ -32,19 +32,39 @@ namespace Mercury.Core;
 internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEnvelopeService envelopeService) : IMercuryClient
 {
 
+    /// <summary>
+    /// The crypto provider
+    /// </summary>
     private readonly ICryptoProvider m_CryptoProvider = dependencies.CryptoProvider
                                                         ?? throw new ArgumentNullException(nameof(dependencies.CryptoProvider));
 
+    /// <summary>
+    /// The transport
+    /// </summary>
     private readonly ITransport m_Transport = dependencies.Transport
                                               ?? throw new ArgumentNullException(nameof(dependencies.Transport));
 
+    /// <summary>
+    /// The envelope service
+    /// </summary>
     private readonly IEnvelopeService m_EnvelopeService = envelopeService
                                                           ?? throw new ArgumentNullException(nameof(envelopeService));
 
+    /// <summary>
+    /// The envelope codec
+    /// </summary>
     private readonly IEnvelopeCodec m_EnvelopeCodec = dependencies.EnvelopeCodec;
 
-
-    internal Task SendAsync(CryptoContext context, ReadOnlyMemory payload, Metadata headerMeta,
+    /// <summary>
+    /// Sends the asynchronous.
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <param name="payload">The payload.</param>
+    /// <param name="headerMeta">The header meta.</param>
+    /// <param name="footerMeta">The footer meta.</param>
+    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <returns>Task.</returns>
+    internal Task SendAsync(ICryptoContext context, ReadOnlyMemory payload, Metadata headerMeta,
         Metadata footerMeta, CancellationToken cancellationToken = default)
             => SendInternalAsync(context, payload, headerMeta,
                 footerMeta, cancellationToken);
@@ -57,9 +77,9 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task.</returns>
     /// <exception cref="NotImplementedException"></exception>
-    public async Task SendAsync(ICryptoContext cryptoContext, ReadOnlyMemory payload,
+    public Task SendAsync(ICryptoContext cryptoContext, ReadOnlyMemory payload,
         CancellationToken cancellationToken = default)
-        => await SendInternalAsync(cryptoContext, payload, Metadata.Empty, Metadata.Empty, cancellationToken);
+        => SendInternalAsync(cryptoContext, payload, Metadata.Empty, Metadata.Empty, cancellationToken);
 
     /// <summary>
     /// Send internal as an asynchronous operation.
