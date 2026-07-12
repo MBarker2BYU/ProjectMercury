@@ -14,6 +14,8 @@
 // ***********************************************************************
 
 using Mercury.Abstractions.Cryptograph;
+using Mercury.Abstractions.Enums;
+using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Transport;
 
 namespace Mercury.Abstractions.Factories;
@@ -22,14 +24,22 @@ namespace Mercury.Abstractions.Factories;
 /// </summary>
 public interface IMercuryFactory
 {
-
     /// <summary>
     /// Builds the dependencies.
     /// </summary>
     /// <param name="cryptoProvider">The crypto provider.</param>
+    /// <param name="envelopeCodec"></param>
     /// <param name="transport">The transport.</param>
     /// <returns>IMercuryClientDependencies.</returns>
-    IMercuryClientDependencies BuildDependencies(ICryptoProvider cryptoProvider, ITransport transport);
+    IMercuryClientDependencies BuildDependencies(ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport);
+
+    /// <summary>
+    /// Builds the dependencies with a passthrough crypto provider
+    /// </summary>
+    /// <param name="envelopeCodec">The envelope codec.</param>
+    /// <param name="transport">The transport.</param>
+    /// <returns>IMercuryClientDependencies.</returns>
+    IMercuryClientDependencies BuildDependencies(EnvelopeCodec envelopeCodec, ITransport transport);
 
     /// <summary>
     /// Builds the client.

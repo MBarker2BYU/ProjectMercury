@@ -4,7 +4,7 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-09-2026
+// Last Modified On : 07-11-2026
 // ***********************************************************************
 // <copyright file="SecureEnvelope.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -22,10 +22,23 @@ namespace Mercury.Core.Envelope;
 /// Class SecureEnvelope. This class cannot be inherited.
 /// Implements the <see cref="ISecureEnvelope" />
 /// </summary>
+/// <param name="version">The version.</param>
+/// <param name="header">The header.</param>
 /// <param name="payload">The payload.</param>
+/// <param name="footer">The footer.</param>
 /// <seealso cref="ISecureEnvelope" />
-internal sealed class SecureEnvelope(IEnvelopeHeader header, ReadOnlyMemory payload, IEnvelopeFooter footer) : ISecureEnvelope
+internal sealed class SecureEnvelope(FrameworkVersion version, IEnvelopeHeader header, ReadOnlyMemory payload, IEnvelopeFooter footer) : ISecureEnvelope
 {
+    /// <summary>
+    /// Gets the version.
+    /// </summary>
+    /// <value>The version.</value>
+    public FrameworkVersion Version { get; } = version;
+
+    /// <summary>
+    /// Gets the header.
+    /// </summary>
+    /// <value>The header.</value>
     public IEnvelopeHeader Header { get; } = header;
 
     /// <summary>

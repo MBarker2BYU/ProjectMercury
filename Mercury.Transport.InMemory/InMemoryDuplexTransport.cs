@@ -1,6 +1,21 @@
-﻿using Mercury.Abstractions.Envelope;
+﻿// ***********************************************************************
+// Assembly       : Mercury.Transport.InMemory
+// Author           : Matthew D. Barker
+// Created          : 07-02-2026
+//
+// Last Modified By : Matthew D. Barker
+// Last Modified On : 07-10-2026
+// ***********************************************************************
+// <copyright file="InMemoryDuplexTransport.cs">
+//     Copyright (c) Matthew D. Barker. All rights reserved.
+//     Submitted in partial fulfillment of CSE499 Senior Capstone Project
+//     at Brigham Young University-Idaho.
+// </copyright>
+// ***********************************************************************
+
 using Mercury.Abstractions.Transport;
 using System.Threading.Channels;
+using Mercury.Abstractions.Primitives;
 
 namespace Mercury.Transport.InMemory;
 
@@ -11,12 +26,12 @@ namespace Mercury.Transport.InMemory;
 /// <seealso cref="ITransport" />
 public sealed class InMemoryDuplexTransport : ITransport
 {
-    private readonly ChannelReader<ISecureEnvelope> m_Inbound;
-    private readonly ChannelWriter<ISecureEnvelope> m_Outbound;
+    private readonly ChannelReader<byte[]> m_Inbound;
+    private readonly ChannelWriter<byte[]> m_Outbound;
 
     private InMemoryDuplexTransport(
-        ChannelReader<ISecureEnvelope> inbound,
-        ChannelWriter<ISecureEnvelope> outbound)
+        ChannelReader<byte[]> inbound,
+        ChannelWriter<byte[]> outbound)
     {
         m_Inbound = inbound;
         m_Outbound = outbound;
@@ -39,7 +54,7 @@ public sealed class InMemoryDuplexTransport : ITransport
         }
 
         var alphaToBravo =
-            Channel.CreateBounded<ISecureEnvelope>(
+            Channel.CreateBounded<byte[]>(
                 new BoundedChannelOptions(capacity)
                 {
                     FullMode = BoundedChannelFullMode.Wait,
@@ -48,7 +63,7 @@ public sealed class InMemoryDuplexTransport : ITransport
                 });
 
         var bravoToAlpha =
-            Channel.CreateBounded<ISecureEnvelope>(
+            Channel.CreateBounded<byte[]>(
                 new BoundedChannelOptions(capacity)
                 {
                     FullMode = BoundedChannelFullMode.Wait,
@@ -72,18 +87,25 @@ public sealed class InMemoryDuplexTransport : ITransport
     /// <summary>
     /// Sends the asynchronous.
     /// </summary>
-    /// <param name="secureEnvelope">The secure envelope.</param>
+    /// <param name="frame"></param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>A Task representing the asynchronous operation.</returns>
     /// <exception cref="ArgumentNullException"></exception>
     public async Task SendAsync(
-        ISecureEnvelope secureEnvelope,
+        ReadOnlyMemory frame,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(secureEnvelope);
+        if (frame.IsEmpty)
+        {
+            throw new ArgumentException(
+                "Frame cannot be empty.",
+                nameof(frame));
+        }
 
         await m_Outbound
-            .WriteAsync(secureEnvelope, cancellationToken)
+            .WriteAsync(
+                frame.ToArray(),
+                cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -91,12 +113,14 @@ public sealed class InMemoryDuplexTransport : ITransport
     /// Receives the asynchronous.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>A Task&lt;ISecureEnvelope&gt; representing the asynchronous operation.</returns>
-    public async Task<ISecureEnvelope> ReceiveAsync(
+    /// <returns>A Task&lt;ReadOnlyMemory&gt; representing the asynchronous operation.</returns>
+    public async Task<ReadOnlyMemory> ReceiveAsync(
         CancellationToken cancellationToken = default)
     {
-        return await m_Inbound
+            var frame = await m_Inbound
             .ReadAsync(cancellationToken)
             .ConfigureAwait(false);
+
+            return new ReadOnlyMemory(frame);
     }
 }

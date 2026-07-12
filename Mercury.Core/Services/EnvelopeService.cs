@@ -40,6 +40,8 @@ public sealed class EnvelopeService : IEnvelopeService
     /// <value>The instance.</value>
     public static EnvelopeService Instance => sm_EnvelopeService.Value;
 
+    
+
     /// <summary>
     /// Builds the envelope header.
     /// </summary>
@@ -110,7 +112,7 @@ public sealed class EnvelopeService : IEnvelopeService
         }
 
         ISecureEnvelope secureEnvelope =
-            new SecureEnvelope(header, payload, footer);
+            new SecureEnvelope(FrameworkVersion.V1, header, payload, footer);
 
         return new MercuryResult(true,
             payload, secureEnvelope, FailureReason.None);

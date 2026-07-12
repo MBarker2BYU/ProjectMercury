@@ -40,7 +40,9 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
     private readonly IEnvelopeService m_EnvelopeService = envelopeService
                                                           ?? throw new ArgumentNullException(nameof(envelopeService));
 
-    
+    private readonly IEnvelopeCodec m_EnvelopeCodec = dependencies.EnvelopeCodec;
+
+
 
     /// <summary>
     /// Sends the asynchronous.
@@ -51,9 +53,21 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
     /// <exception cref="NotImplementedException"></exception>
     public async Task SendAsync(ReadOnlyMemory payload, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (payload.IsEmpty)
+        {
+            throw new ArgumentException(
+                "Payload must not be empty.",
+                nameof(payload));
+        }
+
         var providerResult =
             await m_CryptoProvider
-                .ProtectAsync(payload, m_EnvelopeService, cancellationToken)
+                .ProtectAsync(
+                    payload,
+                    m_EnvelopeService,
+                    cancellationToken)
                 .ConfigureAwait(false);
 
         if (!providerResult.Success ||
@@ -64,8 +78,20 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
                 "The crypto provider failed to create a secure envelope.");
         }
 
+        var frame =
+            m_EnvelopeCodec.Encode(
+                providerResult.ValidatedEnvelope);
+
+        if (frame.IsEmpty)
+        {
+            throw new InvalidOperationException(
+                "The envelope codec returned an empty frame.");
+        }
+
         await m_Transport
-            .SendAsync(providerResult.ValidatedEnvelope, cancellationToken)
+            .SendAsync(
+                frame,
+                cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -73,29 +99,39 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
     /// Receives the asynchronous.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>Task&lt;IMercuryResult&gt;.</returns>
-    /// <exception cref="NotImplementedException"></exception>
-    public async Task<IMercuryResult> ReceiveAsync(CancellationToken cancellationToken = default)
+    /// <returns>A Task&lt;IMercuryResult&gt; representing the asynchronous operation.</returns>
+    public async Task<IMercuryResult> ReceiveAsync(
+        CancellationToken cancellationToken = default)
     {
-
         ISecureEnvelope? secureEnvelope = null;
-        
+
         try
         {
-            secureEnvelope =
+            var frame =
                 await m_Transport
                     .ReceiveAsync(cancellationToken)
                     .ConfigureAwait(false);
 
+            if (frame.IsEmpty)
+            {
+                return new MercuryResult(
+                    false,
+                    ReadOnlyMemory.Empty,
+                    null,
+                    FailureReason.InternalError,
+                    "The transport returned an empty frame.");
+            }
+
+            secureEnvelope =
+                m_EnvelopeCodec.Decode(frame);
+
             var cryptoProviderResult =
                 await m_CryptoProvider
-                    .UnprotectAsync(
-                        secureEnvelope,
-                        m_EnvelopeService,
-                        cancellationToken)
+                    .UnprotectAsync(secureEnvelope, m_EnvelopeService, cancellationToken)
                     .ConfigureAwait(false);
 
-            return new MercuryResult(cryptoProviderResult);
+            return new MercuryResult(
+                cryptoProviderResult);
         }
         catch (OperationCanceledException)
         {

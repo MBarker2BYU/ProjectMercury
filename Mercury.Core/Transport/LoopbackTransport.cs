@@ -4,7 +4,7 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-10-2026
+// Last Modified On : 07-11-2026
 // ***********************************************************************
 // <copyright file="LoopbackTransport.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -14,7 +14,7 @@
 // ***********************************************************************
 
 using System.Collections.Concurrent;
-using Mercury.Abstractions.Envelope;
+using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Transport;
 
 namespace Mercury.Core.Transport;
@@ -29,7 +29,7 @@ internal sealed class LoopbackTransport : ITransport
     /// <summary>
     /// The m queue
     /// </summary>
-    private readonly ConcurrentQueue<ISecureEnvelope> m_Queue = new();
+    private readonly ConcurrentQueue<ReadOnlyMemory> m_Queue = new();
     /// <summary>
     /// The m signal
     /// </summary>
@@ -38,19 +38,21 @@ internal sealed class LoopbackTransport : ITransport
     /// <summary>
     /// Sends the asynchronous.
     /// </summary>
-    /// <param name="secureEnvelope"></param>
+    /// <param name="frame"></param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task.</returns>
     public Task SendAsync(
-        ISecureEnvelope secureEnvelope,
+        ReadOnlyMemory frame,
         CancellationToken cancellationToken = default)
     {
-        if (secureEnvelope == null)
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (frame.IsEmpty)
         {
-            throw new ArgumentNullException(nameof(secureEnvelope));
+            throw new ArgumentException("Sending empty frames is not allowed.",nameof(frame));
         }
 
-        m_Queue.Enqueue(secureEnvelope);
+        m_Queue.Enqueue(frame.Clone());
         m_Signal.Release();
 
         return Task.CompletedTask;
@@ -60,21 +62,21 @@ internal sealed class LoopbackTransport : ITransport
     /// Receives the asynchronous.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>A Task&lt;ISecureEnvelope&gt; representing the asynchronous operation.</returns>
-    /// <exception cref="InvalidOperationException">The loopback transport was signaled without a payload.</exception>
-    public async Task<ISecureEnvelope> ReceiveAsync(
+    /// <returns>A Task&lt;ReadOnlyMemory&gt; representing the asynchronous operation.</returns>
+    /// <exception cref="InvalidOperationException">The loopback transport was signaled without a frame.</exception>
+    public async Task<ReadOnlyMemory> ReceiveAsync(
         CancellationToken cancellationToken = default)
     {
         await m_Signal
             .WaitAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        if (m_Queue.TryDequeue(out var secureEnvelope))
+        if (m_Queue.TryDequeue(out var frame))
         {
-            return secureEnvelope;
+            return frame;
         }
 
         throw new InvalidOperationException(
-            "The loopback transport was signaled without a secure envelope.");
+            "The loopback transport was signaled without a frame.");
     }
 }

@@ -4,9 +4,9 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-09-2026
+// Last Modified On : 07-11-2026
 // ***********************************************************************
-// <copyright file="ISecureEnvelope.cs">
+// <copyright file="IEnvelopeCodec.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
@@ -18,30 +18,22 @@ using Mercury.Abstractions.Primitives;
 namespace Mercury.Abstractions.Envelope;
 
 /// <summary>
-/// Interface ISecureEnvelope
+/// Interface IEnvelopeCodec
 /// </summary>
-public interface ISecureEnvelope
+public interface IEnvelopeCodec
 {
-    /// <summary>
-    /// Gets the version.
-    /// </summary>
-    /// <value>The version.</value>
-    FrameworkVersion Version { get; }   
 
     /// <summary>
-    /// Gets the header.
+    /// Encodes the specified envelope.
     /// </summary>
-    /// <value>The header.</value>
-    IEnvelopeHeader Header { get; }
+    /// <param name="envelope">The envelope.</param>
+    /// <returns>ReadOnlyMemory.</returns>
+    ReadOnlyMemory Encode(ISecureEnvelope envelope);
 
     /// <summary>
-    /// Gets the payload.
+    /// Decodes the specified data.
     /// </summary>
-    /// <value>The payload.</value>
-    ReadOnlyMemory Payload { get; }
-    /// <summary>
-    /// Gets the footer.
-    /// </summary>
-    /// <value>The footer.</value>
-    IEnvelopeFooter Footer { get; }
+    /// <param name="data">The data.</param>
+    /// <returns>ISecureEnvelope.</returns>
+    ISecureEnvelope Decode(ReadOnlyMemory data);
 }

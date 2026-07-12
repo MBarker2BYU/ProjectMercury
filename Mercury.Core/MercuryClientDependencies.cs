@@ -15,7 +15,11 @@
 
 using Mercury.Abstractions;
 using Mercury.Abstractions.Cryptograph;
+using Mercury.Abstractions.Enums;
+using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Transport;
+using Mercury.Core.Codecs;
+using Mercury.Core.Services;
 
 namespace Mercury.Core;
 
@@ -24,16 +28,24 @@ namespace Mercury.Core;
 /// Implements the <see cref="IMercuryClientDependencies" />
 /// </summary>
 /// <param name="cryptoProvider">The crypto provider.</param>
+/// <param name="envelopeCodec">The envelope codec.</param>
 /// <param name="transport">The transport.</param>
 /// <seealso cref="IMercuryClientDependencies" />
-public sealed class MercuryClientDependencies(ICryptoProvider cryptoProvider, ITransport transport) : IMercuryClientDependencies
+public sealed class MercuryClientDependencies(ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport) : IMercuryClientDependencies
 {
     /// <summary>
     /// Gets the crypto provider.
     /// </summary>
     /// <value>The crypto.</value>
-    public ICryptoProvider CryptoProvider { get; } = cryptoProvider
-                                             ?? throw new ArgumentNullException(nameof(cryptoProvider));
+    public ICryptoProvider CryptoProvider { get; } = cryptoProvider 
+                                                     ?? throw new ArgumentNullException(nameof(cryptoProvider));
+
+    /// <summary>
+    /// Gets the envelope codec.
+    /// </summary>
+    /// <value>The envelope codec.</value>
+    public IEnvelopeCodec EnvelopeCodec { get; } = ResolveCodec(envelopeCodec);
+
 
     /// <summary>
     /// Gets the transport.
@@ -41,4 +53,25 @@ public sealed class MercuryClientDependencies(ICryptoProvider cryptoProvider, IT
     /// <value>The transport.</value>
     public ITransport Transport { get; } = transport
                                            ?? throw new ArgumentNullException(nameof(transport));
+
+    private static IEnvelopeCodec ResolveCodec(
+        EnvelopeCodec codecType)
+    {
+        switch (codecType)
+        {
+            case Abstractions.Enums.EnvelopeCodec.Binary:
+                return new BinaryEnvelopeCodec(
+                    EnvelopeService.Instance);
+
+            case Abstractions.Enums.EnvelopeCodec.Json:
+                return new JsonEnvelopeCodec(
+                    EnvelopeService.Instance);
+
+            default:
+                throw new ArgumentOutOfRangeException(
+                    nameof(codecType),
+                    codecType,
+                    "Unsupported envelope codec.");
+        }
+    }
 }

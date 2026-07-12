@@ -8,4 +8,5 @@
   <Project Path="Mercury.Demo.WinForms/Mercury.Demo.WinForms.csproj" Id="51b29b8c-03b6-45f5-a2b1-7d92365e761a" />
   <Project Path="Mercury.Tests/Mercury.Tests.csproj" Id="2e4db06a-46b2-4be1-a459-02fcd553564f" />
   <Project Path="Mercury.Transport.InMemory/Mercury.Transport.InMemory.csproj" Id="6e984a4d-f13a-457d-9e41-ac03df546c0b" />
+  <Project Path="Mercury.Transport.Tcp/Mercury.Transport.Tcp.csproj" Id="0206a2dd-0efa-480b-aa00-b9ef8916cee1" />
 </Solution>

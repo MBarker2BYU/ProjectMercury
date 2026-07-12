@@ -27,8 +27,9 @@ namespace Mercury.Core;
 /// </summary>
 /// <param name="success">if set to <c>true</c> [success].</param>
 /// <param name="payload">The payload.</param>
+/// <param name="secureEnvelope">The secure envelope.</param>
 /// <param name="failureReason">The failure reason.</param>
-/// <param name="message"></param>
+/// <param name="message">The message.</param>
 /// <seealso cref="IMercuryResult" />
 internal class MercuryResult(bool success, ReadOnlyMemory payload,  ISecureEnvelope? secureEnvelope, FailureReason failureReason, string? message = null) : IMercuryResult
 {
