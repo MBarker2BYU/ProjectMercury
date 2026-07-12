@@ -1,12 +1,12 @@
 ﻿// ***********************************************************************
-// Assembly     : Mercury.Providers.AesGcm
+// Assembly     : Mercury.Abstractions
 // Author         : Matthew D. Barker
-// Created        : 07-11-2026
+// Created        : 07-12-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-11-2026
+// Last Modified On : 07-12-2026
 // ***********************************************************************
-// <copyright file="IAesKeyProvider.cs">
+// <copyright file="ISymmetricKeyProvider.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
@@ -15,13 +15,12 @@
 
 using Mercury.Abstractions.Primitives;
 
-namespace Mercury.Provider.AesGcm.Interfaces;
+namespace Mercury.Abstractions.Cryptograph;
 
 /// <summary>
-/// Resolves symmetric AES keys by <see cref="KeyId"/>.
-/// Keys should be 32 bytes for AES-GCM-256.
+/// Resolves symmetric cryptographic keys by <see cref="KeyId"/>.
 /// </summary>
-public interface IAesKeyProvider
+public interface ISymmetricKeyProvider
 {
     /// <summary>
     /// Gets the symmetric key associated with the specified key identifier.
@@ -32,7 +31,7 @@ public interface IAesKeyProvider
     /// to receive notice of cancellation.
     /// </param>
     /// <returns>
-    /// A task that returns the symmetric key.
+    /// A task containing the symmetric key.
     /// </returns>
-    ValueTask<ReadOnlyMemory> GetKeyAsync(KeyId keyId, CancellationToken cancellationToken = default);
+    Task<ReadOnlyMemory> GetKeyAsync(KeyId keyId, CancellationToken cancellationToken = default);
 }

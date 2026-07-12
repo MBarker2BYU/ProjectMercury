@@ -7,6 +7,7 @@ using Mercury.Transport.InMemory;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using Mercury.Abstractions.Shared;
 
 namespace Mercury.Demo.WinForms
 {
@@ -41,7 +42,7 @@ namespace Mercury.Demo.WinForms
                 [BRAVO_NODE] = RandomNumberGenerator.GetBytes(32)
             };
 
-            var keyProvider = new AesKeyProviderDictionary(keys);
+            var keyProvider = new SymmetricKeyProviderDictionary(keys);
             
             var alphaAesGcm = new AesGcmCryptoProvider(keyProvider);
             var bravoAesGcm = new AesGcmCryptoProvider(keyProvider);

@@ -16,11 +16,10 @@
 using System.Collections;
 
 namespace Mercury.Abstractions.Primitives;
+
 /// <summary>
-/// Class Metadata. This class cannot be inherited.
-/// Implements the <see cref="string" />
+/// Stores read-only metadata as string key/value pairs.
 /// </summary>
-/// <seealso cref="string" />
 public sealed class Metadata : IReadOnlyDictionary<string, string>
 {
     /// <summary>
@@ -114,6 +113,13 @@ public sealed class Metadata : IReadOnlyDictionary<string, string>
         value = string.Empty;
         return false;
     }
+
+    /// <summary>
+    /// Clones this instance.
+    /// </summary>
+    /// <returns>Metadata.</returns>
+    public Metadata Clone()
+        => new(this);
 
     /// <summary>
     /// Gets the <see cref="System.String"/> with the specified key.

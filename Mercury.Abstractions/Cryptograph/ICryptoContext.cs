@@ -23,6 +23,12 @@ namespace Mercury.Abstractions.Cryptograph;
 public interface ICryptoContext
 {
     /// <summary>
+    /// Gets a value indicating whether this instance is empty.
+    /// </summary>
+    /// <value><c>true</c> if this instance is empty; otherwise, <c>false</c>.</value>
+    public bool IsEmpty { get; }
+
+    /// <summary>
     /// Gets the sender key identifier.
     /// </summary>
     /// <value>The sender key identifier.</value>
