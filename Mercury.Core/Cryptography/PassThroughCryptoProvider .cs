@@ -35,14 +35,14 @@ internal sealed class PassThroughCryptoProvider(string name) : ICryptoProvider
     public string Name { get; } = name;
 
     /// <summary>
-    /// Protects the asynchronous.
+    /// Seals the asynchronous.
     /// </summary>
     /// <param name="payload">The payload.</param>
     /// <param name="envelopeService">The envelope service.</param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
-    public Task<ICryptoProviderResult> ProtectAsync(
-        ReadOnlyMemory payload,
+    /// <returns>Task&lt;ICryptoProviderResult&gt;.</returns>
+    public Task<ICryptoProviderResult> SealAsync(
+        ISealRequest sealRequest,
         IEnvelopeService envelopeService,
         CancellationToken cancellationToken = default)
     {
@@ -50,23 +50,23 @@ internal sealed class PassThroughCryptoProvider(string name) : ICryptoProvider
         var header = envelopeService.BuildEnvelopeHeader();
         var footer = envelopeService.BuildEnvelopeFooter();
 
-        return Task.FromResult<ICryptoProviderResult>(envelopeService.PackEnvelope(header, payload, footer));
+        return Task.FromResult<ICryptoProviderResult>(envelopeService.PackEnvelope(header, sealRequest.Payload, footer));
     }
 
     /// <summary>
-    /// Unprotects the asynchronous.
+    /// Opens the asynchronous.
     /// </summary>
     /// <param name="secureEnvelope">The secure envelope.</param>
     /// <param name="envelopeService">The envelope service.</param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
-    public Task<ICryptoProviderResult> UnprotectAsync(
-        ISecureEnvelope secureEnvelope,
+    /// <returns>Task&lt;ICryptoProviderResult&gt;.</returns>
+    public Task<ICryptoProviderResult> OpenAsync(
+        IOpenRequest openRequest,
         IEnvelopeService envelopeService,
         CancellationToken cancellationToken = default)
     {
         //Do Crypto Here
 
-        return Task.FromResult<ICryptoProviderResult>(envelopeService.UnpackEnvelope(secureEnvelope));
+        return Task.FromResult<ICryptoProviderResult>(envelopeService.UnpackEnvelope(openRequest.SecureEnvelope));
     }
 }

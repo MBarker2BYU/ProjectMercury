@@ -20,6 +20,7 @@ using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Services;
 using Mercury.Abstractions.Transport;
+using Mercury.Core.Cryptography;
 
 namespace Mercury.Core;
 
@@ -62,10 +63,12 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
                 nameof(payload));
         }
 
+        ISealRequest sealRequest = new SealRequest(payload, Metadata.Empty, Metadata.Empty);
+
         var providerResult =
             await m_CryptoProvider
-                .ProtectAsync(
-                    payload,
+                .SealAsync(
+                    sealRequest,
                     m_EnvelopeService,
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -125,9 +128,11 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
             secureEnvelope =
                 m_EnvelopeCodec.Decode(frame);
 
+            IOpenRequest openRequest = new OpenRequest(secureEnvelope);
+
             var cryptoProviderResult =
                 await m_CryptoProvider
-                    .UnprotectAsync(secureEnvelope, m_EnvelopeService, cancellationToken)
+                    .OpenAsync(openRequest, m_EnvelopeService, cancellationToken)
                     .ConfigureAwait(false);
 
             return new MercuryResult(

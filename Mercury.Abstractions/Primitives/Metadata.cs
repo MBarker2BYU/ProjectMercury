@@ -24,6 +24,12 @@ namespace Mercury.Abstractions.Primitives;
 public sealed class Metadata : IReadOnlyDictionary<string, string>
 {
     /// <summary>
+    /// Gets the empty.
+    /// </summary>
+    /// <value>The empty.</value>
+    public static Metadata Empty => new Metadata();
+
+    /// <summary>
     /// The m metadata
     /// </summary>
     private readonly Dictionary<string, string> m_Metadata;

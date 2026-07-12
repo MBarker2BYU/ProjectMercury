@@ -31,20 +31,20 @@ public interface ICryptoProvider
     string Name { get; }
 
     /// <summary>
-    /// Protects the asynchronous.
+    /// Seals the asynchronous.
     /// </summary>
-    /// <param name="payload">The payload.</param>
-    /// <param name="envelopeService"></param>
+    /// <param name="sealRequest">The protect request.</param>
+    /// <param name="envelopeService">The envelope service.</param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
-    Task<ICryptoProviderResult> ProtectAsync(ReadOnlyMemory payload, IEnvelopeService envelopeService, CancellationToken cancellationToken = default);
+    /// <returns>Task&lt;ICryptoProviderResult&gt;.</returns>
+    Task<ICryptoProviderResult> SealAsync(ISealRequest sealRequest, IEnvelopeService envelopeService, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Unprotects the asynchronous.
+    /// Opens the asynchronous.
     /// </summary>
-    /// <param name="secureEnvelope"></param>
-    /// <param name="envelopeService"></param>
+    /// <param name="openRequest">The unprotect request.</param>
+    /// <param name="envelopeService">The envelope service.</param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
-    Task<ICryptoProviderResult> UnprotectAsync(ISecureEnvelope secureEnvelope, IEnvelopeService envelopeService, CancellationToken cancellationToken = default);
+    /// <returns>Task&lt;ICryptoProviderResult&gt;.</returns>
+    Task<ICryptoProviderResult> OpenAsync(IOpenRequest openRequest, IEnvelopeService envelopeService, CancellationToken cancellationToken = default);
 }
