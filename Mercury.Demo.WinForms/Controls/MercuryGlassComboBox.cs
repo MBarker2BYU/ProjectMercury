@@ -110,6 +110,11 @@ public sealed partial class MercuryGlassComboBox : UserControl
         m_DropDown.Items.Add(m_ListHost);
 
         m_DropDown.Closed += DropDown_Closed;
+
+        if (m_ListBox.Items.Count > 0)
+        {
+            m_ListBox.SelectedIndex = 0;
+        }
     }
 
     /// <summary>
@@ -281,24 +286,30 @@ public sealed partial class MercuryGlassComboBox : UserControl
     /// Gets the display text.
     /// </summary>
     [Browsable(false)]
-    [DesignerSerializationVisibility(
-        DesignerSerializationVisibility.Hidden)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public override string Text
     {
         get
         {
-            return m_ListBox.SelectedItem == null
-                ? string.Empty
-                : m_ListBox.GetItemText(
-                    m_ListBox.SelectedItem);
+            if (m_ListBox.SelectedIndex >= 0)
+            {
+                return m_ListBox.GetItemText(m_ListBox.SelectedItem);
+            }
+            return m_ListBox.Items.Count > 0
+                ? m_ListBox.GetItemText(m_ListBox.Items[0])
+                : string.Empty;
         }
         set
         {
-            var index =
-                m_ListBox.FindStringExact(
-                    value ?? string.Empty);
+            if (string.IsNullOrEmpty(value))
+                return;
 
-            SelectedIndex = index;
+            var index = m_ListBox.FindStringExact(value);
+            if (index >= 0)
+            {
+                m_ListBox.SelectedIndex = index;
+            }
+            Invalidate();
         }
     }
 
