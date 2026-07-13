@@ -1,3 +1,5 @@
+using Mercury.Demo.WinForms.Controls;
+
 namespace Mercury.Demo.WinForms
 {
 
@@ -15,6 +17,24 @@ namespace Mercury.Demo.WinForms
         public MainWindow()
         {
             InitializeComponent();
+
+            mgcCryptoProvider.Items.Add("AES-GCM");
+            mgcCryptoProvider.Items.Add("ChaCha20-Poly1305");
+
+            mgcTransport.Items.Add("In-Memory");
+            mgcTransport.Items.Add("TCP");
+
+            mgcEnvelopeCodec.Items.Add("Binary");
+            mgcEnvelopeCodec.Items.Add("Json");
+
+            mgcChunkSize.Items.Add("1,024 Bytes");
+            mgcChunkSize.Items.Add("512 Bytes");
+            mgcChunkSize.Items.Add("256 Bytes");
+            mgcChunkSize.Items.Add("128 Bytes");
+
+            mgcLogging.Items.Add("Verbose");
+            mgcLogging.Items.Add("Simple");
+
         }
         
     }
