@@ -6,11 +6,11 @@
   <Project Path="Mercury.Abstractions/Mercury.Abstractions.csproj" Id="57d0da9a-afbc-42df-80f3-e2bc8564593a" />
   <Project Path="Mercury.Core/Mercury.Core.csproj" Id="d243c8e6-429c-4712-8b75-6d1079359a13" />
   <Project Path="Mercury.Demo.WinForms/Mercury.Demo.WinForms.csproj" />
-  <Project Path="Mercury.Provider.AesCcmProvider/Mercury.Provider.AesCcmProvider.csproj" Id="35631458-da6c-453d-8476-a5684a02c78d" />
+  <Project Path="Mercury.Provider.AesCcm/Mercury.Provider.AesCcm.csproj" />
   <Project Path="Mercury.Provider.AesGcm/Mercury.Provider.AesGcm.csproj" Id="45bf741c-66d1-473d-b5be-fe7a82998fba" />
   <Project Path="Mercury.Provider.ChaCha20/Mercury.Provider.ChaCha20.csproj" Id="6f0184bd-6ed9-4ab6-8e7b-0bfc75605a44" />
   <Project Path="Mercury.Tests/Mercury.Tests.csproj" Id="2e4db06a-46b2-4be1-a459-02fcd553564f" />
-  <Project Path="Mercury.Transport.FileDropTransport/Mercury.Transport.FileDropTransport.csproj" Id="97c0d42d-737a-405a-9c76-84a275f44a98" />
+  <Project Path="Mercury.Transport.FileDrop/Mercury.Transport.FileDrop.csproj" />
   <Project Path="Mercury.Transport.InMemory/Mercury.Transport.InMemory.csproj" Id="6e984a4d-f13a-457d-9e41-ac03df546c0b" />
   <Project Path="Mercury.Transport.Tcp/Mercury.Transport.Tcp.csproj" Id="0206a2dd-0efa-480b-aa00-b9ef8916cee1" />
 </Solution>

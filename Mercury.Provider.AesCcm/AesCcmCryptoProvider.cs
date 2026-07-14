@@ -1,56 +1,60 @@
 ﻿// ***********************************************************************
 // Assembly     : Mercury.Providers.AesGcm
-// Author         : {Your Name Here}
+// Author         : {Your Name Here} 
 // Created        : 07-14-2026
 //
 // Last Modified By : {Your Name Here}
 // Last Modified On : 07-14-2026
 // ***********************************************************************
-// <copyright file="FileDropTransport.cs">
+// <copyright file="AesCcmCryptoProvider.cs">
 //     Copyright (c) {Your Name Here}. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
 // </copyright>
 // ***********************************************************************
 
-using Mercury.Abstractions.Primitives;
-using Mercury.Abstractions.Transport;
+using Mercury.Abstractions.Cryptograph;
+using Mercury.Abstractions.Services;
 
-namespace Mercury.Transport.FileDropTransport
+namespace Mercury.Provider.AesCcm
 {
     /// <summary>
-    /// Class FileDropTransport.
-    /// Implements the <see cref="ITransport" />
+    /// Class AesCcmCryptoProvider.
+    /// Implements the <see cref="ICryptoProvider" />
     /// </summary>
-    /// <seealso cref="ITransport" />
-    public class FileDropTransport : ITransport
+    /// <seealso cref="ICryptoProvider" />
+    public class AesCcmCryptoProvider : ICryptoProvider
     {
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>The name.</value>
+        public string Name { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the transport is connected.
+        /// Seals the asynchronous.
         /// </summary>
-        /// <value><c>true</c> if the transport is connected; otherwise, <c>false</c>.</value>
-        public bool IsConnected { get; }
-
-        /// <summary>
-        /// Sends the asynchronous.
-        /// </summary>
-        /// <param name="frame">The frame.</param>
+        /// <param name="sealRequest">The protect request.</param>
+        /// <param name="envelopeService">The envelope service.</param>
         /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Task.</returns>
+        /// <returns>Task&lt;ICryptoProviderResult&gt;.</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SendAsync(ReadOnlyMemory frame, CancellationToken cancellationToken = default)
+        public Task<ICryptoProviderResult> SealAsync(ISealRequest sealRequest, IEnvelopeService envelopeService,
+            CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Receives the asynchronous.
+        /// Opens the asynchronous.
         /// </summary>
+        /// <param name="openRequest">The unprotect request.</param>
+        /// <param name="envelopeService">The envelope service.</param>
         /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Task&lt;ReadOnlyMemory&gt;.</returns>
+        /// <returns>Task&lt;ICryptoProviderResult&gt;.</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<ReadOnlyMemory> ReceiveAsync(CancellationToken cancellationToken = default)
+        public Task<ICryptoProviderResult> OpenAsync(IOpenRequest openRequest, IEnvelopeService envelopeService,
+            CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
