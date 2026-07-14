@@ -34,7 +34,7 @@ namespace Mercury.Core;
 /// <param name="envelopeCodec">The envelope codec.</param>
 /// <param name="transport">The transport.</param>
 /// <seealso cref="IMercuryClientDependencies" />
-public sealed class MercuryClientDependencies(ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport, IReplayProtector? replayProtector = null, IMercuryLogger? logger = null) : IMercuryClientDependencies
+internal sealed class MercuryClientDependencies(ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport, IReplayProtector? replayProtector = null, IMercuryLogger? logger = null) : IMercuryClientDependencies
 {
     /// <summary>
     /// Gets the crypto provider.

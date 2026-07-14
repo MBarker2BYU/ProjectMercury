@@ -30,7 +30,7 @@
         {
             pictureBox1 = new PictureBox();
             mgpConfiguration = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
-            ckbChunkEnabled = new CheckBox();
+            chkChunkEnabled = new CheckBox();
             lblChunking = new Label();
             lblLogging = new Label();
             lblChunkSize = new Label();
@@ -47,36 +47,20 @@
             mgbSendPayload = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
             lblRecipientTag = new Label();
             lblSenderTag = new Label();
-            lblPayloadReceived = new Label();
-            lblPayloadSent = new Label();
             lblPayloadSizeReceive = new Label();
             lblPayloadSizeSend = new Label();
-            mercuryGlassButton2 = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mercuryGlassButton1 = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            textBox3 = new TextBox();
-            textBox2 = new TextBox();
+            mgbClearRecipient = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
+            mgbClearSender = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
+            txtRecipient = new TextBox();
+            txtSender = new TextBox();
+            mmlSender = new Mercury.Demo.WinForms.Controls.MercuryMarqueeLabel();
+            mmlRecipient = new Mercury.Demo.WinForms.Controls.MercuryMarqueeLabel();
             mercuryGlassPanel2 = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
             mgbClearLog = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbChunkedPayload = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbLargePayload = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
             mgbTamperPayload = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
             mgbTamperAuthTag = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
             mgbTamperReplayToken = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
             mgbReplayLastFrame = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbReceive = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbSend = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mercuryGlassPanel3 = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
-            mgbLoadFrameFromFile = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbSaveLastFrame = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbViewBinaryFrame = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mercuryGlassPanel4 = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
-            label2 = new Label();
-            lblTransportCon = new Label();
-            mgbDisconnect = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mercuryGlassPanel5 = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
-            mgbSwapEndpoints = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbRemoteEndpoint = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbLocalEndpoint = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
             mercuryGlassPanel6 = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
             textBox1 = new TextBox();
             lblVersion = new Label();
@@ -101,16 +85,13 @@
             mgbProtectedPayload = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
             mgbHeaderMetadata = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
             mgbFooterMetadata = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mercuryGlassPanel16 = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
+            mpgEnvelopeInspectionWorkspace = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
             lblMercury = new Label();
             lblSercureCommunicationsFramework = new Label();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             mgpConfiguration.SuspendLayout();
             mercuryGlassPanel1.SuspendLayout();
             mercuryGlassPanel2.SuspendLayout();
-            mercuryGlassPanel3.SuspendLayout();
-            mercuryGlassPanel4.SuspendLayout();
-            mercuryGlassPanel5.SuspendLayout();
             mercuryGlassPanel6.SuspendLayout();
             mercuryGlassPanel7.SuspendLayout();
             mercuryGlassPanel9.SuspendLayout();
@@ -137,7 +118,7 @@
             mgpConfiguration.AlignTitle = ContentAlignment.TopLeft;
             mgpConfiguration.BackColor = Color.FromArgb(26, 30, 33);
             mgpConfiguration.BorderColor = Color.FromArgb(46, 50, 54);
-            mgpConfiguration.Controls.Add(ckbChunkEnabled);
+            mgpConfiguration.Controls.Add(chkChunkEnabled);
             mgpConfiguration.Controls.Add(lblChunking);
             mgpConfiguration.Controls.Add(lblLogging);
             mgpConfiguration.Controls.Add(lblChunkSize);
@@ -159,18 +140,18 @@
             mgpConfiguration.TabIndex = 1;
             mgpConfiguration.Title = "CONFIGURATION";
             // 
-            // ckbChunkEnabled
+            // chkChunkEnabled
             // 
-            ckbChunkEnabled.AutoSize = true;
-            ckbChunkEnabled.Checked = true;
-            ckbChunkEnabled.CheckState = CheckState.Checked;
-            ckbChunkEnabled.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            ckbChunkEnabled.Location = new Point(126, 147);
-            ckbChunkEnabled.Name = "ckbChunkEnabled";
-            ckbChunkEnabled.Size = new Size(68, 19);
-            ckbChunkEnabled.TabIndex = 13;
-            ckbChunkEnabled.Text = "Enabled";
-            ckbChunkEnabled.UseVisualStyleBackColor = true;
+            chkChunkEnabled.AutoSize = true;
+            chkChunkEnabled.Checked = true;
+            chkChunkEnabled.CheckState = CheckState.Checked;
+            chkChunkEnabled.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            chkChunkEnabled.Location = new Point(126, 147);
+            chkChunkEnabled.Name = "chkChunkEnabled";
+            chkChunkEnabled.Size = new Size(68, 19);
+            chkChunkEnabled.TabIndex = 13;
+            chkChunkEnabled.Text = "Enabled";
+            chkChunkEnabled.UseVisualStyleBackColor = true;
             // 
             // lblChunking
             // 
@@ -308,14 +289,14 @@
             mercuryGlassPanel1.Controls.Add(mgbSendPayload);
             mercuryGlassPanel1.Controls.Add(lblRecipientTag);
             mercuryGlassPanel1.Controls.Add(lblSenderTag);
-            mercuryGlassPanel1.Controls.Add(lblPayloadReceived);
-            mercuryGlassPanel1.Controls.Add(lblPayloadSent);
             mercuryGlassPanel1.Controls.Add(lblPayloadSizeReceive);
             mercuryGlassPanel1.Controls.Add(lblPayloadSizeSend);
-            mercuryGlassPanel1.Controls.Add(mercuryGlassButton2);
-            mercuryGlassPanel1.Controls.Add(mercuryGlassButton1);
-            mercuryGlassPanel1.Controls.Add(textBox3);
-            mercuryGlassPanel1.Controls.Add(textBox2);
+            mercuryGlassPanel1.Controls.Add(mgbClearRecipient);
+            mercuryGlassPanel1.Controls.Add(mgbClearSender);
+            mercuryGlassPanel1.Controls.Add(txtRecipient);
+            mercuryGlassPanel1.Controls.Add(txtSender);
+            mercuryGlassPanel1.Controls.Add(mmlSender);
+            mercuryGlassPanel1.Controls.Add(mmlRecipient);
             mercuryGlassPanel1.Font = new Font("Microsoft Sans Serif", 11.25F, FontStyle.Bold);
             mercuryGlassPanel1.ForeColor = Color.FromArgb(225, 232, 238);
             mercuryGlassPanel1.Location = new Point(310, 89);
@@ -332,7 +313,7 @@
             mgbSendPayload.Font = new Font("Segoe UI", 9F);
             mgbSendPayload.ForeColor = Color.Lime;
             mgbSendPayload.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbSendPayload.Location = new Point(461, 137);
+            mgbSendPayload.Location = new Point(464, 137);
             mgbSendPayload.Name = "mgbSendPayload";
             mgbSendPayload.Padding = new Padding(10, 0, 10, 0);
             mgbSendPayload.Size = new Size(101, 36);
@@ -360,32 +341,12 @@
             lblSenderTag.TabIndex = 8;
             lblSenderTag.Text = "ALPHA ENDPOINT (SENDER)";
             // 
-            // lblPayloadReceived
-            // 
-            lblPayloadReceived.AutoSize = true;
-            lblPayloadReceived.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblPayloadReceived.Location = new Point(595, 43);
-            lblPayloadReceived.Name = "lblPayloadReceived";
-            lblPayloadReceived.Size = new Size(120, 16);
-            lblPayloadReceived.TabIndex = 7;
-            lblPayloadReceived.Text = "Payload Received";
-            // 
-            // lblPayloadSent
-            // 
-            lblPayloadSent.AutoSize = true;
-            lblPayloadSent.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblPayloadSent.Location = new Point(24, 43);
-            lblPayloadSent.Name = "lblPayloadSent";
-            lblPayloadSent.Size = new Size(58, 16);
-            lblPayloadSent.TabIndex = 6;
-            lblPayloadSent.Text = "Payload";
-            // 
             // lblPayloadSizeReceive
             // 
             lblPayloadSizeReceive.AutoSize = true;
             lblPayloadSizeReceive.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblPayloadSizeReceive.ForeColor = Color.FromArgb(0, 192, 0);
-            lblPayloadSizeReceive.Location = new Point(595, 253);
+            lblPayloadSizeReceive.Location = new Point(595, 49);
             lblPayloadSizeReceive.Name = "lblPayloadSizeReceive";
             lblPayloadSizeReceive.Size = new Size(136, 16);
             lblPayloadSizeReceive.TabIndex = 5;
@@ -396,63 +357,93 @@
             lblPayloadSizeSend.AutoSize = true;
             lblPayloadSizeSend.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblPayloadSizeSend.ForeColor = Color.FromArgb(55, 145, 235);
-            lblPayloadSizeSend.Location = new Point(24, 253);
+            lblPayloadSizeSend.Location = new Point(24, 49);
             lblPayloadSizeSend.Name = "lblPayloadSizeSend";
             lblPayloadSizeSend.Size = new Size(136, 16);
             lblPayloadSizeSend.TabIndex = 4;
             lblPayloadSizeSend.Text = "Payload Size: 0 bytes";
             // 
-            // mercuryGlassButton2
+            // mgbClearRecipient
             // 
-            mercuryGlassButton2.BackColor = Color.Transparent;
-            mercuryGlassButton2.ButtonColor = Color.Gray;
-            mercuryGlassButton2.Font = new Font("Segoe UI", 9F);
-            mercuryGlassButton2.ForeColor = Color.FromArgb(225, 232, 238);
-            mercuryGlassButton2.ImageAlign = ContentAlignment.MiddleLeft;
-            mercuryGlassButton2.Location = new Point(903, 245);
-            mercuryGlassButton2.Name = "mercuryGlassButton2";
-            mercuryGlassButton2.Padding = new Padding(10, 0, 10, 0);
-            mercuryGlassButton2.Size = new Size(98, 36);
-            mercuryGlassButton2.TabIndex = 3;
-            mercuryGlassButton2.Text = "Clear";
-            mercuryGlassButton2.UseVisualStyleBackColor = false;
+            mgbClearRecipient.BackColor = Color.Transparent;
+            mgbClearRecipient.ButtonColor = Color.Gray;
+            mgbClearRecipient.Font = new Font("Segoe UI", 9F);
+            mgbClearRecipient.ForeColor = Color.FromArgb(225, 232, 238);
+            mgbClearRecipient.ImageAlign = ContentAlignment.MiddleLeft;
+            mgbClearRecipient.Location = new Point(903, 245);
+            mgbClearRecipient.Name = "mgbClearRecipient";
+            mgbClearRecipient.Padding = new Padding(10, 0, 10, 0);
+            mgbClearRecipient.Size = new Size(98, 36);
+            mgbClearRecipient.TabIndex = 3;
+            mgbClearRecipient.Text = "Clear";
+            mgbClearRecipient.UseVisualStyleBackColor = false;
             // 
-            // mercuryGlassButton1
+            // mgbClearSender
             // 
-            mercuryGlassButton1.BackColor = Color.Transparent;
-            mercuryGlassButton1.ButtonColor = Color.Gray;
-            mercuryGlassButton1.Font = new Font("Segoe UI", 9F);
-            mercuryGlassButton1.ForeColor = Color.FromArgb(225, 232, 238);
-            mercuryGlassButton1.ImageAlign = ContentAlignment.MiddleLeft;
-            mercuryGlassButton1.Location = new Point(332, 245);
-            mercuryGlassButton1.Name = "mercuryGlassButton1";
-            mercuryGlassButton1.Padding = new Padding(10, 0, 10, 0);
-            mercuryGlassButton1.Size = new Size(98, 36);
-            mercuryGlassButton1.TabIndex = 2;
-            mercuryGlassButton1.Text = "Clear";
-            mercuryGlassButton1.UseVisualStyleBackColor = false;
+            mgbClearSender.BackColor = Color.Transparent;
+            mgbClearSender.ButtonColor = Color.Gray;
+            mgbClearSender.Font = new Font("Segoe UI", 9F);
+            mgbClearSender.ForeColor = Color.FromArgb(225, 232, 238);
+            mgbClearSender.ImageAlign = ContentAlignment.MiddleLeft;
+            mgbClearSender.Location = new Point(332, 245);
+            mgbClearSender.Name = "mgbClearSender";
+            mgbClearSender.Padding = new Padding(10, 0, 10, 0);
+            mgbClearSender.Size = new Size(98, 36);
+            mgbClearSender.TabIndex = 2;
+            mgbClearSender.Text = "Clear";
+            mgbClearSender.UseVisualStyleBackColor = false;
             // 
-            // textBox3
+            // txtRecipient
             // 
-            textBox3.BackColor = Color.FromArgb(26, 30, 33);
-            textBox3.BorderStyle = BorderStyle.FixedSingle;
-            textBox3.ForeColor = Color.Gainsboro;
-            textBox3.Location = new Point(595, 71);
-            textBox3.Multiline = true;
-            textBox3.Name = "textBox3";
-            textBox3.Size = new Size(406, 160);
-            textBox3.TabIndex = 1;
+            txtRecipient.BackColor = Color.FromArgb(26, 30, 33);
+            txtRecipient.BorderStyle = BorderStyle.FixedSingle;
+            txtRecipient.ForeColor = Color.Gainsboro;
+            txtRecipient.Location = new Point(595, 71);
+            txtRecipient.Multiline = true;
+            txtRecipient.Name = "txtRecipient";
+            txtRecipient.Size = new Size(406, 160);
+            txtRecipient.TabIndex = 1;
             // 
-            // textBox2
+            // txtSender
             // 
-            textBox2.BackColor = Color.FromArgb(26, 30, 33);
-            textBox2.BorderStyle = BorderStyle.FixedSingle;
-            textBox2.ForeColor = Color.Gainsboro;
-            textBox2.Location = new Point(24, 71);
-            textBox2.Multiline = true;
-            textBox2.Name = "textBox2";
-            textBox2.Size = new Size(406, 160);
-            textBox2.TabIndex = 0;
+            txtSender.BackColor = Color.FromArgb(26, 30, 33);
+            txtSender.BorderStyle = BorderStyle.FixedSingle;
+            txtSender.ForeColor = Color.Gainsboro;
+            txtSender.Location = new Point(24, 71);
+            txtSender.Multiline = true;
+            txtSender.Name = "txtSender";
+            txtSender.Size = new Size(406, 160);
+            txtSender.TabIndex = 0;
+            // 
+            // mmlSender
+            // 
+            mmlSender.AutoSize = true;
+            mmlSender.Direction = WinForms.Controls.MercuryMarqueeLabel.MarqueeDirection.Right;
+            mmlSender.Font = new Font("Consolas", 8.25F, FontStyle.Bold);
+            mmlSender.ForeColor = Color.FromArgb(55, 145, 235);
+            mmlSender.Location = new Point(317, 150);
+            mmlSender.MarqueeEnabled = false;
+            mmlSender.MarqueeInterval = 90;
+            mmlSender.Name = "mmlSender";
+            mmlSender.Size = new Size(193, 13);
+            mmlSender.TabIndex = 0;
+            mmlSender.Text = "0010011 01110101 01110010 01111";
+            mmlSender.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // mmlRecipient
+            // 
+            mmlRecipient.AutoSize = true;
+            mmlRecipient.Direction = WinForms.Controls.MercuryMarqueeLabel.MarqueeDirection.Right;
+            mmlRecipient.Font = new Font("Consolas", 8.25F, FontStyle.Bold);
+            mmlRecipient.ForeColor = Color.FromArgb(0, 192, 0);
+            mmlRecipient.Location = new Point(516, 150);
+            mmlRecipient.MarqueeEnabled = false;
+            mmlRecipient.MarqueeInterval = 90;
+            mmlRecipient.Name = "mmlRecipient";
+            mmlRecipient.Size = new Size(193, 13);
+            mmlRecipient.TabIndex = 11;
+            mmlRecipient.Text = "0010011 01110101 01110010 01111";
+            mmlRecipient.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // mercuryGlassPanel2
             // 
@@ -460,64 +451,33 @@
             mercuryGlassPanel2.BackColor = Color.FromArgb(26, 30, 33);
             mercuryGlassPanel2.BorderColor = Color.FromArgb(46, 50, 54);
             mercuryGlassPanel2.Controls.Add(mgbClearLog);
-            mercuryGlassPanel2.Controls.Add(mgbChunkedPayload);
-            mercuryGlassPanel2.Controls.Add(mgbLargePayload);
             mercuryGlassPanel2.Controls.Add(mgbTamperPayload);
             mercuryGlassPanel2.Controls.Add(mgbTamperAuthTag);
             mercuryGlassPanel2.Controls.Add(mgbTamperReplayToken);
             mercuryGlassPanel2.Controls.Add(mgbReplayLastFrame);
-            mercuryGlassPanel2.Controls.Add(mgbReceive);
-            mercuryGlassPanel2.Controls.Add(mgbSend);
             mercuryGlassPanel2.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             mercuryGlassPanel2.ForeColor = Color.FromArgb(225, 232, 238);
             mercuryGlassPanel2.Location = new Point(1336, 89);
             mercuryGlassPanel2.Name = "mercuryGlassPanel2";
             mercuryGlassPanel2.Padding = new Padding(16);
-            mercuryGlassPanel2.Size = new Size(292, 381);
+            mercuryGlassPanel2.Size = new Size(292, 293);
             mercuryGlassPanel2.TabIndex = 3;
             mercuryGlassPanel2.Title = "TEST PANEL";
             // 
             // mgbClearLog
             // 
             mgbClearLog.BackColor = Color.Transparent;
+            mgbClearLog.ButtonColor = Color.FromArgb(192, 192, 0);
             mgbClearLog.Font = new Font("Segoe UI", 9F);
             mgbClearLog.ForeColor = Color.FromArgb(225, 232, 238);
             mgbClearLog.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbClearLog.Location = new Point(19, 339);
+            mgbClearLog.Location = new Point(19, 185);
             mgbClearLog.Name = "mgbClearLog";
             mgbClearLog.Padding = new Padding(10, 0, 10, 0);
             mgbClearLog.Size = new Size(254, 32);
             mgbClearLog.TabIndex = 9;
             mgbClearLog.Text = "Clear Log";
             mgbClearLog.UseVisualStyleBackColor = false;
-            // 
-            // mgbChunkedPayload
-            // 
-            mgbChunkedPayload.BackColor = Color.Transparent;
-            mgbChunkedPayload.Font = new Font("Segoe UI", 9F);
-            mgbChunkedPayload.ForeColor = Color.FromArgb(225, 232, 238);
-            mgbChunkedPayload.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbChunkedPayload.Location = new Point(19, 301);
-            mgbChunkedPayload.Name = "mgbChunkedPayload";
-            mgbChunkedPayload.Padding = new Padding(10, 0, 10, 0);
-            mgbChunkedPayload.Size = new Size(254, 32);
-            mgbChunkedPayload.TabIndex = 8;
-            mgbChunkedPayload.Text = "Chunked Payload (50 KB)";
-            mgbChunkedPayload.UseVisualStyleBackColor = false;
-            // 
-            // mgbLargePayload
-            // 
-            mgbLargePayload.BackColor = Color.Transparent;
-            mgbLargePayload.Font = new Font("Segoe UI", 9F);
-            mgbLargePayload.ForeColor = Color.FromArgb(225, 232, 238);
-            mgbLargePayload.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbLargePayload.Location = new Point(19, 263);
-            mgbLargePayload.Name = "mgbLargePayload";
-            mgbLargePayload.Padding = new Padding(10, 0, 10, 0);
-            mgbLargePayload.Size = new Size(254, 32);
-            mgbLargePayload.TabIndex = 7;
-            mgbLargePayload.Text = "Large Payload (10 KB)";
-            mgbLargePayload.UseVisualStyleBackColor = false;
             // 
             // mgbTamperPayload
             // 
@@ -526,7 +486,7 @@
             mgbTamperPayload.Font = new Font("Segoe UI", 9F);
             mgbTamperPayload.ForeColor = Color.FromArgb(225, 232, 238);
             mgbTamperPayload.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbTamperPayload.Location = new Point(19, 225);
+            mgbTamperPayload.Location = new Point(19, 147);
             mgbTamperPayload.Name = "mgbTamperPayload";
             mgbTamperPayload.Padding = new Padding(10, 0, 10, 0);
             mgbTamperPayload.Size = new Size(254, 32);
@@ -541,7 +501,7 @@
             mgbTamperAuthTag.Font = new Font("Segoe UI", 9F);
             mgbTamperAuthTag.ForeColor = Color.FromArgb(225, 232, 238);
             mgbTamperAuthTag.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbTamperAuthTag.Location = new Point(19, 187);
+            mgbTamperAuthTag.Location = new Point(19, 109);
             mgbTamperAuthTag.Name = "mgbTamperAuthTag";
             mgbTamperAuthTag.Padding = new Padding(10, 0, 10, 0);
             mgbTamperAuthTag.Size = new Size(254, 32);
@@ -556,7 +516,7 @@
             mgbTamperReplayToken.Font = new Font("Segoe UI", 9F);
             mgbTamperReplayToken.ForeColor = Color.FromArgb(225, 232, 238);
             mgbTamperReplayToken.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbTamperReplayToken.Location = new Point(19, 149);
+            mgbTamperReplayToken.Location = new Point(19, 71);
             mgbTamperReplayToken.Name = "mgbTamperReplayToken";
             mgbTamperReplayToken.Padding = new Padding(10, 0, 10, 0);
             mgbTamperReplayToken.Size = new Size(254, 32);
@@ -567,221 +527,17 @@
             // mgbReplayLastFrame
             // 
             mgbReplayLastFrame.BackColor = Color.Transparent;
+            mgbReplayLastFrame.ButtonColor = Color.FromArgb(192, 0, 0);
             mgbReplayLastFrame.Font = new Font("Segoe UI", 9F);
             mgbReplayLastFrame.ForeColor = Color.FromArgb(225, 232, 238);
             mgbReplayLastFrame.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbReplayLastFrame.Location = new Point(19, 111);
+            mgbReplayLastFrame.Location = new Point(19, 33);
             mgbReplayLastFrame.Name = "mgbReplayLastFrame";
             mgbReplayLastFrame.Padding = new Padding(10, 0, 10, 0);
             mgbReplayLastFrame.Size = new Size(254, 32);
             mgbReplayLastFrame.TabIndex = 3;
             mgbReplayLastFrame.Text = "Replay Last Frame";
             mgbReplayLastFrame.UseVisualStyleBackColor = false;
-            // 
-            // mgbReceive
-            // 
-            mgbReceive.BackColor = Color.Transparent;
-            mgbReceive.ButtonColor = Color.FromArgb(0, 192, 0);
-            mgbReceive.Font = new Font("Segoe UI", 9F);
-            mgbReceive.ForeColor = Color.FromArgb(225, 232, 238);
-            mgbReceive.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbReceive.Location = new Point(19, 73);
-            mgbReceive.Name = "mgbReceive";
-            mgbReceive.Padding = new Padding(10, 0, 10, 0);
-            mgbReceive.Size = new Size(254, 32);
-            mgbReceive.TabIndex = 2;
-            mgbReceive.Text = "Receive";
-            mgbReceive.UseVisualStyleBackColor = false;
-            // 
-            // mgbSend
-            // 
-            mgbSend.BackColor = Color.Transparent;
-            mgbSend.ButtonColor = Color.FromArgb(0, 192, 0);
-            mgbSend.Font = new Font("Segoe UI", 9F);
-            mgbSend.ForeColor = Color.FromArgb(225, 232, 238);
-            mgbSend.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbSend.Location = new Point(19, 35);
-            mgbSend.Name = "mgbSend";
-            mgbSend.Padding = new Padding(10, 0, 10, 0);
-            mgbSend.Size = new Size(254, 32);
-            mgbSend.TabIndex = 1;
-            mgbSend.Text = "Send";
-            mgbSend.UseVisualStyleBackColor = false;
-            // 
-            // mercuryGlassPanel3
-            // 
-            mercuryGlassPanel3.AlignTitle = ContentAlignment.TopLeft;
-            mercuryGlassPanel3.BackColor = Color.FromArgb(26, 30, 33);
-            mercuryGlassPanel3.BorderColor = Color.FromArgb(46, 50, 54);
-            mercuryGlassPanel3.Controls.Add(mgbLoadFrameFromFile);
-            mercuryGlassPanel3.Controls.Add(mgbSaveLastFrame);
-            mercuryGlassPanel3.Controls.Add(mgbViewBinaryFrame);
-            mercuryGlassPanel3.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            mercuryGlassPanel3.ForeColor = Color.FromArgb(225, 232, 238);
-            mercuryGlassPanel3.Location = new Point(1336, 476);
-            mercuryGlassPanel3.Name = "mercuryGlassPanel3";
-            mercuryGlassPanel3.Padding = new Padding(16);
-            mercuryGlassPanel3.Size = new Size(292, 161);
-            mercuryGlassPanel3.TabIndex = 4;
-            mercuryGlassPanel3.Title = "Frame Tools";
-            // 
-            // mgbLoadFrameFromFile
-            // 
-            mgbLoadFrameFromFile.BackColor = Color.Transparent;
-            mgbLoadFrameFromFile.Font = new Font("Segoe UI", 9F);
-            mgbLoadFrameFromFile.ForeColor = Color.FromArgb(225, 232, 238);
-            mgbLoadFrameFromFile.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbLoadFrameFromFile.Location = new Point(19, 114);
-            mgbLoadFrameFromFile.Name = "mgbLoadFrameFromFile";
-            mgbLoadFrameFromFile.Padding = new Padding(10, 0, 10, 0);
-            mgbLoadFrameFromFile.Size = new Size(254, 36);
-            mgbLoadFrameFromFile.TabIndex = 2;
-            mgbLoadFrameFromFile.Text = "Load Frame from File";
-            mgbLoadFrameFromFile.UseVisualStyleBackColor = false;
-            // 
-            // mgbSaveLastFrame
-            // 
-            mgbSaveLastFrame.BackColor = Color.Transparent;
-            mgbSaveLastFrame.Font = new Font("Segoe UI", 9F);
-            mgbSaveLastFrame.ForeColor = Color.FromArgb(225, 232, 238);
-            mgbSaveLastFrame.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbSaveLastFrame.Location = new Point(19, 76);
-            mgbSaveLastFrame.Name = "mgbSaveLastFrame";
-            mgbSaveLastFrame.Padding = new Padding(10, 0, 10, 0);
-            mgbSaveLastFrame.Size = new Size(254, 32);
-            mgbSaveLastFrame.TabIndex = 1;
-            mgbSaveLastFrame.Text = "Save Last Frame";
-            mgbSaveLastFrame.UseVisualStyleBackColor = false;
-            // 
-            // mgbViewBinaryFrame
-            // 
-            mgbViewBinaryFrame.BackColor = Color.Transparent;
-            mgbViewBinaryFrame.Font = new Font("Segoe UI", 9F);
-            mgbViewBinaryFrame.ForeColor = Color.FromArgb(225, 232, 238);
-            mgbViewBinaryFrame.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbViewBinaryFrame.Location = new Point(19, 38);
-            mgbViewBinaryFrame.Name = "mgbViewBinaryFrame";
-            mgbViewBinaryFrame.Padding = new Padding(10, 0, 10, 0);
-            mgbViewBinaryFrame.Size = new Size(254, 32);
-            mgbViewBinaryFrame.TabIndex = 0;
-            mgbViewBinaryFrame.Text = "View Binary Frame";
-            mgbViewBinaryFrame.UseVisualStyleBackColor = false;
-            // 
-            // mercuryGlassPanel4
-            // 
-            mercuryGlassPanel4.AlignTitle = ContentAlignment.TopLeft;
-            mercuryGlassPanel4.BackColor = Color.FromArgb(26, 30, 33);
-            mercuryGlassPanel4.BorderColor = Color.FromArgb(46, 50, 54);
-            mercuryGlassPanel4.Controls.Add(label2);
-            mercuryGlassPanel4.Controls.Add(lblTransportCon);
-            mercuryGlassPanel4.Controls.Add(mgbDisconnect);
-            mercuryGlassPanel4.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            mercuryGlassPanel4.ForeColor = Color.FromArgb(225, 232, 238);
-            mercuryGlassPanel4.Location = new Point(1336, 643);
-            mercuryGlassPanel4.Name = "mercuryGlassPanel4";
-            mercuryGlassPanel4.Padding = new Padding(16);
-            mercuryGlassPanel4.Size = new Size(292, 108);
-            mercuryGlassPanel4.TabIndex = 6;
-            mercuryGlassPanel4.Title = "CONNECTION";
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label2.ForeColor = Color.FromArgb(0, 192, 0);
-            label2.Location = new Point(145, 35);
-            label2.Name = "label2";
-            label2.Size = new Size(65, 15);
-            label2.TabIndex = 2;
-            label2.Text = "Connected";
-            // 
-            // lblTransportCon
-            // 
-            lblTransportCon.AutoSize = true;
-            lblTransportCon.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblTransportCon.Location = new Point(19, 35);
-            lblTransportCon.Name = "lblTransportCon";
-            lblTransportCon.Size = new Size(120, 15);
-            lblTransportCon.TabIndex = 1;
-            lblTransportCon.Text = "In-Memory Transport";
-            // 
-            // mgbDisconnect
-            // 
-            mgbDisconnect.BackColor = Color.Transparent;
-            mgbDisconnect.ButtonColor = Color.FromArgb(192, 0, 0);
-            mgbDisconnect.Enabled = false;
-            mgbDisconnect.Font = new Font("Segoe UI", 9F);
-            mgbDisconnect.ForeColor = Color.Red;
-            mgbDisconnect.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbDisconnect.Location = new Point(19, 63);
-            mgbDisconnect.Name = "mgbDisconnect";
-            mgbDisconnect.Padding = new Padding(10, 0, 10, 0);
-            mgbDisconnect.Size = new Size(254, 32);
-            mgbDisconnect.TabIndex = 0;
-            mgbDisconnect.Text = "Disconnect";
-            mgbDisconnect.UseVisualStyleBackColor = false;
-            // 
-            // mercuryGlassPanel5
-            // 
-            mercuryGlassPanel5.AlignTitle = ContentAlignment.TopLeft;
-            mercuryGlassPanel5.BackColor = Color.FromArgb(26, 30, 33);
-            mercuryGlassPanel5.BorderColor = Color.FromArgb(46, 50, 54);
-            mercuryGlassPanel5.Controls.Add(mgbSwapEndpoints);
-            mercuryGlassPanel5.Controls.Add(mgbRemoteEndpoint);
-            mercuryGlassPanel5.Controls.Add(mgbLocalEndpoint);
-            mercuryGlassPanel5.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            mercuryGlassPanel5.ForeColor = Color.FromArgb(225, 232, 238);
-            mercuryGlassPanel5.Location = new Point(12, 388);
-            mercuryGlassPanel5.Name = "mercuryGlassPanel5";
-            mercuryGlassPanel5.Padding = new Padding(16);
-            mercuryGlassPanel5.Size = new Size(292, 175);
-            mercuryGlassPanel5.TabIndex = 7;
-            mercuryGlassPanel5.Title = "ENDPOINTS";
-            // 
-            // mgbSwapEndpoints
-            // 
-            mgbSwapEndpoints.BackColor = Color.Transparent;
-            mgbSwapEndpoints.ButtonColor = Color.Gray;
-            mgbSwapEndpoints.Font = new Font("Segoe UI", 9F);
-            mgbSwapEndpoints.ForeColor = Color.FromArgb(225, 232, 238);
-            mgbSwapEndpoints.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbSwapEndpoints.Location = new Point(10, 124);
-            mgbSwapEndpoints.Name = "mgbSwapEndpoints";
-            mgbSwapEndpoints.Padding = new Padding(10, 0, 10, 0);
-            mgbSwapEndpoints.Size = new Size(267, 36);
-            mgbSwapEndpoints.TabIndex = 2;
-            mgbSwapEndpoints.Text = "Swap Endpoints";
-            mgbSwapEndpoints.UseVisualStyleBackColor = false;
-            // 
-            // mgbRemoteEndpoint
-            // 
-            mgbRemoteEndpoint.BackColor = Color.Transparent;
-            mgbRemoteEndpoint.ButtonColor = Color.Gray;
-            mgbRemoteEndpoint.Font = new Font("Segoe UI", 9F);
-            mgbRemoteEndpoint.ForeColor = Color.FromArgb(225, 232, 238);
-            mgbRemoteEndpoint.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbRemoteEndpoint.Location = new Point(10, 82);
-            mgbRemoteEndpoint.Name = "mgbRemoteEndpoint";
-            mgbRemoteEndpoint.Padding = new Padding(10, 0, 10, 0);
-            mgbRemoteEndpoint.Size = new Size(267, 36);
-            mgbRemoteEndpoint.TabIndex = 1;
-            mgbRemoteEndpoint.Text = "Remote Endpoint (Bravo)";
-            mgbRemoteEndpoint.UseVisualStyleBackColor = false;
-            // 
-            // mgbLocalEndpoint
-            // 
-            mgbLocalEndpoint.BackColor = Color.Transparent;
-            mgbLocalEndpoint.ButtonColor = Color.Gray;
-            mgbLocalEndpoint.Font = new Font("Segoe UI", 9F);
-            mgbLocalEndpoint.ForeColor = Color.FromArgb(225, 232, 238);
-            mgbLocalEndpoint.ImageAlign = ContentAlignment.MiddleLeft;
-            mgbLocalEndpoint.Location = new Point(10, 40);
-            mgbLocalEndpoint.Name = "mgbLocalEndpoint";
-            mgbLocalEndpoint.Padding = new Padding(10, 0, 10, 0);
-            mgbLocalEndpoint.Size = new Size(267, 36);
-            mgbLocalEndpoint.TabIndex = 0;
-            mgbLocalEndpoint.Text = "Local Endpoint (Alpha)";
-            mgbLocalEndpoint.UseVisualStyleBackColor = false;
             // 
             // mercuryGlassPanel6
             // 
@@ -810,7 +566,7 @@
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(267, 100);
             textBox1.TabIndex = 1;
-            textBox1.Text = "Mercury is a secure communications framework that ensures no unprotected data is ever sent over any transport.\n\nBuilt for flexibility. Designed for trust.\n\nArchitected for the mission.";
+            textBox1.Text = "Mercury is a secure communications framework that ensures no unprotected data is ever sent over any transport. \r\n\r\nBuilt for flexibility. Designed for trust.\r\n\r\nArchitected for the mission.";
             // 
             // lblVersion
             // 
@@ -880,12 +636,12 @@
             // lblStatusConnection
             // 
             lblStatusConnection.Font = new Font("Microsoft Sans Serif", 11.25F, FontStyle.Bold);
-            lblStatusConnection.ForeColor = Color.FromArgb(0, 192, 0);
-            lblStatusConnection.Location = new Point(19, 36);
+            lblStatusConnection.ForeColor = Color.FromArgb(192, 192, 0);
+            lblStatusConnection.Location = new Point(19, 32);
             lblStatusConnection.Name = "lblStatusConnection";
-            lblStatusConnection.Size = new Size(124, 20);
+            lblStatusConnection.Size = new Size(124, 35);
             lblStatusConnection.TabIndex = 0;
-            lblStatusConnection.Text = "Connected";
+            lblStatusConnection.Text = "Offline";
             lblStatusConnection.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // mercuryGlassPanel10
@@ -907,11 +663,11 @@
             // 
             lblStatusFramesSent.Font = new Font("Microsoft Sans Serif", 14.25F, FontStyle.Bold);
             lblStatusFramesSent.ForeColor = Color.FromArgb(55, 145, 235);
-            lblStatusFramesSent.Location = new Point(19, 36);
+            lblStatusFramesSent.Location = new Point(19, 32);
             lblStatusFramesSent.Name = "lblStatusFramesSent";
-            lblStatusFramesSent.Size = new Size(124, 20);
+            lblStatusFramesSent.Size = new Size(124, 35);
             lblStatusFramesSent.TabIndex = 1;
-            lblStatusFramesSent.Text = "14";
+            lblStatusFramesSent.Text = "0";
             lblStatusFramesSent.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // mercuryGlassPanel11
@@ -933,11 +689,11 @@
             // 
             lblStatusFramesReceived.Font = new Font("Microsoft Sans Serif", 14.25F, FontStyle.Bold);
             lblStatusFramesReceived.ForeColor = Color.FromArgb(0, 192, 0);
-            lblStatusFramesReceived.Location = new Point(19, 36);
+            lblStatusFramesReceived.Location = new Point(19, 32);
             lblStatusFramesReceived.Name = "lblStatusFramesReceived";
-            lblStatusFramesReceived.Size = new Size(124, 20);
+            lblStatusFramesReceived.Size = new Size(124, 35);
             lblStatusFramesReceived.TabIndex = 1;
-            lblStatusFramesReceived.Text = "14";
+            lblStatusFramesReceived.Text = "0";
             lblStatusFramesReceived.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // mercuryGlassPanel12
@@ -959,9 +715,9 @@
             // 
             lblStatusAuthFailures.Font = new Font("Microsoft Sans Serif", 14.25F, FontStyle.Bold);
             lblStatusAuthFailures.ForeColor = Color.FromArgb(192, 0, 0);
-            lblStatusAuthFailures.Location = new Point(19, 36);
+            lblStatusAuthFailures.Location = new Point(19, 32);
             lblStatusAuthFailures.Name = "lblStatusAuthFailures";
-            lblStatusAuthFailures.Size = new Size(124, 20);
+            lblStatusAuthFailures.Size = new Size(124, 35);
             lblStatusAuthFailures.TabIndex = 1;
             lblStatusAuthFailures.Text = "0";
             lblStatusAuthFailures.TextAlign = ContentAlignment.MiddleCenter;
@@ -985,11 +741,11 @@
             // 
             lblStatusReplayAttemps.Font = new Font("Microsoft Sans Serif", 14.25F, FontStyle.Bold);
             lblStatusReplayAttemps.ForeColor = Color.FromArgb(192, 192, 0);
-            lblStatusReplayAttemps.Location = new Point(19, 36);
+            lblStatusReplayAttemps.Location = new Point(19, 32);
             lblStatusReplayAttemps.Name = "lblStatusReplayAttemps";
-            lblStatusReplayAttemps.Size = new Size(124, 20);
+            lblStatusReplayAttemps.Size = new Size(124, 35);
             lblStatusReplayAttemps.TabIndex = 1;
-            lblStatusReplayAttemps.Text = "1";
+            lblStatusReplayAttemps.Text = "0";
             lblStatusReplayAttemps.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // mercuryGlassPanel14
@@ -1011,11 +767,11 @@
             // 
             lblStatusChunkCount.Font = new Font("Microsoft Sans Serif", 14.25F, FontStyle.Bold);
             lblStatusChunkCount.ForeColor = Color.FromArgb(55, 145, 235);
-            lblStatusChunkCount.Location = new Point(19, 36);
+            lblStatusChunkCount.Location = new Point(19, 32);
             lblStatusChunkCount.Name = "lblStatusChunkCount";
-            lblStatusChunkCount.Size = new Size(124, 20);
+            lblStatusChunkCount.Size = new Size(124, 35);
             lblStatusChunkCount.TabIndex = 1;
-            lblStatusChunkCount.Text = "3";
+            lblStatusChunkCount.Text = "0";
             lblStatusChunkCount.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // mercuryGlassPanel15
@@ -1037,11 +793,11 @@
             // 
             lblStatusAverageSize.Font = new Font("Microsoft Sans Serif", 14.25F, FontStyle.Bold);
             lblStatusAverageSize.ForeColor = Color.FromArgb(55, 145, 235);
-            lblStatusAverageSize.Location = new Point(11, 36);
+            lblStatusAverageSize.Location = new Point(11, 32);
             lblStatusAverageSize.Name = "lblStatusAverageSize";
-            lblStatusAverageSize.Size = new Size(187, 20);
+            lblStatusAverageSize.Size = new Size(187, 35);
             lblStatusAverageSize.TabIndex = 1;
-            lblStatusAverageSize.Text = "1,024 B";
+            lblStatusAverageSize.Text = "0 B";
             lblStatusAverageSize.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // mgcEnvelopeInspector
@@ -1108,17 +864,17 @@
             mgbFooterMetadata.Text = "FOOTER METADATA";
             mgbFooterMetadata.UseVisualStyleBackColor = false;
             // 
-            // mercuryGlassPanel16
+            // mpgEnvelopeInspectionWorkspace
             // 
-            mercuryGlassPanel16.BackColor = Color.FromArgb(26, 30, 33);
-            mercuryGlassPanel16.BorderColor = Color.FromArgb(46, 50, 54);
-            mercuryGlassPanel16.ForeColor = Color.FromArgb(225, 232, 238);
-            mercuryGlassPanel16.Location = new Point(310, 428);
-            mercuryGlassPanel16.Name = "mercuryGlassPanel16";
-            mercuryGlassPanel16.Padding = new Padding(16);
-            mercuryGlassPanel16.Size = new Size(1020, 323);
-            mercuryGlassPanel16.TabIndex = 20;
-            mercuryGlassPanel16.Title = "";
+            mpgEnvelopeInspectionWorkspace.BackColor = Color.FromArgb(26, 30, 33);
+            mpgEnvelopeInspectionWorkspace.BorderColor = Color.FromArgb(46, 50, 54);
+            mpgEnvelopeInspectionWorkspace.ForeColor = Color.FromArgb(225, 232, 238);
+            mpgEnvelopeInspectionWorkspace.Location = new Point(310, 428);
+            mpgEnvelopeInspectionWorkspace.Name = "mpgEnvelopeInspectionWorkspace";
+            mpgEnvelopeInspectionWorkspace.Padding = new Padding(16);
+            mpgEnvelopeInspectionWorkspace.Size = new Size(1020, 323);
+            mpgEnvelopeInspectionWorkspace.TabIndex = 20;
+            mpgEnvelopeInspectionWorkspace.Title = "";
             // 
             // lblMercury
             // 
@@ -1149,7 +905,7 @@
             BackColor = Color.FromArgb(24, 27, 29);
             ClientSize = new Size(1640, 1023);
             Controls.Add(lblSercureCommunicationsFramework);
-            Controls.Add(mercuryGlassPanel16);
+            Controls.Add(mpgEnvelopeInspectionWorkspace);
             Controls.Add(mgbFooterMetadata);
             Controls.Add(mgbHeaderMetadata);
             Controls.Add(mgbProtectedPayload);
@@ -1164,9 +920,6 @@
             Controls.Add(mercuryGlassPanel8);
             Controls.Add(mercuryGlassPanel7);
             Controls.Add(mercuryGlassPanel6);
-            Controls.Add(mercuryGlassPanel5);
-            Controls.Add(mercuryGlassPanel4);
-            Controls.Add(mercuryGlassPanel3);
             Controls.Add(mercuryGlassPanel2);
             Controls.Add(mercuryGlassPanel1);
             Controls.Add(mgpConfiguration);
@@ -1181,10 +934,6 @@
             mercuryGlassPanel1.ResumeLayout(false);
             mercuryGlassPanel1.PerformLayout();
             mercuryGlassPanel2.ResumeLayout(false);
-            mercuryGlassPanel3.ResumeLayout(false);
-            mercuryGlassPanel4.ResumeLayout(false);
-            mercuryGlassPanel4.PerformLayout();
-            mercuryGlassPanel5.ResumeLayout(false);
             mercuryGlassPanel6.ResumeLayout(false);
             mercuryGlassPanel6.PerformLayout();
             mercuryGlassPanel7.ResumeLayout(false);
@@ -1207,16 +956,6 @@
         private Label lblCryptoProvider;
         private Controls.MercuryGlassPanel mercuryGlassPanel1;
         private Controls.MercuryGlassPanel mercuryGlassPanel2;
-        private Controls.MercuryGlassPanel mercuryGlassPanel3;
-        private Controls.MercuryGlassButton mgbLoadFrameFromFile;
-        private Controls.MercuryGlassButton mgbSaveLastFrame;
-        private Controls.MercuryGlassButton mgbViewBinaryFrame;
-        private Controls.MercuryGlassPanel mercuryGlassPanel4;
-        private Controls.MercuryGlassButton mgbDisconnect;
-        private Controls.MercuryGlassPanel mercuryGlassPanel5;
-        private Controls.MercuryGlassButton mgbSwapEndpoints;
-        private Controls.MercuryGlassButton mgbRemoteEndpoint;
-        private Controls.MercuryGlassButton mgbLocalEndpoint;
         private Controls.MercuryGlassPanel mercuryGlassPanel6;
         private Controls.MercuryGlassButton mgbApplyConfiguration;
         private Controls.MercuryGlassComboBox mgcLogging;
@@ -1228,14 +967,10 @@
         private TextBox textBox1;
         private Label lblVersion;
         private Controls.MercuryGlassButton mgbClearLog;
-        private Controls.MercuryGlassButton mgbChunkedPayload;
-        private Controls.MercuryGlassButton mgbLargePayload;
         private Controls.MercuryGlassButton mgbTamperPayload;
         private Controls.MercuryGlassButton mgbTamperAuthTag;
         private Controls.MercuryGlassButton mgbTamperReplayToken;
         private Controls.MercuryGlassButton mgbReplayLastFrame;
-        private Controls.MercuryGlassButton mgbReceive;
-        private Controls.MercuryGlassButton mgbSend;
         private Controls.MercuryGlassPanel mercuryGlassPanel9;
         private Controls.MercuryGlassPanel mercuryGlassPanel10;
         private Controls.MercuryGlassPanel mercuryGlassPanel11;
@@ -1243,9 +978,7 @@
         private Controls.MercuryGlassPanel mercuryGlassPanel13;
         private Controls.MercuryGlassPanel mercuryGlassPanel14;
         private Controls.MercuryGlassPanel mercuryGlassPanel15;
-        private Label lblTransportCon;
-        private Label label2;
-        private CheckBox ckbChunkEnabled;
+        private CheckBox chkChunkEnabled;
         private Label lblChunking;
         private Label lblLogging;
         private Label lblChunkSize;
@@ -1255,7 +988,7 @@
         private Controls.MercuryGlassButton mgbProtectedPayload;
         private Controls.MercuryGlassButton mgbHeaderMetadata;
         private Controls.MercuryGlassButton mgbFooterMetadata;
-        private Controls.MercuryGlassPanel mercuryGlassPanel16;
+        private Controls.MercuryGlassPanel mpgEnvelopeInspectionWorkspace;
         private Label lblStatusConnection;
         private Label lblStatusFramesSent;
         private Label lblStatusFramesReceived;
@@ -1264,18 +997,18 @@
         private Label lblStatusChunkCount;
         private Label lblStatusAverageSize;
         private Label lblPayloadSizeSend;
-        private Controls.MercuryGlassButton mercuryGlassButton2;
-        private Controls.MercuryGlassButton mercuryGlassButton1;
-        private TextBox textBox3;
-        private TextBox textBox2;
+        private Controls.MercuryGlassButton mgbClearRecipient;
+        private Controls.MercuryGlassButton mgbClearSender;
+        private TextBox txtRecipient;
+        private TextBox txtSender;
         private Label lblPayloadSizeReceive;
         private Label lblSenderTag;
-        private Label lblPayloadReceived;
-        private Label lblPayloadSent;
         private Controls.MercuryGlassButton mgbSendPayload;
         private Label lblRecipientTag;
         private Label lblMercury;
         private Label lblSercureCommunicationsFramework;
         private RichTextBox richTextBox1;
+        private Controls.MercuryMarqueeLabel mmlRecipient;
+        private Controls.MercuryMarqueeLabel mmlSender;
     }
 }

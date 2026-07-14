@@ -268,7 +268,7 @@ public sealed class MercuryGlassButton : ButtonBase
     /// Handles pointer entry.
     /// </summary>
     /// <param name="eventArgs">The event arguments.</param>
-    protected override void OnMouseEnter(EventArgs eventArgs)
+    protected override void OnMouseEnter(System.EventArgs eventArgs)
     {
         base.OnMouseEnter(eventArgs);
 

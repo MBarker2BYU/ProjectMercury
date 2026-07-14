@@ -10,7 +10,7 @@ namespace Mercury.Demo.WinForms
     /// <seealso cref="System.Windows.Forms.Form" />
     public partial class MainWindow : Form
     {
-       
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
@@ -18,24 +18,40 @@ namespace Mercury.Demo.WinForms
         {
             InitializeComponent();
 
-            mgcCryptoProvider.Items.Add("AES-GCM");
-            mgcCryptoProvider.Items.Add("ChaCha20-Poly1305");
+            var initializeInterfaceResults = InitializeInterface();
 
-            mgcTransport.Items.Add("In-Memory");
-            mgcTransport.Items.Add("TCP");
-
-            mgcEnvelopeCodec.Items.Add("Binary");
-            mgcEnvelopeCodec.Items.Add("Json");
-
-            mgcChunkSize.Items.Add("1,024 Bytes");
-            mgcChunkSize.Items.Add("512 Bytes");
-            mgcChunkSize.Items.Add("256 Bytes");
-            mgcChunkSize.Items.Add("128 Bytes");
-
-            mgcLogging.Items.Add("Verbose");
-            mgcLogging.Items.Add("Simple");
-
+            if (initializeInterfaceResults is { success: false, exception: not null })
+                throw initializeInterfaceResults.exception;
         }
-        
+
+        private (bool success, Exception? exception) InitializeInterface()
+        {
+            try
+            {
+
+                m_DemoController = new DemoController(
+                    new ConfigurationPanelControls(mgcCryptoProvider, mgcTransport, mgcEnvelopeCodec, chkChunkEnabled, mgcChunkSize, mgcLogging, mgbApplyConfiguration), 
+                    new CommunicationsControls(txtSender, mgbClearSender, lblPayloadSizeSend, mmlSender, txtRecipient, mgbClearRecipient, lblPayloadSizeReceive, mmlRecipient, mgbSendPayload),
+                    new TestPanelControls(mgbReplayLastFrame, mgbTamperReplayToken, mgbTamperAuthTag, mgbTamperPayload,mgbClearLog),
+                    new TelemetryControls(lblStatusConnection, lblStatusFramesSent, lblStatusFramesReceived, lblStatusAuthFailures, lblStatusReplayAttemps, lblStatusChunkCount, lblStatusAverageSize));
+
+                var demoInitResults = m_DemoController.Initialize();
+
+                if (demoInitResults is { Success: false, Exception: not null })
+                    throw demoInitResults.Exception;
+
+                return (true, null);
+            }
+            catch (Exception exception)
+            {
+                return (false, exception);
+            }
+        }
+
+
+        private DemoController m_DemoController;
+
     }
+
+
 }
