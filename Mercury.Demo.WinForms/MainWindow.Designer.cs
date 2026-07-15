@@ -57,10 +57,10 @@
             mmlRecipient = new Mercury.Demo.WinForms.Controls.MercuryMarqueeLabel();
             mercuryGlassPanel2 = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
             mgbClearLog = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbTamperPayload = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbTamperAuthTag = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbTamperReplayToken = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            mgbReplayLastFrame = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
+            mgbTamperPayload = new Mercury.Demo.WinForms.Controls.MercuryGlassToggleButton();
+            mgbTamperAuthTag = new Mercury.Demo.WinForms.Controls.MercuryGlassToggleButton();
+            mgbTamperReplayToken = new Mercury.Demo.WinForms.Controls.MercuryGlassToggleButton();
+            mgbReplayLastFrame = new Mercury.Demo.WinForms.Controls.MercuryGlassToggleButton();
             mercuryGlassPanel6 = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
             textBox1 = new TextBox();
             lblVersion = new Label();
@@ -506,7 +506,7 @@
             mgbTamperAuthTag.Padding = new Padding(10, 0, 10, 0);
             mgbTamperAuthTag.Size = new Size(254, 36);
             mgbTamperAuthTag.TabIndex = 5;
-            mgbTamperAuthTag.Text = "TamperAuthTag";
+            mgbTamperAuthTag.Text = "Tamper Auth Tag";
             mgbTamperAuthTag.UseVisualStyleBackColor = false;
             // 
             // mgbTamperReplayToken
@@ -967,10 +967,10 @@
         private TextBox textBox1;
         private Label lblVersion;
         private Controls.MercuryGlassButton mgbClearLog;
-        private Controls.MercuryGlassButton mgbTamperPayload;
-        private Controls.MercuryGlassButton mgbTamperAuthTag;
-        private Controls.MercuryGlassButton mgbTamperReplayToken;
-        private Controls.MercuryGlassButton mgbReplayLastFrame;
+        private Controls.MercuryGlassToggleButton mgbTamperPayload;
+        private Controls.MercuryGlassToggleButton mgbTamperAuthTag;
+        private Controls.MercuryGlassToggleButton mgbTamperReplayToken;
+        private Controls.MercuryGlassToggleButton mgbReplayLastFrame;
         private Controls.MercuryGlassPanel mercuryGlassPanel9;
         private Controls.MercuryGlassPanel mercuryGlassPanel10;
         private Controls.MercuryGlassPanel mercuryGlassPanel11;

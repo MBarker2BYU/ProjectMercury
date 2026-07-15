@@ -4,11 +4,19 @@ using Mercury.Demo.WinForms.Interfaces;
 
 namespace Mercury.Demo.WinForms;
 
-internal sealed class TestPanelControls(MercuryGlassButton replayLastFrameButton, MercuryGlassButton tamperReplayTokenButton, 
-    MercuryGlassButton tamperAuthButton, MercuryGlassButton tamperPayloadButton, MercuryGlassButton clearLogButton)
+internal sealed class TestPanelControls(MercuryGlassToggleButton replayLastFrameButton, MercuryGlassToggleButton tamperReplayTokenButton,
+    MercuryGlassToggleButton tamperAuthButton, MercuryGlassToggleButton tamperPayloadButton, MercuryGlassButton clearLogButton)
 {
     public IResult Initialize()
-        => Reset();
+    {
+
+        ReplayLastFrameButton.Checked = false;
+        TamperReplayTokenButton.Checked = false;
+        TamperAuthButton.Checked = false;
+        TamperPayloadButton.Checked = false;
+
+        return Reset();
+    }
 
     public IResult Reset()
     {
@@ -34,10 +42,10 @@ internal sealed class TestPanelControls(MercuryGlassButton replayLastFrameButton
     }
 
 
-    public MercuryGlassButton ReplayLastFrameButton { get; } = replayLastFrameButton;
-    public MercuryGlassButton TamperReplayTokenButton { get; } = tamperReplayTokenButton;
-    public MercuryGlassButton TamperAuthButton { get; } = tamperAuthButton;
-    public MercuryGlassButton TamperPayloadButton { get; } = tamperPayloadButton;
+    public MercuryGlassToggleButton ReplayLastFrameButton { get; } = replayLastFrameButton;
+    public MercuryGlassToggleButton TamperReplayTokenButton { get; } = tamperReplayTokenButton;
+    public MercuryGlassToggleButton TamperAuthButton { get; } = tamperAuthButton;
+    public MercuryGlassToggleButton TamperPayloadButton { get; } = tamperPayloadButton;
     public MercuryGlassButton ClearLogButton { get; } = clearLogButton;
 
 }
