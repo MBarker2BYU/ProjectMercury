@@ -59,13 +59,11 @@ internal sealed class CommunicationsControls(TextBox senderTextBox, MercuryGlass
             SenderTextBox.Clear();
             RecipientTextBox.Clear();
 
-            SenderMarqueeLabel.Visible = false;
-            SenderMarqueeLabel.Enabled = false;
-
-            RecipientMarqueeLabel.Visible = false;
-            RecipientMarqueeLabel.Enabled = false;
+            EnableMarquee(false);
 
             RecipientTextBox.ReadOnly = true;
+
+            EnableControls(false);
 
             AttachEvents();
 
@@ -77,14 +75,47 @@ internal sealed class CommunicationsControls(TextBox senderTextBox, MercuryGlass
         }
     }
 
+    public void EnableControls(bool enabled = true)
+    {
+        SendButton.Enabled = enabled;
+
+        SenderTextBox.Enabled = enabled;
+        SenderClearButton.Enabled = enabled;
+        
+        RecipientClearButton.Enabled = enabled;
+    }
+
+    public void EnableMarquee(bool enable = true)
+    {
+        SenderMarqueeLabel.Enabled = enable;
+        SenderMarqueeLabel.Visible = enable;
+
+        RecipientMarqueeLabel.Enabled = enable;
+        RecipientMarqueeLabel.Visible = enable;
+    }
+
     /// <summary>
     /// Handles the <see cref="E:SendRequested" /> event.
     /// </summary>
     /// <param name="sender">The sender.</param>
     /// <param name="eventArgs">The <see cref="EventArgs"/> instance containing the event data.</param>
-    private void OnSendRequested(object? sender, EventArgs eventArgs)
+    private async void OnSendRequested(object? sender, EventArgs eventArgs)
     {
-        SendRequested?.Invoke(this, EventArgs.Empty);
+        try
+        {
+            //Enables animation
+            EnableMarquee();
+            
+            await Task.Delay(
+                TimeSpan.FromSeconds(.15));
+        }
+        finally
+        {
+            //Send message
+            SendRequested?.Invoke(this, EventArgs.Empty);
+
+            EnableMarquee(false);
+        }
     }
 
     /// <summary>
@@ -98,7 +129,7 @@ internal sealed class CommunicationsControls(TextBox senderTextBox, MercuryGlass
     private void OnSenderClear(object? sender, EventArgs eventArgs)
     {
         SenderPayloadSize.Text =
-            $"Payload Size: 0 bytes";
+            @"Payload Size: 0 bytes";
 
         SenderTextBox.Clear();
     }
@@ -114,7 +145,7 @@ internal sealed class CommunicationsControls(TextBox senderTextBox, MercuryGlass
     private void OnRecipientClear(object? sender, EventArgs eventArgs)
     {
         RecipientPayloadSize.Text =
-            $"Payload Size: 0 bytes";
+            @"Payload Size: 0 bytes";
 
         RecipientTextBox.Clear();
     }

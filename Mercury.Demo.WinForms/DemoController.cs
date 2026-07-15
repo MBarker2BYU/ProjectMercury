@@ -4,14 +4,18 @@ using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Shared;
 using Mercury.Abstractions.Transport;
+using Mercury.Core.Chunking;
 using Mercury.Core.Factories;
 using Mercury.Demo.WinForms.Interfaces;
+using Mercury.Demo.WinForms.Wrappers;
 using Mercury.Provider.AesGcm;
 using Mercury.Provider.ChaCha20;
 using Mercury.Transport.InMemory;
+using Mercury.Transport.Tcp;
+using System.Net;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
-using Mercury.Core.Chunking;
 
 namespace Mercury.Demo.WinForms;
 
@@ -36,6 +40,9 @@ internal class DemoController(ConfigurationPanelControls configurationPanelContr
     //Clients
     private IMercuryClient? m_AlphaClient;
     private IMercuryClient? m_BravoClient;
+
+    //Tamper Demo
+    private DemoCaptureTransport? m_AlphaCaptureTransport;
 
     #region Events
 
@@ -75,16 +82,14 @@ internal class DemoController(ConfigurationPanelControls configurationPanelContr
             if (m_AlphaClient == null ||
                 m_BravoClient == null)
             {
-                throw new InvalidOperationException(
-                    "Apply a configuration before sending.");
+                throw new InvalidOperationException("Apply a configuration before sending.");
             }
 
             var senderPayload = m_CommunicationsControls.SenderTextBox.Text;
 
             if (string.IsNullOrWhiteSpace(senderPayload))
             {
-                throw new InvalidOperationException(
-                    "The sender payload cannot be empty.");
+                throw new InvalidOperationException("The sender payload cannot be empty.");
             }
 
             var payload =
@@ -131,20 +136,15 @@ internal class DemoController(ConfigurationPanelControls configurationPanelContr
         }
         catch (Exception exception)
         {
-            MessageBox.Show(
-                exception.Message,
-                "Communication Failed",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            MessageBox.Show(exception.Message, "Communication Failed",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
     private int GetChunkSizeBytes()
     {
         var selectedValue =
-            m_ConfigurationPanelControls
-                .ChunkSizeCombo
-                .Text
+            m_ConfigurationPanelControls.ChunkSizeCombo.Text
                 .Replace("KB", string.Empty, StringComparison.OrdinalIgnoreCase)
                 .Trim();
 
@@ -157,7 +157,7 @@ internal class DemoController(ConfigurationPanelControls configurationPanelContr
         return checked(chunkSizeKilobytes * 1024);
     }
 
-    private Task ApplyConfigurationAsync()
+    private async Task ApplyConfigurationAsync()
     {
         var keys =
             new Dictionary<KeyId, byte[]>
@@ -176,12 +176,14 @@ internal class DemoController(ConfigurationPanelControls configurationPanelContr
 
         var bravoCryptoProvider = BuildCryptoProvider(keyProvider);
 
-        var (alphaTransport, bravoTransport) = BuildTransport();
+        var (alphaTransport, bravoTransport) =  await BuildTransportAsync();
 
         var envelopeCodec = BuildEnvelopeCodec();
 
+        m_AlphaCaptureTransport = new DemoCaptureTransport(alphaTransport);
+
         var alphaDependencies = MercuryFactory.Instance.BuildDependencies(
-                alphaCryptoProvider, envelopeCodec, alphaTransport);
+                alphaCryptoProvider, envelopeCodec, m_AlphaCaptureTransport);
 
         var bravoDependencies =
             MercuryFactory.Instance.BuildDependencies(
@@ -198,7 +200,8 @@ internal class DemoController(ConfigurationPanelControls configurationPanelContr
         m_TelemetryControls.StatusLabel.Text = "Connected";
         m_TelemetryControls.StatusLabel.ForeColor = Color.Lime;
 
-        return Task.CompletedTask;
+        m_CommunicationsControls.EnableControls();
+        m_TestPanelControls.EnableControls();
     }
 
     public IResult Initialize()
@@ -217,8 +220,8 @@ internal class DemoController(ConfigurationPanelControls configurationPanelContr
             
             var testPanelInitResults = m_TestPanelControls.Initialize();
 
-            if (testPanelInitResults is { success: false, exception: not null })
-                throw testPanelInitResults.exception;
+            if (testPanelInitResults is { Success: false, Exception: not null })
+                throw testPanelInitResults.Exception;
 
             var telemetryInitResults = m_TelemetryControls.Initialize();
 
@@ -249,17 +252,50 @@ internal class DemoController(ConfigurationPanelControls configurationPanelContr
         }
     }
 
-    private (ITransport alphaTransport, ITransport bravoTransport) BuildTransport()
+    private async Task<(ITransport alphaTransport, ITransport bravoTransport)> BuildTransportAsync(CancellationToken cancellationToken = default)
     {
         switch (m_ConfigurationPanelControls.TransportCombo.Text)
         {
             case IN_MEMORY_TRANSPORT:
+            {
                 return InMemoryDuplexTransport.CreateConnectedPair();
+            }
+
             case TCP_TRANSPORT:
-                throw new NotSupportedException(
-                    "TCP configuration has not been wired into the demo yet.");
+            {
+                var listener =
+                    new TcpListener(IPAddress.Loopback, 0);
+
+                listener.Start();
+
+                try
+                {
+                    var localEndpoint =
+                        (IPEndPoint)listener.LocalEndpoint;
+
+                    var bravoTransportTask =
+                        TcpTransport.AcceptAsync(listener, cancellationToken);
+
+                    var alphaTransportTask =
+                        TcpTransport.ConnectAsync(IPAddress.Loopback.ToString(),
+                            localEndpoint.Port, cancellationToken);
+
+                    await Task.WhenAll(alphaTransportTask, bravoTransportTask)
+                        .ConfigureAwait(false);
+
+                    return (
+                        await alphaTransportTask.ConfigureAwait(false),
+                        await bravoTransportTask.ConfigureAwait(false));
+                }
+                finally
+                {
+                    listener.Stop();
+                }
+            }
+
             default:
-                throw new ArgumentException("CryptoProvider");
+                throw new ArgumentException("The selected transport is not supported.",
+                    nameof(m_ConfigurationPanelControls.TransportCombo));
         }
     }
 
@@ -274,8 +310,7 @@ internal class DemoController(ConfigurationPanelControls configurationPanelContr
                 return EnvelopeCodec.Json;
 
             default:
-                throw new ArgumentException(
-                    "Unsupported envelope codec.");
+                throw new ArgumentException("Unsupported envelope codec.");
         }
     }
 }

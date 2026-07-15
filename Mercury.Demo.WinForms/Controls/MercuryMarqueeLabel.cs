@@ -1,20 +1,61 @@
-﻿using System.ComponentModel;
+﻿// ***********************************************************************
+// Assembly     : Mercury.Core.WinForms
+// Author         : Matthew D. Barker
+// Created        : 07-14-2026
+//
+// Last Modified By : Matthew D. Barker
+// Last Modified On : 07-14-2026
+// ***********************************************************************
+// <copyright file="MercuryMarqueeLabel.cs">
+//     Copyright (c) Matthew D. Barker. All rights reserved.
+//     Submitted in partial fulfillment of CSE499 Senior Capstone Project
+//     at Brigham Young University-Idaho.
+// </copyright>
+// ***********************************************************************
+
+using System.ComponentModel;
 using Timer = System.Windows.Forms.Timer;
 
 namespace Mercury.Demo.WinForms.Controls;
 
+/// <summary>
+/// Class MercuryMarqueeLabel.
+/// Implements the <see cref="System.Windows.Forms.Label" />
+/// </summary>
+/// <seealso cref="System.Windows.Forms.Label" />
 public class MercuryMarqueeLabel : Label
 {
+    /// <summary>
+    /// Enum MarqueeDirection
+    /// </summary>
     public enum MarqueeDirection
     {
+        /// <summary>
+        /// The left
+        /// </summary>
         Left,
+        /// <summary>
+        /// The right
+        /// </summary>
         Right
     }
 
+    /// <summary>
+    /// The m timer
+    /// </summary>
     private readonly Timer m_Timer = new Timer();
+    /// <summary>
+    /// The m interval
+    /// </summary>
     private int m_Interval = 120;
+    /// <summary>
+    /// The m direction
+    /// </summary>
     private MarqueeDirection m_Direction = MarqueeDirection.Left;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MercuryMarqueeLabel"/> class.
+    /// </summary>
     public MercuryMarqueeLabel()
     {
         AutoSize = false;
@@ -40,6 +81,10 @@ public class MercuryMarqueeLabel : Label
         }
     }
 
+    /// <summary>
+    /// Gets or sets the direction.
+    /// </summary>
+    /// <value>The direction.</value>
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public MarqueeDirection Direction
     {
@@ -68,6 +113,9 @@ public class MercuryMarqueeLabel : Label
         }
     }
 
+    /// <summary>
+    /// Raises the <see cref="M:System.Windows.Forms.Control.CreateControl" /> method.
+    /// </summary>
     protected override void OnCreateControl()
     {
         base.OnCreateControl();
@@ -78,6 +126,11 @@ public class MercuryMarqueeLabel : Label
         }
     }
 
+    /// <summary>
+    /// Handles the <see cref="E:TimerTick" /> event.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
     private void OnTimerTick(object sender, EventArgs e)
     {
         if (string.IsNullOrEmpty(Text) || Text.Length < 2)
@@ -95,6 +148,10 @@ public class MercuryMarqueeLabel : Label
         }
     }
 
+    /// <summary>
+    /// Releases the unmanaged resources used by the <see cref="T:System.Windows.Forms.Label" /> and optionally releases the managed resources.
+    /// </summary>
+    /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
     protected override void Dispose(bool disposing)
     {
         if (disposing)
