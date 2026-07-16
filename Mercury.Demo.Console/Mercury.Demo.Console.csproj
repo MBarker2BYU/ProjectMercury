@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DemoControllerBU.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mercury.Abstractions\Mercury.Abstractions.csproj" />
+    <ProjectReference Include="..\Mercury.Core\Mercury.Core.csproj" />
+    <ProjectReference Include="..\Mercury.Provider.AesGcm\Mercury.Provider.AesGcm.csproj" />
+    <ProjectReference Include="..\Mercury.Provider.ChaCha20\Mercury.Provider.ChaCha20.csproj" />
+    <ProjectReference Include="..\Mercury.Transport.InMemory\Mercury.Transport.InMemory.csproj" />
+    <ProjectReference Include="..\Mercury.Transport.Tcp\Mercury.Transport.Tcp.csproj" />
+  </ItemGroup>
+
+</Project>
