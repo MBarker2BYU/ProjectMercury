@@ -68,28 +68,17 @@ public sealed class EnvelopeCodecTests
         Assert.False(frame.IsEmpty);
         Assert.Equal(envelope.Version.Major, decoded.Version.Major);
         Assert.Equal(envelope.Version.Minor, decoded.Version.Minor);
-        Assert.Equal(envelope.Header.EnvelopeId,
-            decoded.Header.EnvelopeId);
-        Assert.Equal(envelope.Header.Timestamp,
-            decoded.Header.Timestamp);
-        Assert.Equal(envelope.Header.SenderKeyId,
-            decoded.Header.SenderKeyId);
-        Assert.Equal(envelope.Header.RecipientKeyId,
-            decoded.Header.RecipientKeyId);
-        Assert.Equal(envelope.Header.Encryption,
-            decoded.Header.Encryption);
-        Assert.Equal(envelope.Header.Signature,
-            decoded.Header.Signature);
-        Assert.Equal(envelope.Header.ReplayToken.ToArray(),
-            decoded.Header.ReplayToken.ToArray());
-        Assert.Equal(envelope.Payload.ToArray(),
-            decoded.Payload.ToArray());
-        Assert.Equal("alpha-bravo",
-            decoded.Header.Meta["route"]);
-        Assert.Equal("12345",
-            decoded.Header.Meta["correlation"]);
-        Assert.Equal("codec-roundtrip",
-            decoded.Footer.Meta["purpose"]);
+        Assert.Equal(envelope.Header.EnvelopeId, decoded.Header.EnvelopeId);
+        Assert.Equal(envelope.Header.Timestamp.ToUnixTimeMilliseconds(), decoded.Header.Timestamp.ToUnixTimeMilliseconds());
+        Assert.Equal(envelope.Header.SenderKeyId, decoded.Header.SenderKeyId);
+        Assert.Equal(envelope.Header.RecipientKeyId, decoded.Header.RecipientKeyId);
+        Assert.Equal(envelope.Header.Encryption, decoded.Header.Encryption);
+        Assert.Equal(envelope.Header.Signature, decoded.Header.Signature);
+        Assert.Equal(envelope.Header.ReplayToken.ToArray(), decoded.Header.ReplayToken.ToArray());
+        Assert.Equal(envelope.Payload.ToArray(), decoded.Payload.ToArray());
+        Assert.Equal("alpha-bravo", decoded.Header.Meta["route"]);
+        Assert.Equal("12345", decoded.Header.Meta["correlation"]);
+        Assert.Equal("codec-roundtrip", decoded.Footer.Meta["purpose"]);
     }
 
     /// <summary>
