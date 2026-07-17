@@ -37,7 +37,7 @@ public readonly struct KeyId(string value) : IEquatable<KeyId>
     /// Gets the value.
     /// </summary>
     /// <value>The value.</value>
-    public string Value { get; } = !value.Contains("|") ? 
+    public string Value { get; } = !HasPipeInValue(value) ? 
         value : throw new ArgumentException("The pipe '|' is an invalid character.");
 
     /// <summary>
@@ -79,5 +79,19 @@ public readonly struct KeyId(string value) : IEquatable<KeyId>
     /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
     public override int GetHashCode()
         => (Value ?? string.Empty).GetHashCode();
+
+
+    /// <summary>
+    /// Determines whether [has pipe in value] [the specified value].
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <returns><c>true</c> if [has pipe in value] [the specified value]; otherwise, <c>false</c>.</returns>
+    public static bool HasPipeInValue(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        return value != null && value.Contains("|");
+    }
 }
 

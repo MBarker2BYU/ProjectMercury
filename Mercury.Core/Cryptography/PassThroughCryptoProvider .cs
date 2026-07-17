@@ -4,7 +4,7 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-09-2026
+// Last Modified On : 07-17-2026
 // ***********************************************************************
 // <copyright file="PassThroughCryptoProvider.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -14,9 +14,10 @@
 // ***********************************************************************
 
 using Mercury.Abstractions.Cryptograph;
-using Mercury.Abstractions.Envelope;
+using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Services;
+using System.Security.Cryptography;
 
 namespace Mercury.Core.Cryptography;
 
@@ -40,16 +41,50 @@ internal sealed class PassThroughCryptoProvider : ICryptoProvider
     /// <param name="envelopeService">The envelope service.</param>
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task&lt;ICryptoProviderResult&gt;.</returns>
-    public Task<ICryptoProviderResult> SealAsync(
-        ISealRequest sealRequest,
-        IEnvelopeService envelopeService,
+
+    public Task<ICryptoProviderResult> SealAsync(ISealRequest sealRequest, IEnvelopeService envelopeService,
         CancellationToken cancellationToken = default)
     {
-        //Do Crypto Here
-        var header = envelopeService.BuildEnvelopeHeader();
-        var footer = envelopeService.BuildEnvelopeFooter();
+        cancellationToken.ThrowIfCancellationRequested();
 
-        return Task.FromResult<ICryptoProviderResult>(envelopeService.PackEnvelope(header, sealRequest.Payload, footer));
+        if (sealRequest == null)
+            throw new ArgumentNullException(nameof(sealRequest));
+
+        if (envelopeService == null)
+            throw new ArgumentNullException(nameof(envelopeService));
+
+        if (sealRequest.Payload.IsEmpty)
+        {
+            return Task.FromResult(envelopeService.BuildCryptoProviderResult(
+                    false, ReadOnlyMemory.Empty, null,
+                    FailureReason.Custom, "The payload cannot be empty."));
+        }
+
+        if (sealRequest.CryptoContext.IsEmpty)
+        {
+            return Task.FromResult(envelopeService.BuildCryptoProviderResult(
+                    false, ReadOnlyMemory.Empty, null,
+                    FailureReason.Custom, "The crypto context cannot be empty."));
+        }
+
+        var replayToken = new byte[16];
+
+        using (var randomNumberGenerator = RandomNumberGenerator.Create())
+        {
+            randomNumberGenerator.GetBytes(replayToken);
+        }
+
+        var header =
+            envelopeService.BuildEnvelopeHeader(new KeyId(Guid.NewGuid().ToString("N")),
+                DateTimeOffset.UtcNow, sealRequest.CryptoContext.SenderKeyId, sealRequest.CryptoContext.RecipientKeyId,
+                new AlgorithmId(Name), AlgorithmId.None, new ReadOnlyMemory(replayToken),
+                sealRequest.HeaderMeta.Clone());
+
+        var footer =
+            envelopeService.BuildEnvelopeFooter(sealRequest.FooterMeta.Clone());
+
+        return Task.FromResult<ICryptoProviderResult>(envelopeService.PackEnvelope(header,
+                sealRequest.Payload, footer));
     }
 
     /// <summary>
@@ -60,9 +95,9 @@ internal sealed class PassThroughCryptoProvider : ICryptoProvider
     /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns>Task&lt;ICryptoProviderResult&gt;.</returns>
     public Task<ICryptoProviderResult> OpenAsync(
-        IOpenRequest openRequest,
-        IEnvelopeService envelopeService,
-        CancellationToken cancellationToken = default)
+            IOpenRequest openRequest,
+            IEnvelopeService envelopeService,
+            CancellationToken cancellationToken = default)
     {
         //Do Crypto Here
 

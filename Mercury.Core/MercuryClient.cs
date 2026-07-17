@@ -299,8 +299,7 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
     /// <exception cref="OperationCanceledException">
     /// The operation is canceled through the supplied cancellation token.
     /// </exception>
-    public async Task<IMercuryResult> ReceiveAsync(
-        CancellationToken cancellationToken = default)
+    public async Task<IMercuryResult> ReceiveAsync(CancellationToken cancellationToken = default)
     {
         ISecureEnvelope? secureEnvelope = null;
 
@@ -344,18 +343,37 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
                     .ConfigureAwait(false);
 
             // Authentication, decryption, or provider validation failed.
-            if (!cryptoProviderResult.Success ||
-                cryptoProviderResult.ValidatedEnvelope == null)
+            if (!cryptoProviderResult.Success)
             {
-                return new MercuryResult(
-                    cryptoProviderResult);
+                return new MercuryResult(cryptoProviderResult);
+            }
+
+            // A provider must never report success without returning the
+            // validated secure envelope that produced the recovered payload.
+            if (cryptoProviderResult.ValidatedEnvelope == null)
+            {
+                return new MercuryResult(false, ReadOnlyMemory.Empty, null,
+                    FailureReason.InternalError, "The crypto provider reported success without returning a validated secure envelope.");
+            }
+
+            // Retrieve the authenticated header from the secure envelope returned
+            // by the crypto provider.
+            var validatedHeader = cryptoProviderResult.ValidatedEnvelope.Header;
+
+            // Replay protection requires both the sender identity and a replay token.
+            // An authenticated envelope missing either value is rejected before its
+            // recovered payload can be delivered.
+            if (validatedHeader.SenderKeyId.IsEmpty || validatedHeader.ReplayToken.IsEmpty)
+            {
+                return new MercuryResult(false, ReadOnlyMemory.Empty, cryptoProviderResult.ValidatedEnvelope,
+                    FailureReason.AuthenticationFailed, "The validated secure envelope is missing required replay information.");
             }
 
             // The replay token is checked only after the envelope has been
             // authenticated by the crypto provider.
             var replayAccepted =
                 await m_ReplayProtector
-                    .TryAcceptAsync(cryptoProviderResult.ValidatedEnvelope.Header, cancellationToken)
+                    .TryAcceptAsync(validatedHeader, cancellationToken)
                     .ConfigureAwait(false);
 
             // A previously accepted replay token means the frame is a replay
