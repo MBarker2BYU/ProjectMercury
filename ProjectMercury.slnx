@@ -7,6 +7,7 @@
   <Project Path="Mercury.Core/Mercury.Core.csproj" Id="d243c8e6-429c-4712-8b75-6d1079359a13" />
   <Project Path="Mercury.Demo.Console/Mercury.Demo.Console.csproj" />
   <Project Path="Mercury.Demo.WinForms/Mercury.Demo.WinForms.csproj" />
+  <Project Path="Mercury.Extensions.EasySetup/Mercury.Extensions.EasySetup.csproj" />
   <Project Path="Mercury.Provider.AesCcm/Mercury.Provider.AesCcm.csproj" />
   <Project Path="Mercury.Provider.AesGcm/Mercury.Provider.AesGcm.csproj" Id="45bf741c-66d1-473d-b5be-fe7a82998fba" />
   <Project Path="Mercury.Provider.ChaCha20/Mercury.Provider.ChaCha20.csproj" Id="6f0184bd-6ed9-4ab6-8e7b-0bfc75605a44" />
