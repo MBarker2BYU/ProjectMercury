@@ -30,9 +30,9 @@ namespace Mercury.Demo.WinForms
             {
 
                 m_DemoController = new DemoController(
-                    new ConfigurationPanelControls(mgcCryptoProvider, mgcTransport, mgcEnvelopeCodec, chkChunkEnabled, mgcChunkSize, mgcLogging, mgbApplyConfiguration), 
+                    new ConfigurationPanelControls(mgcCryptoProvider, mgcTransport, mgcEnvelopeCodec, chkChunkEnabled, mgcChunkSize, mgcLogging, mgbApplyConfiguration),
                     new CommunicationsControls(txtSender, mgbClearSender, lblPayloadSizeSend, mmlSender, txtRecipient, mgbClearRecipient, lblPayloadSizeReceive, mmlRecipient, mgbSendPayload),
-                    new TestPanelControls(mgbReplayLastFrame, mgbTamperReplayToken, mgbTamperAuthTag, mgbTamperPayload,mgbClearLog),
+                    new TestPanelControls(mgbReplayLastFrame, mgbTamperReplayToken, mgbTamperAuthTag, mgbTamperPayload, mgbClearLog),
                     new TelemetryControls(lblStatusConnection, lblStatusFramesSent, lblStatusFramesReceived, lblStatusAuthFailures, lblStatusReplayAttemps, lblStatusChunkCount, lblStatusAverageSize));
 
                 var demoInitResults = m_DemoController.Initialize();
@@ -50,7 +50,6 @@ namespace Mercury.Demo.WinForms
 
 
         private DemoController m_DemoController;
-
     }
 
 
