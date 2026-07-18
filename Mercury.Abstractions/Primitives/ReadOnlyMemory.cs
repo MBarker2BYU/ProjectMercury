@@ -3,8 +3,8 @@
 // Author           : Matthew D. Barker
 // Created          : 07-02-2026
 //
-// Last Modified By : Matthew D. Barker
-// Last Modified On : 07-03-2026
+// Last Modified By : Kim K. Brown
+// Last Modified On : 07-18-2026
 // ***********************************************************************
 // <copyright file="ReadOnlyMemory.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -30,7 +30,7 @@ public readonly struct ReadOnlyMemory(byte[]? data)
     /// The data
     /// </summary>
     private readonly byte[]? m_Data = data != null ? (byte[])data.Clone() : [];
-    
+
     /// <summary>
     /// Converts to array.
     /// </summary>
@@ -48,8 +48,7 @@ public readonly struct ReadOnlyMemory(byte[]? data)
     /// Clones this instance.
     /// </summary>
     /// <returns>System.Byte[].</returns>
-    public ReadOnlyMemory Clone()
-            => new ReadOnlyMemory(ToArray());
+    public ReadOnlyMemory Clone() => new(ToArray());
 
     /// <summary>
     /// Slices the specified start.
@@ -63,7 +62,7 @@ public readonly struct ReadOnlyMemory(byte[]? data)
             throw new ArgumentOutOfRangeException();
 
         var slice = new byte[length];
-        if (m_Data != null) 
+        if (m_Data != null)
             Array.Copy(m_Data, start, slice, 0, length);
 
         return new ReadOnlyMemory(slice);

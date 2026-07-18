@@ -3,8 +3,8 @@
 // Author           : Matthew D. Barker
 // Created          : 07-17-2026
 //
-// Last Modified By : Matthew D. Barker
-// Last Modified On : 07-17-2026
+// Last Modified By : Kim K.Brown
+// Last Modified On : 07-18-2026
 // ***********************************************************************
 // <copyright file="MercuryPipelineTests.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -21,8 +21,10 @@ using Mercury.Core.Replay;
 using Mercury.Tests.Support;
 using Mercury.Transport.InMemory;
 using Mercury.Transport.Tcp;
+using Xunit;
 
-using MercuryMemory = Mercury.Abstractions.Primitives.ReadOnlyMemory;
+using MercuryMemory =
+    Mercury.Abstractions.Primitives.ReadOnlyMemory;
 
 namespace Mercury.Tests.Pipeline;
 
@@ -31,62 +33,102 @@ namespace Mercury.Tests.Pipeline;
 /// </summary>
 public sealed class MercuryPipelineTests
 {
-    public static IEnumerable<object[]> ProviderCodecCases()
+    /// <summary>
+    /// Provides the crypto-provider and envelope-codec combinations used by
+    /// the pipeline theory tests.
+    /// </summary>
+    /// <returns>The strongly typed provider and codec test cases.</returns>
+    public static TheoryData<ProviderKind, EnvelopeCodec>
+        ProviderCodecCases()
         => MercuryTestFactory.ProviderCodecCases();
 
     /// <summary>
-    /// Defines the test method InMemoryPipeline_SendThenReceive_ReturnsOriginalPayload.
+    /// Defines the test method
+    /// InMemoryPipeline_SendThenReceive_ReturnsOriginalPayload.
     /// </summary>
     /// <param name="providerKind">Kind of the provider.</param>
     /// <param name="codec">The codec.</param>
     [Theory]
     [MemberData(nameof(ProviderCodecCases))]
-    public async Task InMemoryPipeline_SendThenReceive_ReturnsOriginalPayload(ProviderKind providerKind, EnvelopeCodec codec)
+    public async Task
+        InMemoryPipeline_SendThenReceive_ReturnsOriginalPayload(
+            ProviderKind providerKind,
+            EnvelopeCodec codec)
     {
-        var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
-        var alphaClient = MercuryTestFactory.BuildClient(MercuryTestFactory.BuildProvider(providerKind),
-            codec, alphaTransport, new InMemoryReplayProtector());
-        var bravoClient = MercuryTestFactory.BuildClient(MercuryTestFactory.BuildProvider(providerKind),
-            codec, bravoTransport, new InMemoryReplayProtector());
-        var payload = MercuryTestFactory.CreatePayload(4096);
+        var (alphaTransport, bravoTransport) =
+            InMemoryDuplexTransport.CreateConnectedPair();
 
-        await alphaClient.SendAsync(MercuryTestFactory.BuildContext(),
+        var alphaClient = MercuryTestFactory.BuildClient(
+            MercuryTestFactory.BuildProvider(providerKind),
+            codec,
+            alphaTransport,
+            new InMemoryReplayProtector());
+
+        var bravoClient = MercuryTestFactory.BuildClient(
+            MercuryTestFactory.BuildProvider(providerKind),
+            codec,
+            bravoTransport,
+            new InMemoryReplayProtector());
+
+        var payload =
+            MercuryTestFactory.CreatePayload(4096);
+
+        await alphaClient.SendAsync(
+            MercuryTestFactory.BuildContext(),
             new MercuryMemory(payload));
 
-        var result = await bravoClient.ReceiveAsync();
+        var result =
+            await bravoClient.ReceiveAsync();
 
         Assert.True(result.Success, result.Message);
         Assert.Equal(FailureReason.None, result.FailureReason);
         Assert.Equal(payload, result.Payload.ToArray());
         Assert.NotNull(result.ValidatedEnvelope);
-        Assert.Equal(MercuryTestFactory.BuildProvider(providerKind).Name,
+
+        Assert.Equal(
+            MercuryTestFactory.BuildProvider(providerKind).Name,
             result.ValidatedEnvelope.Header.Encryption.Value);
     }
 
     /// <summary>
-    /// Defines the test method TcpPipeline_SendThenReceive_ReturnsOriginalPayload.
+    /// Defines the test method
+    /// TcpPipeline_SendThenReceive_ReturnsOriginalPayload.
     /// </summary>
     /// <param name="providerKind">Kind of the provider.</param>
     /// <param name="codec">The codec.</param>
     [Theory]
     [MemberData(nameof(ProviderCodecCases))]
-    public async Task TcpPipeline_SendThenReceive_ReturnsOriginalPayload(ProviderKind providerKind, EnvelopeCodec codec)
+    public async Task TcpPipeline_SendThenReceive_ReturnsOriginalPayload(
+        ProviderKind providerKind,
+        EnvelopeCodec codec)
     {
-        var (alphaTransport, bravoTransport) = await CreateTcpPairAsync();
+        var (alphaTransport, bravoTransport) =
+            await CreateTcpPairAsync();
+
         await using (alphaTransport)
         await using (bravoTransport)
         {
-            var alphaClient = MercuryTestFactory.BuildClient(MercuryTestFactory.BuildProvider(providerKind),
-                codec, alphaTransport, new InMemoryReplayProtector());
-            
-            var bravoClient = MercuryTestFactory.BuildClient(MercuryTestFactory.BuildProvider(providerKind),
-                codec, bravoTransport,
+            var alphaClient = MercuryTestFactory.BuildClient(
+                MercuryTestFactory.BuildProvider(providerKind),
+                codec,
+                alphaTransport,
                 new InMemoryReplayProtector());
 
-            var payload = MercuryTestFactory.CreatePayload(8192);
+            var bravoClient = MercuryTestFactory.BuildClient(
+                MercuryTestFactory.BuildProvider(providerKind),
+                codec,
+                bravoTransport,
+                new InMemoryReplayProtector());
 
-            await alphaClient.SendAsync(MercuryTestFactory.BuildContext(), new MercuryMemory(payload));
-            var result = await bravoClient.ReceiveAsync();
+            var payload =
+                MercuryTestFactory.CreatePayload(8192);
+
+            await alphaClient.SendAsync(
+                MercuryTestFactory.BuildContext(),
+                new MercuryMemory(payload));
+
+            var result =
+                await bravoClient.ReceiveAsync();
 
             Assert.True(result.Success, result.Message);
             Assert.Equal(payload, result.Payload.ToArray());
@@ -94,20 +136,32 @@ public sealed class MercuryPipelineTests
     }
 
     /// <summary>
-    /// Defines the test method InMemoryPipeline_MultipleExchanges_PreservesOrderAndPayloads.
+    /// Defines the test method
+    /// InMemoryPipeline_MultipleExchanges_PreservesOrderAndPayloads.
     /// </summary>
     /// <param name="providerKind">Kind of the provider.</param>
     /// <param name="codec">The codec.</param>
     [Theory]
     [MemberData(nameof(ProviderCodecCases))]
-    public async Task InMemoryPipeline_MultipleExchanges_PreservesOrderAndPayloads(ProviderKind providerKind, EnvelopeCodec codec)
+    public async Task
+        InMemoryPipeline_MultipleExchanges_PreservesOrderAndPayloads(
+            ProviderKind providerKind,
+            EnvelopeCodec codec)
     {
-        var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair(capacity: 64);
-        var sender = MercuryTestFactory.BuildClient(MercuryTestFactory.BuildProvider(providerKind),
-            codec, alphaTransport, new InMemoryReplayProtector());
+        var (alphaTransport, bravoTransport) =
+            InMemoryDuplexTransport.CreateConnectedPair(capacity: 64);
 
-        var receiver = MercuryTestFactory.BuildClient(MercuryTestFactory.BuildProvider(providerKind),
-            codec, bravoTransport, new InMemoryReplayProtector());
+        var sender = MercuryTestFactory.BuildClient(
+            MercuryTestFactory.BuildProvider(providerKind),
+            codec,
+            alphaTransport,
+            new InMemoryReplayProtector());
+
+        var receiver = MercuryTestFactory.BuildClient(
+            MercuryTestFactory.BuildProvider(providerKind),
+            codec,
+            bravoTransport,
+            new InMemoryReplayProtector());
 
         var payloads = Enumerable.Range(1, 25)
             .Select(index => Enumerable.Range(0, index * 17)
@@ -124,104 +178,167 @@ public sealed class MercuryPipelineTests
 
         foreach (var expected in payloads)
         {
-            var result = await receiver.ReceiveAsync();
+            var result =
+                await receiver.ReceiveAsync();
+
             Assert.True(result.Success, result.Message);
             Assert.Equal(expected, result.Payload.ToArray());
         }
     }
 
     /// <summary>
-    /// Defines the test method Pipeline_BinaryPayloadWithNullsAndAllByteValues_RoundTripsExactly.
+    /// Defines the test method
+    /// Pipeline_BinaryPayloadWithNullsAndAllByteValues_RoundTripsExactly.
     /// </summary>
     /// <param name="providerKind">Kind of the provider.</param>
     /// <param name="codec">The codec.</param>
     [Theory]
     [MemberData(nameof(ProviderCodecCases))]
-    public async Task Pipeline_BinaryPayloadWithNullsAndAllByteValues_RoundTripsExactly(ProviderKind providerKind, EnvelopeCodec codec)
+    public async Task
+        Pipeline_BinaryPayloadWithNullsAndAllByteValues_RoundTripsExactly(
+            ProviderKind providerKind,
+            EnvelopeCodec codec)
     {
-        var transport = new QueueTransport();
-        var client = MercuryTestFactory.BuildClient(MercuryTestFactory.BuildProvider(providerKind),
-            codec, transport, new InMemoryReplayProtector());
+        var transport =
+            new QueueTransport();
+
+        var client = MercuryTestFactory.BuildClient(
+            MercuryTestFactory.BuildProvider(providerKind),
+            codec,
+            transport,
+            new InMemoryReplayProtector());
 
         var payload = Enumerable.Range(0, 2048)
             .Select(value => (byte)(value % 256))
             .ToArray();
 
-        await client.SendAsync(MercuryTestFactory.BuildContext(), new MercuryMemory(payload));
+        await client.SendAsync(
+            MercuryTestFactory.BuildContext(),
+            new MercuryMemory(payload));
 
-        var result = await client.ReceiveAsync();
+        var result =
+            await client.ReceiveAsync();
 
         Assert.True(result.Success, result.Message);
         Assert.Equal(payload, result.Payload.ToArray());
     }
 
     /// <summary>
-    /// Defines the test method SendAsync_TransportBoundaryDoesNotContainOriginalPayload.
+    /// Defines the test method
+    /// SendAsync_TransportBoundaryDoesNotContainOriginalPayload.
     /// </summary>
     /// <param name="providerKind">Kind of the provider.</param>
     /// <param name="codec">The codec.</param>
     [Theory]
     [MemberData(nameof(ProviderCodecCases))]
-    public async Task SendAsync_TransportBoundaryDoesNotContainOriginalPayload(ProviderKind providerKind, EnvelopeCodec codec)
+    public async Task
+        SendAsync_TransportBoundaryDoesNotContainOriginalPayload(
+            ProviderKind providerKind,
+            EnvelopeCodec codec)
     {
-        var transport = new RecordingTransport();
-        var client = MercuryTestFactory.BuildClient(MercuryTestFactory.BuildProvider(providerKind),
-            codec, transport, new InMemoryReplayProtector());
+        var transport =
+            new RecordingTransport();
 
-        var payload = Encoding.UTF8.GetBytes("MERCURY-RAW-PAYLOAD-BOUNDARY-CHECK-" +
-                                             string.Concat(Enumerable.Repeat("0123456789ABCDEF", 16)));
+        var client = MercuryTestFactory.BuildClient(
+            MercuryTestFactory.BuildProvider(providerKind),
+            codec,
+            transport,
+            new InMemoryReplayProtector());
 
-        await client.SendAsync(MercuryTestFactory.BuildContext(), new MercuryMemory(payload));
+        var payload = Encoding.UTF8.GetBytes(
+            "MERCURY-RAW-PAYLOAD-BOUNDARY-CHECK-" +
+            string.Concat(
+                Enumerable.Repeat("0123456789ABCDEF", 16)));
 
-        var frame = transport.LastFrame.ToArray();
+        await client.SendAsync(
+            MercuryTestFactory.BuildContext(),
+            new MercuryMemory(payload));
+
+        var frame =
+            transport.LastFrame.ToArray();
 
         Assert.Equal(1, transport.SendCount);
         Assert.NotEmpty(frame);
-        Assert.False(ByteSearch.ContainsSubsequence(frame, payload),
-            "The encoded transport frame contains the complete original payload.");
+
+        Assert.False(
+            ByteSearch.ContainsSubsequence(frame, payload),
+            "The encoded transport frame contains the complete " +
+            "original payload.");
     }
 
     /// <summary>
-    /// Defines the test method Pipeline_OneMegabytePayload_RoundTripsExactly.
+    /// Defines the test method
+    /// Pipeline_OneMegabytePayload_RoundTripsExactly.
     /// </summary>
     /// <param name="providerKind">Kind of the provider.</param>
     /// <param name="codec">The codec.</param>
     [Theory]
     [MemberData(nameof(ProviderCodecCases))]
-    public async Task Pipeline_OneMegabytePayload_RoundTripsExactly(ProviderKind providerKind, EnvelopeCodec codec)
+    public async Task Pipeline_OneMegabytePayload_RoundTripsExactly(
+        ProviderKind providerKind,
+        EnvelopeCodec codec)
     {
-        var transport = new QueueTransport();
-        var client = MercuryTestFactory.BuildClient(MercuryTestFactory.BuildProvider(providerKind),
-            codec, transport, new InMemoryReplayProtector());
+        var transport =
+            new QueueTransport();
 
-        var payload = MercuryTestFactory.CreatePayload(1024 * 1024);
+        var client = MercuryTestFactory.BuildClient(
+            MercuryTestFactory.BuildProvider(providerKind),
+            codec,
+            transport,
+            new InMemoryReplayProtector());
 
-        await client.SendAsync(MercuryTestFactory.BuildContext(), new MercuryMemory(payload));
+        var payload =
+            MercuryTestFactory.CreatePayload(1024 * 1024);
 
-        var result = await client.ReceiveAsync();
+        await client.SendAsync(
+            MercuryTestFactory.BuildContext(),
+            new MercuryMemory(payload));
+
+        var result =
+            await client.ReceiveAsync();
 
         Assert.True(result.Success, result.Message);
         Assert.Equal(payload, result.Payload.ToArray());
     }
 
     /// <summary>
-    /// Creates the TCP pair asynchronous.
+    /// Creates a connected pair of TCP transports.
     /// </summary>
-    /// <returns>System.Threading.Tasks.Task&lt;(Mercury.Transport.Tcp.TcpTransport Alpha, Mercury.Transport.Tcp.TcpTransport Bravo)&gt;.</returns>
-    private static async Task<(TcpTransport Alpha, TcpTransport Bravo)> CreateTcpPairAsync()
+    /// <returns>
+    /// The connected alpha and bravo TCP transports.
+    /// </returns>
+    private static async Task<(TcpTransport Alpha, TcpTransport Bravo)>
+        CreateTcpPairAsync()
     {
-        var listener = new TcpListener(IPAddress.Loopback, 0);
+        var listener =
+            new TcpListener(IPAddress.Loopback, 0);
 
         listener.Start();
 
-        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-        var acceptTask = TcpTransport.AcceptAsync(listener);
-        var connectTask = TcpTransport.ConnectAsync("127.0.0.1", port);
+        try
+        {
+            var port =
+                ((IPEndPoint)listener.LocalEndpoint).Port;
 
-        await Task.WhenAll(acceptTask, connectTask);
+            var acceptTask =
+                TcpTransport.AcceptAsync(listener);
 
-        listener.Stop();
+            var connectTask =
+                TcpTransport.ConnectAsync(
+                    "127.0.0.1",
+                    port);
 
-        return (await connectTask, await acceptTask);
+            await Task.WhenAll(
+                acceptTask,
+                connectTask);
+
+            return (
+                await connectTask,
+                await acceptTask);
+        }
+        finally
+        {
+            listener.Stop();
+        }
     }
 }

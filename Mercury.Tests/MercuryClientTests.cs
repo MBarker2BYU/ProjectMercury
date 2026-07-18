@@ -3,8 +3,8 @@
 // Author           : Matthew D. Barker
 // Created          : 07-02-2026
 //
-// Last Modified By : Matthew D. Barker
-// Last Modified On : 07-09-2026
+// Last Modified By : Kim K. Brown
+// Last Modified On : 07-18-2026
 // ***********************************************************************
 // <copyright file="MercuryClientTests.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -13,45 +13,72 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions;
+using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Primitives;
 using Mercury.Core.Factories;
+using Mercury.Tests.Support;
 
 namespace Mercury.Tests;
+
 /// <summary>
-/// Class MercuryClientTests.
+/// Tests the Mercury client.
 /// </summary>
-public class MercuryClientTests
+public sealed class MercuryClientTests
 {
     /// <summary>
-    /// Defines the test method BuildClient_ReturnsClient.
+    /// Verifies that the factory builds a client from explicit dependencies.
     /// </summary>
     [Fact]
     public void BuildClient_ReturnsClient()
     {
-        var client =
-            MercuryFactory.Instance.BuildClient();
+        var client = BuildClient();
 
         Assert.NotNull(client);
     }
 
     /// <summary>
-    /// Defines the test method SendAsync_ThenReceiveAsync_ReturnsPayload.
+    /// Verifies that a sent payload can be received and recovered.
     /// </summary>
     [Fact]
     public async Task SendAsync_ThenReceiveAsync_ReturnsPayload()
     {
-        var client =
-            MercuryFactory.Instance.BuildClient();
-        var cryptoContext = MercuryFactory.Instance.BuildCryptoContext("Alpha", "Bravo");
+        var client = BuildClient();
 
-        var expected = new byte[] { 1, 2, 3, 4 };
+        var cryptoContext =
+            MercuryFactory.Instance.BuildCryptoContext(
+                new KeyId(MercuryTestFactory.SenderKeyId),
+                new KeyId(MercuryTestFactory.RecipientKeyId));
 
-        await client.SendAsync(cryptoContext, new ReadOnlyMemory(expected));
+        byte[] expected = [1, 2, 3, 4];
 
-        var result =
-            await client.ReceiveAsync();
+        await client.SendAsync(
+            cryptoContext,
+            new ReadOnlyMemory(expected));
 
-        Assert.True(result.Success);
+        var result = await client.ReceiveAsync();
+
+        Assert.True(result.Success, result.Message);
         Assert.Equal(expected, result.Payload.ToArray());
+    }
+
+    /// <summary>
+    /// Builds a client using explicit, non-obsolete dependencies.
+    /// </summary>
+    /// <returns>The configured Mercury client.</returns>
+    private static IMercuryClient BuildClient()
+    {
+        var provider = MercuryTestFactory.BuildProvider(
+            ProviderKind.AesGcm);
+
+        var transport = new QueueTransport();
+
+        var dependencies =
+            MercuryFactory.Instance.BuildDependencies(
+                provider,
+                EnvelopeCodec.Json,
+                transport);
+
+        return MercuryFactory.Instance.BuildClient(dependencies);
     }
 }

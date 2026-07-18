@@ -3,8 +3,8 @@
 // Author           : Matthew D. Barker
 // Created          : 07-02-2026
 //
-// Last Modified By : Matthew D. Barker
-// Last Modified On : 07-09-2026
+// Last Modified By : Kim K. Brown
+// Last Modified On : 07-18-2026
 // ***********************************************************************
 // <copyright file="ISecureEnvelope.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -26,7 +26,7 @@ public interface ISecureEnvelope
     /// Gets the version.
     /// </summary>
     /// <value>The version.</value>
-    FrameworkVersion Version { get; }   
+    FrameworkVersion Version { get; }
 
     /// <summary>
     /// Gets the header.
