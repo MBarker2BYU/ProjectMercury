@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mercury.Abstractions\Mercury.Abstractions.csproj" />
+    <ProjectReference Include="..\Mercury.Core\Mercury.Core.csproj" />
+    <ProjectReference Include="..\Mercury.Extensions.EasySetup\Mercury.Extensions.EasySetup.csproj" />
+    <ProjectReference Include="..\Mercury.Provider.AesCcm\Mercury.Provider.AesCcm.csproj" />
+    <ProjectReference Include="..\Mercury.Provider.AesGcm\Mercury.Provider.AesGcm.csproj" />
+    <ProjectReference Include="..\Mercury.Provider.ChaCha20\Mercury.Provider.ChaCha20.csproj" />
+    <ProjectReference Include="..\Mercury.Transport.FileDrop\Mercury.Transport.FileDrop.csproj" />
+    <ProjectReference Include="..\Mercury.Transport.InMemory\Mercury.Transport.InMemory.csproj" />
+    <ProjectReference Include="..\Mercury.Transport.Tcp\Mercury.Transport.Tcp.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
