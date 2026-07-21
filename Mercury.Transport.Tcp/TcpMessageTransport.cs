@@ -82,8 +82,7 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     /// <exception cref="ArgumentOutOfRangeException">
     /// The port is outside the valid TCP port range.
     /// </exception>
-    public static async Task<TcpTransport> ConnectAsync(
-        string host, int port, CancellationToken cancellationToken = default)
+    public static async Task<TcpTransport> ConnectAsync(string host, int port, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(host))
         {

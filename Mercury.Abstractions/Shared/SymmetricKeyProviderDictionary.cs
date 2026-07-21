@@ -43,8 +43,7 @@ public sealed class SymmetricKeyProviderDictionary : ISymmetricKeyProvider
     /// <exception cref="ArgumentException">
     /// A supplied key is null or empty.
     /// </exception>
-    public SymmetricKeyProviderDictionary(
-        IDictionary<KeyId, byte[]> keys)
+    public SymmetricKeyProviderDictionary(IDictionary<KeyId, byte[]> keys)
     {
         if (keys == null)
         {
@@ -79,9 +78,7 @@ public sealed class SymmetricKeyProviderDictionary : ISymmetricKeyProvider
     /// <returns>
     /// A task containing the symmetric key.
     /// </returns>
-    public Task<ReadOnlyMemory> GetKeyAsync(
-        KeyId keyId,
-        CancellationToken cancellationToken = default)
+    public Task<ReadOnlyMemory> GetKeyAsync(KeyId keyId, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 

@@ -51,6 +51,13 @@ public enum ProviderKind
 internal static class MercuryTestFactory
 {
     /// <summary>
+    /// Gets the alpha client identifier.
+    /// </summary>
+    /// <value>The alpha client identifier.</value>
+    public static MercuryMemory AlphaClientId()
+        => RandomNumberGenerator.GetBytes(32);
+
+    /// <summary>
     /// The sender key identifier
     /// </summary>
     public const string SenderKeyId = "alpha";
@@ -148,7 +155,7 @@ internal static class MercuryTestFactory
         var selectedTransport = transport ?? new QueueTransport();
 
         return MercuryFactory.Instance
-            .BuildDependencies(selectedProvider, codec, selectedTransport)
+            .BuildDependencies(AlphaClientId(), selectedProvider, codec, selectedTransport)
             .EnvelopeCodec;
     }
 
@@ -165,7 +172,7 @@ internal static class MercuryTestFactory
     {
         var envelopeCodec = BuildCodec(codec, provider, transport);
 
-        var dependencies = new TestDependencies(provider, envelopeCodec, transport, replayProtector);
+        var dependencies = new TestDependencies(AlphaClientId(), provider, envelopeCodec, transport, replayProtector);
 
         return MercuryFactory.Instance.BuildClient(dependencies);
     }

@@ -131,6 +131,6 @@ public sealed class EasySetupPipelineTests
     private static MercuryClientPair BuildPair(EnvelopeCodec envelopeCodec, ITransport alphaTransport, ITransport bravoTransport)
     {
         return MercuryFactory.Instance.BuildEphemeralClientPair(ALPHA_NODE, BRAVO_NODE, keyProvider 
-                => new AesGcmCryptoProvider(keyProvider), envelopeCodec, alphaTransport, bravoTransport);
+                => new AesGcmCryptoProvider(keyProvider), envelopeCodec, alphaTransport, bravoTransport).Result;
     }
 }

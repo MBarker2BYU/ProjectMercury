@@ -15,6 +15,7 @@
 
 using Mercury.Abstractions.Primitives;
 using Mercury.Core.Factories;
+using System.Security.Cryptography;
 
 namespace Mercury.Tests;
 /// <summary>
@@ -29,7 +30,7 @@ public class MercuryClientTests
     public void BuildClient_ReturnsClient()
     {
         var client =
-            MercuryFactory.Instance.BuildClient();
+            MercuryFactory.Instance.BuildClient(RandomNumberGenerator.GetBytes(32));
 
         Assert.NotNull(client);
     }
@@ -40,8 +41,10 @@ public class MercuryClientTests
     [Fact]
     public async Task SendAsync_ThenReceiveAsync_ReturnsPayload()
     {
+        
         var client =
-            MercuryFactory.Instance.BuildClient();
+            MercuryFactory.Instance.BuildClient(RandomNumberGenerator.GetBytes(32));
+
         var cryptoContext = MercuryFactory.Instance.BuildCryptoContext("Alpha", "Bravo");
 
         var expected = new byte[] { 1, 2, 3, 4 };

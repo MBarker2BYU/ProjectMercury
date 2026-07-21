@@ -16,6 +16,7 @@
 using Mercury.Abstractions;
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
+using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Shared;
 using Mercury.Abstractions.Transport;
 using Mercury.Core.Factories;
@@ -33,12 +34,14 @@ public static class MercuryFactoryExtensions
     /// an explicit dependency object.
     /// </summary>
     /// <param name="factory">The Mercury factory.</param>
+    /// <param name="clientId"></param>
     /// <param name="cryptoProvider">The crypto provider.</param>
     /// <param name="envelopeCodec">The envelope codec.</param>
     /// <param name="transport">The transport.</param>
     /// <returns>A configured Mercury client.</returns>
     public static IMercuryClient BuildEasyClient(
         this MercuryFactory factory,
+        ReadOnlyMemory clientId,
         ICryptoProvider cryptoProvider,
         EnvelopeCodec envelopeCodec,
         ITransport transport)
@@ -55,7 +58,7 @@ public static class MercuryFactoryExtensions
             throw new ArgumentNullException(nameof(transport));
 
         var dependencies =
-            factory.BuildDependencies(cryptoProvider, envelopeCodec, transport);
+            factory.BuildDependencies(clientId, cryptoProvider, envelopeCodec, transport);
 
         return factory.BuildClient(dependencies);
     }
@@ -81,7 +84,7 @@ public static class MercuryFactoryExtensions
     /// <returns>
     /// A configured Mercury client pair.
     /// </returns>
-    public static MercuryClientPair BuildEphemeralClientPair(this MercuryFactory factory, string alphaKeyName,
+    public static async Task<MercuryClientPair> BuildEphemeralClientPair(this MercuryFactory factory, string alphaKeyName,
         string bravoKeyName, Func<SymmetricKeyProviderDictionary, ICryptoProvider> cryptoProviderFactory,
         EnvelopeCodec envelopeCodec, ITransport alphaTransport, ITransport bravoTransport)
     {
@@ -124,7 +127,7 @@ public static class MercuryFactoryExtensions
         var alphaCryptoProvider = cryptoProviderFactory(keyProvider);
 
         var bravoCryptoProvider = cryptoProviderFactory(keyProvider);
-
+        
         if (alphaCryptoProvider == null)
         {
             throw new InvalidOperationException("The crypto provider factory returned a null Alpha provider.");
@@ -135,9 +138,13 @@ public static class MercuryFactoryExtensions
             throw new InvalidOperationException("The crypto provider factory returned a null Bravo provider.");
         }
 
-        var alphaClient = factory.BuildEasyClient(alphaCryptoProvider, envelopeCodec, alphaTransport);
+        var alphaClientId = await  keyProvider.GetKeyAsync(alphaKeyName).ConfigureAwait(false);
 
-        var bravoClient = factory.BuildEasyClient(bravoCryptoProvider, envelopeCodec, bravoTransport);
+        var alphaClient = factory.BuildEasyClient(alphaClientId , alphaCryptoProvider, envelopeCodec, alphaTransport);
+
+        var bravoClientId = await keyProvider.GetKeyAsync(alphaKeyName).ConfigureAwait(false);
+
+        var bravoClient = factory.BuildEasyClient(bravoClientId, bravoCryptoProvider, envelopeCodec, bravoTransport);
 
         var alphaToBravoContext = factory.BuildCryptoContext(alphaKeyName, bravoKeyName);
 

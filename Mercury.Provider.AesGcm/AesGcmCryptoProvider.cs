@@ -43,7 +43,7 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
     /// <summary>
     /// The shared authenticated payload format.
     /// </summary>
-    private static readonly AuthenticatedPayloadFormat sm_PayloadFormat = new AuthenticatedPayloadFormat(12, 16);
+    private static readonly AuthenticatedPayloadFormat sm_PayloadFormat = new (12, 16);
 
     /// <summary>
     /// The symmetric key provider.
@@ -59,11 +59,8 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="keys"/> is null.
     /// </exception>
-    public AesGcmCryptoProvider(ISymmetricKeyProvider keys)
-    {
-        m_Keys = keys
+    public AesGcmCryptoProvider(ISymmetricKeyProvider keys) => m_Keys = keys
             ?? throw new ArgumentNullException(nameof(keys));
-    }
 
     /// <summary>
     /// Gets the provider name.

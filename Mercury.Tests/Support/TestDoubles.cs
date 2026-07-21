@@ -248,24 +248,29 @@ internal sealed class TestDependencies : IMercuryClientDependencies
     /// <summary>
     /// Initializes a new instance of the <see cref="TestDependencies"/> class.
     /// </summary>
+    /// <param name="clientId"></param>
     /// <param name="cryptoProvider">The crypto provider.</param>
     /// <param name="envelopeCodec">The envelope codec.</param>
     /// <param name="transport">The transport.</param>
     /// <param name="replayProtector">The replay protector.</param>
     /// <param name="logger">The logger.</param>
     public TestDependencies(
+        MercuryMemory clientId,
         ICryptoProvider cryptoProvider,
         IEnvelopeCodec envelopeCodec,
         ITransport transport,
         IReplayProtector? replayProtector = null,
         IMercuryLogger? logger = null)
     {
+        ClientId = clientId;
         CryptoProvider = cryptoProvider;
         EnvelopeCodec = envelopeCodec;
         Transport = transport;
         ReplayProtector = replayProtector ?? new AcceptAllReplayProtector();
         Logger = logger ?? NoOpMercuryLogger.Instance;
     }
+
+    public ReadOnlyMemory ClientId { get; }
 
     /// <summary>
     /// Gets the crypto provider.

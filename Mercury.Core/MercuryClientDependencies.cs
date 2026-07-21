@@ -4,7 +4,7 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-10-2026
+// Last Modified On : 07-21-2026
 // ***********************************************************************
 // <copyright file="MercuryClientDependencies.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -18,6 +18,7 @@ using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Logging;
+using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Replay;
 using Mercury.Abstractions.Transport;
 using Mercury.Core.Codecs;
@@ -34,8 +35,16 @@ namespace Mercury.Core;
 /// <param name="envelopeCodec">The envelope codec.</param>
 /// <param name="transport">The transport.</param>
 /// <seealso cref="IMercuryClientDependencies" />
-internal sealed class MercuryClientDependencies(ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport, IReplayProtector? replayProtector = null, IMercuryLogger? logger = null) : IMercuryClientDependencies
+internal sealed class MercuryClientDependencies(ReadOnlyMemory clientId, ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport, IReplayProtector? replayProtector = null, IMercuryLogger? logger = null) : IMercuryClientDependencies
 {
+    /// <summary>
+    /// Gets the client identifier.
+    /// </summary>
+    /// <value>The client identifier.</value>
+    public ReadOnlyMemory ClientId { get; } = clientId.IsEmpty
+        ? throw new ArgumentNullException(nameof(clientId))
+        : clientId;
+
     /// <summary>
     /// Gets the crypto provider.
     /// </summary>

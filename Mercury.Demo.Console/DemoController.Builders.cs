@@ -56,12 +56,12 @@ internal sealed partial class DemoController
 
         m_AlphaCaptureTransport = new CaptureTransport(alphaTransport);
 
-        var alphaDependencies = MercuryFactory.Instance.BuildDependencies(
+        var alphaDependencies = MercuryFactory.Instance.BuildDependencies(keys[ALPHA_NODE],
             alphaCryptoProvider,
             envelopeCodec,
             m_AlphaCaptureTransport);
 
-        var bravoDependencies = MercuryFactory.Instance.BuildDependencies(
+        var bravoDependencies = MercuryFactory.Instance.BuildDependencies(keys[BRAVO_NODE],
             bravoCryptoProvider,
             envelopeCodec,
             bravoTransport);

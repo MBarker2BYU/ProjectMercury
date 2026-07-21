@@ -4,6 +4,8 @@
 // Created        : 07-19-2026
 // ***********************************************************************
 
+using Mercury.Abstractions;
+using Mercury.Abstractions.Primitives;
 using Mercury.Demo.WinForms.Demo;
 using Mercury.Demo.WinForms.Services;
 
@@ -86,6 +88,11 @@ internal sealed class DemoController(Action<DemoLogEntry> log) : IAsyncDisposabl
         {
             throw new InvalidOperationException("Select a valid chunk size.");
         }
+    }
+
+    public Task<IMercuryResult> SendAsync(ReadOnlyMemory payload)
+    {
+        return m_Session.SendAsync(payload, m_CancellationTokenSource.Token);
     }
 
     #region IAsyncDisposable Implementation

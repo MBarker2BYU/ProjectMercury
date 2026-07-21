@@ -64,35 +64,37 @@ public sealed class MercuryFactory : IMercuryFactory
     /// <returns>ICryptoContext.</returns>
     public ICryptoContext BuildCryptoContext(KeyId senderKeyId, KeyId recipientKeyId)
         => new CryptoContext(senderKeyId, recipientKeyId);
-        
+
     /// <summary>
     /// Builds the dependencies.
     /// </summary>
+    /// <param name="clientId"></param>
     /// <param name="cryptoProvider">The crypto provider.</param>
     /// <param name="envelopeCodec"></param>
     /// <param name="transport">The transport.</param>
     /// <returns>IMercuryClientDependencies.</returns>
-    public IMercuryClientDependencies BuildDependencies(ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport)
-        => new MercuryClientDependencies(cryptoProvider, envelopeCodec, transport);
+    public IMercuryClientDependencies BuildDependencies(ReadOnlyMemory clientId, ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport)
+        => new MercuryClientDependencies(clientId, cryptoProvider, envelopeCodec, transport);
 
     /// <summary>
     /// Builds the dependencies with a passthrough crypto provider
     /// </summary>
+    /// <param name="clientId"></param>
     /// <param name="envelopeCodec">The envelope codec.</param>
     /// <param name="transport">The transport.</param>
     /// <returns>IMercuryClientDependencies.</returns>
     [Obsolete("Remove prior to release", false)]
-    public IMercuryClientDependencies BuildDependencies(EnvelopeCodec envelopeCodec, ITransport transport)
-        => new MercuryClientDependencies(new PassThroughCryptoProvider(), envelopeCodec, transport);
+    public IMercuryClientDependencies BuildDependencies(ReadOnlyMemory clientId, EnvelopeCodec envelopeCodec, ITransport transport)
+        => new MercuryClientDependencies(clientId, new PassThroughCryptoProvider(), envelopeCodec, transport);
 
     /// <summary>
     /// Builds the client.
     /// </summary>
     /// <returns>IMercuryClient.</returns>
     [Obsolete("Remove prior to release", false)]
-    public IMercuryClient BuildClient()
+    public IMercuryClient BuildClient(ReadOnlyMemory clientId)
     {
-        var dependencies = BuildDependencies(new PassThroughCryptoProvider(), sm_EnvelopeCodec, new LoopbackTransport());
+        var dependencies = BuildDependencies(clientId, new PassThroughCryptoProvider(), sm_EnvelopeCodec, new LoopbackTransport());
 
         return BuildClient(dependencies);
     }

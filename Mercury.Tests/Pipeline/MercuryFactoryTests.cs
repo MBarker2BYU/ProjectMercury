@@ -16,6 +16,9 @@
 using Mercury.Abstractions.Enums;
 using Mercury.Core.Factories;
 using Mercury.Tests.Support;
+using System.Security.Cryptography;
+
+using MercuryMemory = Mercury.Abstractions.Primitives.ReadOnlyMemory;
 
 namespace Mercury.Tests.Pipeline;
 
@@ -24,6 +27,14 @@ namespace Mercury.Tests.Pipeline;
 /// </summary>
 public sealed class MercuryFactoryTests
 {
+
+    /// <summary>
+    /// Gets the alpha client identifier.
+    /// </summary>
+    /// <value>The alpha client identifier.</value>
+    public static MercuryMemory AlphaClientId()
+        => RandomNumberGenerator.GetBytes(32);
+
     /// <summary>
     /// Defines the test method BuildDependencies_NullProvider_ThrowsArgumentNullException.
     /// </summary>
@@ -44,10 +55,9 @@ public sealed class MercuryFactoryTests
     public void BuildDependencies_NullTransport_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(
-            () => MercuryFactory.Instance.BuildDependencies(
+            () => MercuryFactory.Instance.BuildDependencies(AlphaClientId(),
                 MercuryTestFactory.BuildProvider(ProviderKind.AesGcm),
-                EnvelopeCodec.Binary,
-                null!));
+                EnvelopeCodec.Binary, null!));
     }
 
     /// <summary>
@@ -57,10 +67,9 @@ public sealed class MercuryFactoryTests
     public void BuildDependencies_UnsupportedCodec_ThrowsArgumentOutOfRangeException()
     {
         Assert.Throws<ArgumentOutOfRangeException>(
-            () => MercuryFactory.Instance.BuildDependencies(
+            () => MercuryFactory.Instance.BuildDependencies(AlphaClientId(),
                 MercuryTestFactory.BuildProvider(ProviderKind.AesGcm),
-                (EnvelopeCodec)999,
-                new QueueTransport()));
+                (EnvelopeCodec)999, new QueueTransport()));
     }
 
     /// <summary>
@@ -77,10 +86,8 @@ public sealed class MercuryFactoryTests
             ProviderKind.AesGcm);
         var transport = new QueueTransport();
 
-        var dependencies = MercuryFactory.Instance.BuildDependencies(
-            provider,
-            codec,
-            transport);
+        var dependencies = MercuryFactory.Instance.BuildDependencies(AlphaClientId(),
+            provider, codec, transport);
 
         Assert.Same(provider, dependencies.CryptoProvider);
         Assert.Same(transport, dependencies.Transport);

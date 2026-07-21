@@ -52,8 +52,7 @@ public static class EphemeralKeyProviderFactory
     /// Thrown when no key names are supplied, a key name is empty,
     /// or duplicate key names are supplied.
     /// </exception>
-    public static SymmetricKeyProviderDictionary Create(
-        params string[] keyNames)
+    public static SymmetricKeyProviderDictionary Create(params string[] keyNames)
     {
         if (keyNames == null)
             throw new ArgumentNullException(nameof(keyNames));

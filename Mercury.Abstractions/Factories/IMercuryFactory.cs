@@ -4,7 +4,7 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-09-2026
+// Last Modified On : 07-21-2026
 // ***********************************************************************
 // <copyright file="IMercuryFactory.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -36,25 +36,27 @@ public interface IMercuryFactory
     /// <summary>
     /// Builds the dependencies.
     /// </summary>
+    /// <param name="clientId"></param>
     /// <param name="cryptoProvider">The crypto provider.</param>
     /// <param name="envelopeCodec"></param>
     /// <param name="transport">The transport.</param>
     /// <returns>IMercuryClientDependencies.</returns>
-    IMercuryClientDependencies BuildDependencies(ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport);
+    IMercuryClientDependencies BuildDependencies(ReadOnlyMemory clientId, ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport);
 
     /// <summary>
     /// Builds the dependencies with a passthrough crypto provider
     /// </summary>
+    /// <param name="clientId"></param>
     /// <param name="envelopeCodec">The envelope codec.</param>
     /// <param name="transport">The transport.</param>
     /// <returns>IMercuryClientDependencies.</returns>
-    IMercuryClientDependencies BuildDependencies(EnvelopeCodec envelopeCodec, ITransport transport);
+    IMercuryClientDependencies BuildDependencies(ReadOnlyMemory clientId, EnvelopeCodec envelopeCodec, ITransport transport);
 
     /// <summary>
     /// Builds the client.
     /// </summary>
     /// <returns>IMercuryClient.</returns>
-    IMercuryClient BuildClient();
+    IMercuryClient BuildClient(ReadOnlyMemory clientId);
 
     /// <summary>
     /// Builds the client.

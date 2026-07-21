@@ -10,6 +10,7 @@ internal static class DemoConstants
 {
     public const string ALPHA_NODE = "Alpha Node";
     public const string BRAVO_NODE = "Bravo Node";
+    public const string CHARLIE_NODE = "Charlie Node";
 
     public const string AES_GCM = "AES-GCM";
     public const string CHA_CHA_20 = "ChaCha20-Poly1305";

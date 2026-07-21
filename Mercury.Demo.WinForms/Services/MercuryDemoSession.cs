@@ -4,8 +4,6 @@
 // Created        : 07-19-2026
 // ***********************************************************************
 
-
-
 using Mercury.Abstractions;
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
@@ -21,6 +19,7 @@ using Mercury.Transport.Tcp;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
+using Mercury.Demo.WinForms.Proxy;
 
 namespace Mercury.Demo.WinForms.Services;
 
@@ -37,10 +36,10 @@ internal sealed class MercuryDemoSession(Action<DemoLogEntry> log) : IAsyncDispo
 
     public DemoConfiguration Configuration => m_Configuration;
 
+    public static bool WrongKeyEnabled { get; set; } = true;
+
     public bool IsConnected =>
         m_AlphaCaptureTransport?.IsConnected == true && m_BravoTransport?.IsConnected == true;
-
-    
 
     public async Task ConfigureAsync(DemoConfiguration configuration, CancellationToken cancellationToken = default)
     {
@@ -60,6 +59,9 @@ internal sealed class MercuryDemoSession(Action<DemoLogEntry> log) : IAsyncDispo
                     RandomNumberGenerator.GetBytes(32),
 
                 [DemoConstants.BRAVO_NODE] =
+                    RandomNumberGenerator.GetBytes(32),
+
+                [DemoConstants.CHARLIE_NODE] =
                     RandomNumberGenerator.GetBytes(32)
             };
 
@@ -80,9 +82,9 @@ internal sealed class MercuryDemoSession(Action<DemoLogEntry> log) : IAsyncDispo
 
             var envelopeCodec = BuildEnvelopeCodec(configuration.EnvelopeCodec);
 
-            var alphaDependencies = MercuryFactory.Instance.BuildDependencies(alphaCryptoProvider, envelopeCodec, m_AlphaCaptureTransport);
+            var alphaDependencies = MercuryFactory.Instance.BuildDependencies(keys[DemoConstants.ALPHA_NODE], alphaCryptoProvider, envelopeCodec, m_AlphaCaptureTransport);
 
-            var bravoDependencies = MercuryFactory.Instance.BuildDependencies(bravoCryptoProvider, envelopeCodec, m_BravoTransport);
+            var bravoDependencies = MercuryFactory.Instance.BuildDependencies(keys[DemoConstants.BRAVO_NODE], bravoCryptoProvider, envelopeCodec, m_BravoTransport);
 
             m_AlphaClient =
                 MercuryFactory.Instance.BuildClient(alphaDependencies);
@@ -138,9 +140,7 @@ internal sealed class MercuryDemoSession(Action<DemoLogEntry> log) : IAsyncDispo
         };
     }
 
-    private static async Task<(ITransport Alpha, ITransport Bravo)>
-        BuildTransportAsync(
-            string transportName,
+    private static async Task<(ITransport Alpha, ITransport Bravo)> BuildTransportAsync(string transportName,
             CancellationToken cancellationToken)
     {
         switch (transportName)
@@ -150,26 +150,38 @@ internal sealed class MercuryDemoSession(Action<DemoLogEntry> log) : IAsyncDispo
 
             case DemoConstants.TCP_TRANSPORT:
                 {
-                    var listener =
-                        new TcpListener(IPAddress.Loopback, 0);
+                    TcpListener? realListener = null;
 
-                    listener.Start();
+                    if (TcpAttackSimulatorProxy != null)
+                        await TcpAttackSimulatorProxy.DisposeAsync();
+
+                    TcpAttackSimulatorProxy = null;
 
                     try
                     {
-                        var endpoint =
-                            (IPEndPoint)listener.LocalEndpoint;
+                        //var endpoint =
+                        //    (IPEndPoint)listener.LocalEndpoint;
+
+                        realListener = new TcpListener(IPAddress.Loopback, 0);
+                        realListener.Start();
+                        var realPort = ((IPEndPoint)realListener.LocalEndpoint).Port;
+
+                        var proxyListener = new TcpListener(IPAddress.Loopback, 0);
+                        proxyListener.Start();
+                        var proxyPort = ((IPEndPoint)proxyListener.LocalEndpoint).Port;
+                        proxyListener.Stop();
+
+                        TcpAttackSimulatorProxy = new TcpAttackSimulator(proxyPort, realPort);
+                        await TcpAttackSimulatorProxy.StartAsync();
+
+                        //TcpAttackSimulatorProxy.ReplayEnabled = true;
 
                         var bravoTask =
-                            TcpTransport.AcceptAsync(
-                                listener,
-                                cancellationToken);
+                            TcpTransport.AcceptAsync(realListener, cancellationToken);
 
                         var alphaTask =
-                            TcpTransport.ConnectAsync(
-                                IPAddress.Loopback.ToString(),
-                                endpoint.Port,
-                                cancellationToken);
+                            TcpTransport.ConnectAsync(IPAddress.Loopback.ToString(),
+                                proxyPort, cancellationToken);
 
                         await Task
                             .WhenAll(alphaTask, bravoTask)
@@ -181,7 +193,7 @@ internal sealed class MercuryDemoSession(Action<DemoLogEntry> log) : IAsyncDispo
                     }
                     finally
                     {
-                        listener.Stop();
+                        realListener?.Stop();
                     }
                 }
 
@@ -203,6 +215,8 @@ internal sealed class MercuryDemoSession(Action<DemoLogEntry> log) : IAsyncDispo
 
         return $"{bytes / 1024:N0} KB";
     }
+
+    public static TcpAttackSimulator? TcpAttackSimulatorProxy { get; private set; }
 
     #region IAsyncDisposable Implementation
 
@@ -235,6 +249,80 @@ internal sealed class MercuryDemoSession(Action<DemoLogEntry> log) : IAsyncDispo
         m_AlphaCaptureTransport = null;
         m_AlphaTransport = null;
         m_BravoTransport = null;
+    }
+
+    public async Task<IMercuryResult> SendAsync(ReadOnlyMemory payload, CancellationToken cancellationToken = default)
+    {
+        if (payload.IsEmpty)
+            throw new ArgumentException(
+                "Payload must not be empty.",
+                nameof(payload));
+
+        await m_OperationLock
+            .WaitAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        try
+        {
+            if (m_AlphaClient == null || m_BravoClient == null)
+            {
+                throw new InvalidOperationException(
+                    "Mercury has not been configured.");
+            }
+
+            //var context =
+            //    MercuryFactory.Instance.BuildCryptoContext(
+            //        DemoConstants.ALPHA_NODE,
+            //        DemoConstants.BRAVO_NODE);
+
+            ICryptoContext context;
+
+            if (WrongKeyEnabled)
+            {
+                context = MercuryFactory.Instance.BuildCryptoContext(
+                    DemoConstants.ALPHA_NODE,
+                    DemoConstants.CHARLIE_NODE);   // ← this is the important one
+
+                Log("WARN", "Sending with WRONG KEY");
+            }
+            else
+            {
+                context = MercuryFactory.Instance.BuildCryptoContext(
+                    DemoConstants.ALPHA_NODE,
+                    DemoConstants.BRAVO_NODE);
+            }
+
+            Log(
+                "INFO",
+                $"Sending {payload.Length:N0} payload bytes");
+
+            var receiveTask =
+                m_BravoClient.ReceiveAsync(
+                    cancellationToken);
+
+            var sendTask =
+                m_AlphaClient.SendAsync(context, payload, cancellationToken);
+
+            await Task
+                .WhenAll(receiveTask, sendTask)
+                .ConfigureAwait(false);
+
+            var result =
+                await receiveTask.ConfigureAwait(false);
+
+            Log(
+                result.Success ? "INFO" : "ERROR",
+                result.Success
+                    ? "Payload received and authenticated"
+                    : result.Message ??
+                      result.FailureReason.ToString());
+
+            return result;
+        }
+        finally
+        {
+            m_OperationLock.Release();
+        }
     }
 
     private static async ValueTask DisposeTransportAsync(ITransport? transport)

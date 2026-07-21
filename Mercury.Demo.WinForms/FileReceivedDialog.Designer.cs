@@ -29,8 +29,9 @@
         private void InitializeComponent()
         {
             btnClose = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            pictureBox1 = new PictureBox();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            picReceivedFile = new PictureBox();
+            lblFileName = new Label();
+            ((System.ComponentModel.ISupportInitialize)picReceivedFile).BeginInit();
             SuspendLayout();
             // 
             // btnClose
@@ -49,13 +50,24 @@
             btnClose.UseVisualStyleBackColor = false;
             btnClose.Click += btnClose_Click;
             // 
-            // pictureBox1
+            // picReceivedFile
             // 
-            pictureBox1.Location = new Point(12, 43);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(977, 555);
-            pictureBox1.TabIndex = 1;
-            pictureBox1.TabStop = false;
+            picReceivedFile.Location = new Point(12, 43);
+            picReceivedFile.Name = "picReceivedFile";
+            picReceivedFile.Size = new Size(977, 555);
+            picReceivedFile.TabIndex = 1;
+            picReceivedFile.TabStop = false;
+            // 
+            // lblFileName
+            // 
+            lblFileName.AutoSize = true;
+            lblFileName.Font = new Font("Segoe UI Semibold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblFileName.Location = new Point(12, 9);
+            lblFileName.Name = "lblFileName";
+            lblFileName.Size = new Size(146, 25);
+            lblFileName.TabIndex = 2;
+            lblFileName.Tag = "Received File : ";
+            lblFileName.Text = "Received File : -";
             // 
             // FileReceivedDialog
             // 
@@ -63,20 +75,24 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(0, 12, 25);
             ClientSize = new Size(1001, 652);
-            Controls.Add(pictureBox1);
+            Controls.Add(lblFileName);
+            Controls.Add(picReceivedFile);
             Controls.Add(btnClose);
             DoubleBuffered = true;
             ForeColor = Color.Gainsboro;
             FormBorderStyle = FormBorderStyle.None;
             Name = "FileReceivedDialog";
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Close";
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picReceivedFile).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
         private Controls.MercuryGlassButton btnClose;
-        private PictureBox pictureBox1;
+        private PictureBox picReceivedFile;
+        private Label lblFileName;
     }
 }

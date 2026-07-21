@@ -19,6 +19,7 @@ using Mercury.Abstractions.Primitives;
 using Mercury.Core.Factories;
 using Mercury.Core.Replay;
 using Mercury.Tests.Support;
+using System.Security.Cryptography;
 using MercuryMemory = Mercury.Abstractions.Primitives.ReadOnlyMemory;
 
 namespace Mercury.Tests.Pipeline;
@@ -34,6 +35,13 @@ public sealed class MercuryPipelineFailureTests
     /// <returns>IEnumerable&lt;System.Object[]&gt;.</returns>
     public static IEnumerable<object[]> ProviderCodecCases()
         => MercuryTestFactory.ProviderCodecCases();
+
+    /// <summary>
+    /// Gets the alpha client identifier.
+    /// </summary>
+    /// <value>The alpha client identifier.</value>
+    public static MercuryMemory AlphaClientId()
+        => RandomNumberGenerator.GetBytes(32);
 
     /// <summary>
     /// Defines the test method ReceiveAsync_WrongKey_ReturnsAuthenticationFailureWithoutPayload.
@@ -275,11 +283,11 @@ public sealed class MercuryPipelineFailureTests
                     null,
                     FailureReason.AuthenticationFailed,
                     "Provider refused the payload.")));
+
         var codec = MercuryTestFactory.BuildCodec(
-            EnvelopeCodec.Binary,
-            MercuryTestFactory.BuildProvider(ProviderKind.AesGcm));
-        var client = MercuryFactory.Instance.BuildClient(
-            new TestDependencies(provider, codec, transport));
+            EnvelopeCodec.Binary, MercuryTestFactory.BuildProvider(ProviderKind.AesGcm));
+
+        var client = MercuryFactory.Instance.BuildClient(new TestDependencies(AlphaClientId(), provider, codec, transport));
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => client.SendAsync(
@@ -420,7 +428,7 @@ public sealed class MercuryPipelineFailureTests
             open: (_, _, _) => Task.FromException<ICryptoProviderResult>(
                 new InvalidOperationException("Provider exploded.")));
         var client = MercuryFactory.Instance.BuildClient(
-            new TestDependencies(
+            new TestDependencies(AlphaClientId(),
                 throwingProvider,
                 codec,
                 transport,
@@ -535,7 +543,7 @@ public sealed class MercuryPipelineFailureTests
         var transport = new QueueTransport();
         transport.Inject(new MercuryMemory([1]));
         var client = MercuryFactory.Instance.BuildClient(
-            new TestDependencies(provider, codec, transport));
+            new TestDependencies(AlphaClientId(), provider, codec, transport));
 
         var result = await client.ReceiveAsync();
 
@@ -616,7 +624,7 @@ public sealed class MercuryPipelineFailureTests
                     null,
                     FailureReason.None)));
         var client = MercuryFactory.Instance.BuildClient(
-            new TestDependencies(
+            new TestDependencies(AlphaClientId(),
                 invalidProvider,
                 codec,
                 transport,

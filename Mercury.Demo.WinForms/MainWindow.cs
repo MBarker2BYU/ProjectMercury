@@ -3,7 +3,11 @@ using Mercury.Demo.WinForms.Controls;
 using Mercury.Demo.WinForms.Demo;
 using Mercury.Demo.WinForms.Presentation;
 using System.Drawing.Drawing2D;
+using System.Text;
+using Mercury.Abstractions;
+using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
+using Mercury.Demo.WinForms.Services;
 
 namespace Mercury.Demo.WinForms
 {
@@ -22,7 +26,17 @@ namespace Mercury.Demo.WinForms
 
                 SetBusy(true);
 
+                var cryptoProvider = cboCryptoProvider.Text;
+                var transport = cboTransport.Text;
+                var codec = cboEnvelopeCodec.Text;
+                var chunkingEnabled = tglChunking.Enabled;
                 
+                var logging = cboLogging.Text;
+
+                var demoConfiguration = new DemoConfiguration(cryptoProvider, transport, codec, chunkingEnabled, 64 * 1024, logging);
+
+                await m_DemoController.ConfigureAsync(demoConfiguration);
+
             }
             catch (Exception exception)
             {
@@ -32,6 +46,18 @@ namespace Mercury.Demo.WinForms
             {
                 SetBusy(false);
             }
+        }
+
+        //Tmp Values
+        private bool m_InReplay = false;
+        public bool ReplayEnabled = true;
+        
+        private async Task SendOnceAsync()
+        {
+            var payload = new ReadOnlyMemory(Encoding.UTF8.GetBytes(txtSendPayload.Text));
+            var result = await m_DemoController.SendAsync(payload);
+
+            DisplayResult(result);
         }
 
         private async void btnSend_Click(object sender, EventArgs e)
@@ -44,8 +70,42 @@ namespace Mercury.Demo.WinForms
 
                 SetBusy(true);
 
+                await SendOnceAsync();
 
-              
+                if (MercuryDemoSession.TcpAttackSimulatorProxy != null && MercuryDemoSession.TcpAttackSimulatorProxy.ReplayEnabled && !m_InReplay)
+                {
+                    m_InReplay = true;
+                    await Task.Delay(400);
+                    await SendOnceAsync();          // second send
+
+                    // Clear the cached frame in the attack simulator
+                    MercuryDemoSession.TcpAttackSimulatorProxy.ClearLastFrame();
+
+                    m_InReplay = false;
+                }
+
+
+                //var payload = new ReadOnlyMemory(Encoding.UTF8.GetBytes(txtSendPayload.Text));
+
+                //var result =
+                //    await m_DemoController.SendAsync(payload);
+
+                //DisplayResult(result);
+
+                //if (ReplayEnabled)
+                //{
+                //    if (!m_InReplay)
+                //    {
+                //        m_InReplay = true;
+
+                //        await Task.Delay(400); // short pause so it looks like an attack
+
+                //        btnSend_Click(sender, e);
+
+                //        m_InReplay = false;
+                //    }
+                //}
+
             }
             catch (Exception exception)
             {
@@ -61,8 +121,48 @@ namespace Mercury.Demo.WinForms
         {
             try
             {
-                
-                
+                if (m_DemoController == null)
+                    return;
+
+                using var dialog = new OpenFileDialog
+                {
+                    Title = @"Select an image to send",
+                    Filter =
+                        @"Image Files (*.png;*.jpg;*.jpeg;*.bmp;*.gif)|" +
+                       @"*.png;*.jpg;*.jpeg;*.bmp;*.gif",
+                    CheckFileExists = true,
+                    Multiselect = false,
+                    AddExtension = true,
+                    RestoreDirectory = true
+                };
+
+
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                if (!IsImageFile(dialog.FileName))
+                {
+                    DisplayError("The selected file is not a supported image.");
+                    return;
+                }
+
+                SetBusy(true);
+
+                var fileName =
+                    Path.GetFileName(dialog.FileName);
+
+                var payload =
+                    await File.ReadAllBytesAsync(
+                        dialog.FileName);
+
+                AppendLog(new DemoLogEntry("INFO", $"Sending image {fileName} | {FormatFileSize(payload.Length)}"));
+
+                var result =
+                    await m_DemoController.SendAsync(
+                        new ReadOnlyMemory(payload));
+
+                DisplayFileResult(result, fileName);
+
             }
             catch (Exception exception)
             {
@@ -397,161 +497,276 @@ namespace Mercury.Demo.WinForms
 
         private void DisplayError(string message)
         {
-            lblReceiveResult.Text = $"FAILED: {message}";
+            lblReceiveResult.Text = @$"FAILED: {message}";
             lblReceiveResult.ForeColor = MercuryTheme.FailureColor;
             lblReceiveResult.BackColor = Color.FromArgb(35, MercuryTheme.FailureColor);
 
-            MessageBox.Show(this, message, "Mercury Demo",
+            MessageBox.Show(this, message, @"Mercury Demo",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        //private void DisplayResult(DemoExchangeResult result)
-        //{
-        //    var isProtectedExchange =
-        //        result.Scenario == DemoScenario.ProtectedExchange;
-
-        //    var accepted =
-        //        isProtectedExchange && result.Success;
-
-        //    txtReceiveHeader.Text = result.Header;
-
-        //    txtReceivePayload.Text = accepted
-        //        ? result.RestoredPayload
-        //        : result.LogEntry;
-
-        //    txtReceiveFooter.Text = result.Footer;
-
-        //    lblReceiveResult.Text = result.Scenario switch
-        //    {
-        //        DemoScenario.ProtectedExchange when result.Success =>
-        //            $"RECEIVED OK  |  {result.Duration.TotalMilliseconds:N1} ms",
-
-        //        DemoScenario.ReplayAttack when result.Success =>
-        //            "REPLAY BLOCKED",
-
-        //        DemoScenario.TamperAttack when result.Success =>
-        //            "TAMPERED FRAME REJECTED",
-
-        //        DemoScenario.WrongKey when result.Success =>
-        //            "WRONG KEY REJECTED",
-
-        //        _ =>
-        //            $"FAILED: {result.LogEntry}"
-        //    };
-
-        //    lblReceiveResult.ForeColor = result.Success
-        //        ? MercuryTheme.SuccessColor
-        //        : MercuryTheme.FailureColor;
-
-        //    lblReceiveResult.BackColor = Color.FromArgb(
-        //        32,
-        //        result.Success
-        //            ? MercuryTheme.SuccessColor
-        //            : MercuryTheme.FailureColor);
-
-        //    lblIntegrityState.Text = result.Success
-        //        ? "VERIFIED"
-        //        : "FAILED";
-
-        //    lblIntegrityState.ForeColor = result.Success
-        //        ? MercuryTheme.SuccessColor
-        //        : MercuryTheme.FailureColor;
-
-        //    lblLastCheck.Text = $"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
-
-        //    lblTamperState.Text = result.Scenario == DemoScenario.TamperAttack
-        //            ? result.Success
-        //                ? "DETECTED"
-        //                : "FAILED"
-        //            : "CLEAN";
-
-        //    lblTamperState.ForeColor = result.Success
-        //        ? MercuryTheme.SuccessColor
-        //        : MercuryTheme.FailureColor;
-
-        //    //lblThreatValue.Text = result.Success
-        //    //    ? "LOW"
-        //    //    : "ELEVATED";
-
-        //    //lblThreatValue.ForeColor = result.Success
-        //    //    ? MercuryTheme.SuccessColor
-        //    //    : MercuryTheme.WarningColor;
-
-        //    //lblFlowProtected.Text = result.Success
-        //    //    ? "PROTECTED"
-        //    //    : "FAILED";
-
-        //    //lblFlowProtected.ForeColor = result.Success
-        //    //    ? MercuryTheme.SuccessColor
-        //    //    : MercuryTheme.FailureColor;
-
-        //    //lblFlowTransit.Text = result.RawPayloadVisible
-        //    //    ? "RAW PAYLOAD VISIBLE"
-        //    //    : "PROTECTED IN TRANSIT";
-
-        //    //lblFlowTransit.ForeColor = result.RawPayloadVisible
-        //    //    ? MercuryTheme.FailureColor
-        //    //    : MercuryTheme.SuccessColor;
-
-        //    //lblFlowReceived.Text = result.Scenario switch
-        //    //{
-        //    //    DemoScenario.ProtectedExchange when result.Success =>
-        //    //        "DELIVERED",
-
-        //    //    DemoScenario.ReplayAttack when result.Success =>
-        //    //        "BLOCKED",
-
-        //    //    DemoScenario.TamperAttack when result.Success =>
-        //    //        "BLOCKED",
-
-        //    //DemoScenario.WrongKey when result.Success =>
-        //    //"BLOCKED",
-
-        //    //    _ =>
-        //    //        "FAILED"
-        //    //};
-
-        //    //lblFlowReceived.ForeColor = result.Success
-        //    //    ? MercuryTheme.SuccessColor
-        //    //    : MercuryTheme.FailureColor;
-
-        //    DisplayEnvelope(result.Envelope, result.RawPayloadVisible);
-
-        //    SetStatusIndicator(picTamperCheck, result.Scenario != DemoScenario.TamperAttack || result.Success);
-        //}
-
-        private void DisplayEnvelope(EnvelopeInspection envelope, bool rawPayloadVisible)
+        private void DisplayResult(IMercuryResult result)
         {
-            lblEnvelopeVersionValue.Text = envelope.Version;
-            lblEnvelopeIdValue.Text = envelope.EnvelopeId;
-            //lblEnvelopeTimestampValue.Text = envelope.Timestamp;
-            //lblSenderKeyValue.Text = envelope.SenderKeyId;
-            //lblRecipientKeyValue.Text = envelope.RecipientKeyId;
-            lblAlgorithmValue.Text = envelope.Algorithm;
-            lblReplayTokenValue.Text = envelope.ReplayToken;
+            if (!result.Success)
+            {
+                DisplayFailedResult(result);
+                return;
+            }
+
+            var secureEnvelope = result.ValidatedEnvelope;
+
+            if (secureEnvelope == null)
+            {
+                DisplayError(
+                    "Mercury reported success but did not return a validated SecureEnvelope.");
+
+                return;
+            }
+
+            txtReceivePayload.Text =
+                Encoding.UTF8.GetString(
+                    result.Payload.ToArray());
+
+            txtReceiveHeader.Text =
+                FormatMetadata(secureEnvelope.Header.Meta);
+
+            txtReceiveFooter.Text =
+                FormatMetadata(secureEnvelope.Footer.Meta);
+
+            lblReceiveResult.Text =
+                $"RECEIVED OK | {result.Payload.Length:N0} bytes";
+
+            lblReceiveResult.ForeColor =
+                MercuryTheme.SuccessColor;
+
+            lblReceiveResult.BackColor =
+                Color.FromArgb(
+                    32,
+                    MercuryTheme.SuccessColor);
+
+            DisplayValidatedEnvelope(secureEnvelope);
+
+            lblIntegrityState.Text = "VERIFIED";
+            lblIntegrityState.ForeColor =
+                MercuryTheme.SuccessColor;
+
+            lblReplayState.Text = "ACCEPTED";
+            lblReplayState.ForeColor =
+                MercuryTheme.SuccessColor;
+
+            lblTamperState.Text = "CLEAN";
+            lblTamperState.ForeColor =
+                MercuryTheme.SuccessColor;
+
+            lblLastCheck.Text =
+                $"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
+
+            SetStatusIndicator(picIntegrityCheck, true);
+            SetStatusIndicator(picReplayCheck, true);
+            SetStatusIndicator(picTamperCheck, true);
+        }
+
+        private void DisplayFileResult(
+            IMercuryResult result,
+            string fileName)
+        {
+            if (!result.Success)
+            {
+                DisplayFailedResult(result);
+                return;
+            }
+
+            var secureEnvelope =
+                result.ValidatedEnvelope;
+
+            if (secureEnvelope == null)
+            {
+                DisplayError(
+                    "Mercury reported success but did not return a validated SecureEnvelope.");
+
+                return;
+            }
+
+            txtReceiveHeader.Text =
+                FormatMetadata(
+                    secureEnvelope.Header.Meta);
+
+            txtReceivePayload.Text =
+                @$"{fileName}{Environment.NewLine}" +
+                @$"{FormatFileSize(result.Payload.Length)} received";
+
+            txtReceiveFooter.Text =
+                FormatMetadata(
+                    secureEnvelope.Footer.Meta);
+
+            lblReceiveResult.Text =
+                @$"IMAGE RECEIVED OK | {FormatFileSize(result.Payload.Length)}";
+
+            lblReceiveResult.ForeColor =
+                MercuryTheme.SuccessColor;
+
+            lblReceiveResult.BackColor =
+                Color.FromArgb(
+                    32,
+                    MercuryTheme.SuccessColor);
+
+            DisplayValidatedEnvelope(
+                secureEnvelope);
+
+            lblIntegrityState.Text = @"VERIFIED";
+
+            lblIntegrityState.ForeColor =
+                MercuryTheme.SuccessColor;
+
+            lblLastCheck.Text =
+                @$"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
+
+            SetStatusIndicator(
+                picIntegrityCheck,
+                true);
+
+            AppendLog(
+                new DemoLogEntry(
+                    "INFO",
+                    $"File received and authenticated: {fileName}"));
+
+            if (IsImageFile(fileName))
+            {
+                ShowReceivedImage(
+                    result.Payload,
+                    fileName);
+            }
+        }
+
+        private static bool IsImageFile(
+            string fileName)
+        {
+            var extension =
+                Path.GetExtension(fileName);
+
+            return extension.Equals(
+                       ".png",
+                       StringComparison.OrdinalIgnoreCase)
+                   ||
+                   extension.Equals(
+                       ".jpg",
+                       StringComparison.OrdinalIgnoreCase)
+                   ||
+                   extension.Equals(
+                       ".jpeg",
+                       StringComparison.OrdinalIgnoreCase)
+                   ||
+                   extension.Equals(
+                       ".bmp",
+                       StringComparison.OrdinalIgnoreCase)
+                   ||
+                   extension.Equals(
+                       ".gif",
+                       StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void DisplayValidatedEnvelope(ISecureEnvelope secureEnvelope)
+        {
+            lblEnvelopeVersionValue.Text =
+                secureEnvelope.Version.ToString();
+
+            lblEnvelopeIdValue.Text =
+                secureEnvelope.Header.EnvelopeId.ToString();
+
+            lblAlgorithmValue.Text =
+                secureEnvelope.Header.Encryption.ToString();
+
+            lblReplayTokenValue.Text =
+                Convert.ToHexString(
+                    secureEnvelope.Header.ReplayToken.ToArray());
 
             lblProtectedSizeValue.Text =
-                $"{envelope.ProtectedPayloadSize:N0} bytes";
+                $"{secureEnvelope.Payload.Length:N0} bytes";
 
-            lblFrameSizeValue.Text =
-                $"{envelope.TotalFrameSize:N0} bytes";
+            txtHeaderMetadata.Text = FormatMetadata(secureEnvelope.Header.Meta);
 
-            lblRawPayloadValue.Text =
-                rawPayloadVisible ? "YES" : "NO";
+            txtFooterMetadata.Text = FormatMetadata(secureEnvelope.Footer.Meta);
+
+            /*
+             * These values are not returned by IMercuryResult or
+             * ISecureEnvelope. Do not manufacture them.
+             */
+
+            lblFrameSizeValue.Text = "NOT AVAILABLE";
+            lblRawPayloadValue.Text = "NOT AVAILABLE";
+            rtbHexPreview.Clear();
+
+            lblFrameSizeValue.ForeColor =
+                MercuryTheme.MutedColor;
 
             lblRawPayloadValue.ForeColor =
-                rawPayloadVisible
-                    ? MercuryTheme.FailureColor
-                    : MercuryTheme.SuccessColor;
+                MercuryTheme.MutedColor;
+        }
 
-            txtHeaderMetadata.Text =
-                envelope.HeaderMetadata;
+        private void DisplayFailedResult(
+            IMercuryResult result)
+        {
+            txtReceiveHeader.Clear();
+            txtReceivePayload.Clear();
+            txtReceiveFooter.Clear();
 
-            txtFooterMetadata.Text =
-                envelope.FooterMetadata;
+            ClearEnvelopeDisplay();
 
-            rtbHexPreview.Text =
-                envelope.HexPreview;
+            var failureMessage =
+                result.Message ??
+                result.FailureReason.ToString();
+
+            lblReceiveResult.Text =
+                $"FAILED | {failureMessage}";
+
+            lblReceiveResult.ForeColor =
+                MercuryTheme.FailureColor;
+
+            lblReceiveResult.BackColor =
+                Color.FromArgb(
+                    32,
+                    MercuryTheme.FailureColor);
+
+            lblIntegrityState.Text = "FAILED";
+            lblIntegrityState.ForeColor =
+                MercuryTheme.FailureColor;
+
+            lblLastCheck.Text =
+                $"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
+
+            SetStatusIndicator(picIntegrityCheck, false);
+
+            AppendLog(
+                new DemoLogEntry(
+                    "ERROR",
+                    failureMessage));
+        }
+
+        private void ClearEnvelopeDisplay()
+        {
+            lblEnvelopeVersionValue.Text = "-";
+            lblEnvelopeIdValue.Text = "-";
+            lblAlgorithmValue.Text = "-";
+            lblReplayTokenValue.Text = "-";
+            lblProtectedSizeValue.Text = "-";
+            lblFrameSizeValue.Text = "-";
+            lblRawPayloadValue.Text = "-";
+
+            txtHeaderMetadata.Clear();
+            txtFooterMetadata.Clear();
+            rtbHexPreview.Clear();
+        }
+
+        private static string FormatMetadata(
+            Metadata metadata)
+        {
+            if (metadata.Count == 0)
+                return string.Empty;
+
+            return string.Join(
+                Environment.NewLine,
+                metadata.Select(
+                    item => $"{item.Key}: {item.Value}"));
         }
 
         //private DemoExchangeRequest BuildExchangeRequest()
@@ -563,15 +778,8 @@ namespace Mercury.Demo.WinForms
         {
             if (payload.IsEmpty)
                 throw new InvalidOperationException("Mercury did not return an image payload.");
-
-            using var stream = new MemoryStream(payload.ToArray(), writable: false);
-
-            using var sourceImage = Image.FromStream(stream, useEmbeddedColorManagement: true,
-                validateImageData: true);
-
-            var receivedImage = new Bitmap(sourceImage);
-
-            using var window = new FileReceivedDialog(receivedImage, fileName);
+            
+            using var window = new FileReceivedDialog(fileName, payload);
 
             window.ShowDialog(this);
         }

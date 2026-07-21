@@ -90,65 +90,63 @@ internal sealed class BinaryEnvelopeCodec : IEnvelopeCodec
                 nameof(envelope));
         }
 
-        using (var memoryStream =
+        using var memoryStream =
                new MemoryStream(
-                   256 + envelope.Payload.Length))
-        using (var writer =
+                   256 + envelope.Payload.Length);
+        using var writer =
                new BinaryWriter(
                    memoryStream,
                    Encoding.UTF8,
-                   true))
-        {
-            writer.Write(sm_Magic);
+                   true);
+        writer.Write(sm_Magic);
 
-            writer.Write(envelope.Version.Major);
-            writer.Write(envelope.Version.Minor);
+        writer.Write(envelope.Version.Major);
+        writer.Write(envelope.Version.Minor);
 
-            WriteString(
-                writer,
-                envelope.Header.EnvelopeId.Value);
+        WriteString(
+            writer,
+            envelope.Header.EnvelopeId.Value);
 
-            writer.Write(
-                envelope.Header.Timestamp
-                    .ToUnixTimeMilliseconds());
+        writer.Write(
+            envelope.Header.Timestamp
+                .ToUnixTimeMilliseconds());
 
-            WriteString(
-                writer,
-                envelope.Header.SenderKeyId.Value);
+        WriteString(
+            writer,
+            envelope.Header.SenderKeyId.Value);
 
-            WriteString(
-                writer,
-                envelope.Header.RecipientKeyId.Value);
+        WriteString(
+            writer,
+            envelope.Header.RecipientKeyId.Value);
 
-            WriteString(
-                writer,
-                envelope.Header.Encryption.Value);
+        WriteString(
+            writer,
+            envelope.Header.Encryption.Value);
 
-            WriteString(
-                writer,
-                envelope.Header.Signature.Value);
+        WriteString(
+            writer,
+            envelope.Header.Signature.Value);
 
-            WriteBytes(
-                writer,
-                envelope.Header.ReplayToken);
+        WriteBytes(
+            writer,
+            envelope.Header.ReplayToken);
 
-            WriteMetadata(
-                writer,
-                envelope.Header.Meta);
+        WriteMetadata(
+            writer,
+            envelope.Header.Meta);
 
-            WriteBytes(
-                writer,
-                envelope.Payload);
+        WriteBytes(
+            writer,
+            envelope.Payload);
 
-            WriteMetadata(
-                writer,
-                envelope.Footer.Meta);
+        WriteMetadata(
+            writer,
+            envelope.Footer.Meta);
 
-            writer.Flush();
+        writer.Flush();
 
-            return new ReadOnlyMemory(
-                memoryStream.ToArray());
-        }
+        return new ReadOnlyMemory(
+            memoryStream.ToArray());
     }
 
     /// <summary>
@@ -180,98 +178,96 @@ internal sealed class BinaryEnvelopeCodec : IEnvelopeCodec
                 "Binary envelope is too small.");
         }
 
-        using (var memoryStream =
+        using var memoryStream =
                new MemoryStream(
                    encodedData,
-                   false))
-        using (var reader =
+                   false);
+        using var reader =
                new BinaryReader(
                    memoryStream,
                    Encoding.UTF8,
-                   true))
+                   true);
+        ValidateMagic(reader);
+
+        var major = reader.ReadByte();
+        var minor = reader.ReadByte();
+
+        ValidateVersion(
+            major,
+            minor);
+
+        var envelopeId =
+            ReadString(reader);
+
+        var timestampMilliseconds =
+            reader.ReadInt64();
+
+        var senderKeyId =
+            ReadString(reader);
+
+        var recipientKeyId =
+            ReadString(reader);
+
+        var encryption =
+            ReadString(reader);
+
+        var signature =
+            ReadString(reader);
+
+        var replayToken =
+            ReadBytes(reader);
+
+        var headerMetadata =
+            ReadMetadata(reader);
+
+        var protectedPayload =
+            ReadBytes(reader);
+
+        var footerMetadata =
+            ReadMetadata(reader);
+
+        if (memoryStream.Position !=
+            memoryStream.Length)
         {
-            ValidateMagic(reader);
-
-            var major = reader.ReadByte();
-            var minor = reader.ReadByte();
-
-            ValidateVersion(
-                major,
-                minor);
-
-            var envelopeId =
-                ReadString(reader);
-
-            var timestampMilliseconds =
-                reader.ReadInt64();
-
-            var senderKeyId =
-                ReadString(reader);
-
-            var recipientKeyId =
-                ReadString(reader);
-
-            var encryption =
-                ReadString(reader);
-
-            var signature =
-                ReadString(reader);
-
-            var replayToken =
-                ReadBytes(reader);
-
-            var headerMetadata =
-                ReadMetadata(reader);
-
-            var protectedPayload =
-                ReadBytes(reader);
-
-            var footerMetadata =
-                ReadMetadata(reader);
-
-            if (memoryStream.Position !=
-                memoryStream.Length)
-            {
-                throw new FormatException(
-                    "Binary envelope contains unexpected trailing data.");
-            }
-
-            var header =
-                m_EnvelopeService
-                    .BuildEnvelopeHeader(
-                        new KeyId(envelopeId),
-                        DateTimeOffset
-                            .FromUnixTimeMilliseconds(
-                                timestampMilliseconds),
-                        new KeyId(senderKeyId),
-                        new KeyId(recipientKeyId),
-                        new AlgorithmId(encryption),
-                        new AlgorithmId(signature),
-                        replayToken,
-                        headerMetadata);
-
-            var footer =
-                m_EnvelopeService
-                    .BuildEnvelopeFooter(
-                        footerMetadata);
-
-            var result =
-                m_EnvelopeService
-                    .PackEnvelope(
-                        header,
-                        protectedPayload,
-                        footer);
-
-            if (!result.Success ||
-                result.ValidatedEnvelope == null)
-            {
-                throw new FormatException(
-                    result.Message ??
-                    "The decoded envelope could not be constructed.");
-            }
-
-            return result.ValidatedEnvelope;
+            throw new FormatException(
+                "Binary envelope contains unexpected trailing data.");
         }
+
+        var header =
+            m_EnvelopeService
+                .BuildEnvelopeHeader(
+                    new KeyId(envelopeId),
+                    DateTimeOffset
+                        .FromUnixTimeMilliseconds(
+                            timestampMilliseconds),
+                    new KeyId(senderKeyId),
+                    new KeyId(recipientKeyId),
+                    new AlgorithmId(encryption),
+                    new AlgorithmId(signature),
+                    replayToken,
+                    headerMetadata);
+
+        var footer =
+            m_EnvelopeService
+                .BuildEnvelopeFooter(
+                    footerMetadata);
+
+        var result =
+            m_EnvelopeService
+                .PackEnvelope(
+                    header,
+                    protectedPayload,
+                    footer);
+
+        if (!result.Success ||
+            result.ValidatedEnvelope == null)
+        {
+            throw new FormatException(
+                result.Message ??
+                "The decoded envelope could not be constructed.");
+        }
+
+        return result.ValidatedEnvelope;
     }
 
     /// <summary>
@@ -289,8 +285,7 @@ internal sealed class BinaryEnvelopeCodec : IEnvelopeCodec
             magic[2] != sm_Magic[2] ||
             magic[3] != sm_Magic[3])
         {
-            throw new FormatException(
-                "Invalid binary envelope magic.");
+            throw new FormatException("Invalid binary envelope magic.");
         }
     }
 
@@ -306,11 +301,7 @@ internal sealed class BinaryEnvelopeCodec : IEnvelopeCodec
         if (major != FrameworkVersion.V1.Major ||
             minor != FrameworkVersion.V1.Minor)
         {
-            throw new FormatException(
-                string.Format(
-                    "Unsupported envelope version: {0}.{1}.",
-                    major,
-                    minor));
+            throw new FormatException($"Unsupported envelope version: {major}.{minor}.");
         }
     }
 
@@ -319,22 +310,18 @@ internal sealed class BinaryEnvelopeCodec : IEnvelopeCodec
     /// </summary>
     /// <param name="writer">The writer.</param>
     /// <param name="value">The value.</param>
-    private static void WriteString(
-        BinaryWriter writer,
-        string value)
+    private static void WriteString(BinaryWriter writer, string value)
     {
         var safeValue =
             value ?? string.Empty;
 
         var bytes =
-            Encoding.UTF8.GetBytes(
-                safeValue);
+            Encoding.UTF8.GetBytes(safeValue);
 
         if ((uint)bytes.Length >
             MAX_STRING_BYTES)
         {
-            throw new InvalidOperationException(
-                "String is too large to encode.");
+            throw new InvalidOperationException("String is too large to encode.");
         }
 
         WriteUInt32(

@@ -4,7 +4,7 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-11-2026
+// Last Modified On : 07-21-2026
 // ***********************************************************************
 // <copyright file="IMercuryClientDependencies.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -16,6 +16,7 @@
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Logging;
+using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Replay;
 using Mercury.Abstractions.Transport;
 
@@ -26,6 +27,12 @@ namespace Mercury.Abstractions;
 /// </summary>
 public interface IMercuryClientDependencies
 {
+    /// <summary>
+    /// Gets the client identifier.
+    /// </summary>
+    /// <value>The client identifier.</value>
+    ReadOnlyMemory ClientId { get; }
+
     /// <summary>
     /// Gets the crypto provider.
     /// </summary>

@@ -13,6 +13,7 @@
 // </copyright>
 // ***********************************************************************
 
+using System.Security.Cryptography;
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Shared;
@@ -20,6 +21,8 @@ using Mercury.Core.Factories;
 using Mercury.Extensions.EasySetup;
 using Mercury.Provider.AesGcm;
 using Mercury.Transport.InMemory;
+
+using MercuryMemory = Mercury.Abstractions.Primitives.ReadOnlyMemory;
 
 namespace Mercury.Tests.Extensions.EasySetup;
 
@@ -39,10 +42,17 @@ public sealed class MercuryFactoryExtensionsTests
     private const string BRAVO_NODE = "Bravo Node";
 
     /// <summary>
+    /// Gets the alpha client identifier.
+    /// </summary>
+    /// <value>The alpha client identifier.</value>
+    public static MercuryMemory AlphaClientId()
+        => RandomNumberGenerator.GetBytes(32);
+
+    /// <summary>
     /// Verifies that a valid easy client can be built.
     /// </summary>
     [Fact]
-    public void BuildEasyClient_WithValidComponents_ReturnsClient()
+    public async void BuildEasyClient_WithValidComponents_ReturnsClient()
     {
         var keyProvider = EphemeralKeyProviderFactory.Create(ALPHA_NODE, BRAVO_NODE);
 
@@ -50,7 +60,9 @@ public sealed class MercuryFactoryExtensionsTests
 
         var (alphaTransport, _) = InMemoryDuplexTransport.CreateConnectedPair();
 
-        var client = MercuryFactory.Instance.BuildEasyClient(cryptoProvider, EnvelopeCodec.Binary, alphaTransport);
+        MercuryMemory clientId = await keyProvider.GetKeyAsync(ALPHA_NODE);
+
+        var client = MercuryFactory.Instance.BuildEasyClient(clientId, cryptoProvider, EnvelopeCodec.Binary, alphaTransport);
 
         Assert.NotNull(client);
     }
@@ -61,8 +73,7 @@ public sealed class MercuryFactoryExtensionsTests
     [Fact]
     public void BuildEasyClient_WithNullFactory_ThrowsArgumentNullException()
     {
-        var exception = Assert.Throws<ArgumentNullException>(
-                () => MercuryFactoryExtensions.BuildEasyClient(null!, null!,
+        var exception = Assert.Throws<ArgumentNullException>(() => MercuryFactoryExtensions.BuildEasyClient(null!,null!, null!,
                         EnvelopeCodec.Binary, null!));
 
         Assert.Equal("factory", exception.ParamName);
@@ -77,7 +88,7 @@ public sealed class MercuryFactoryExtensionsTests
         var (alphaTransport, _) = InMemoryDuplexTransport.CreateConnectedPair();
 
         var exception = Assert.Throws<ArgumentNullException>(() =>
-                    MercuryFactory.Instance.BuildEasyClient(null!, EnvelopeCodec.Binary, alphaTransport));
+                    MercuryFactory.Instance.BuildEasyClient(AlphaClientId(),null!, EnvelopeCodec.Binary, alphaTransport));
 
         Assert.Equal("cryptoProvider", exception.ParamName);
     }
@@ -93,7 +104,7 @@ public sealed class MercuryFactoryExtensionsTests
         var cryptoProvider = new AesGcmCryptoProvider(keyProvider);
 
         var exception = Assert.Throws<ArgumentNullException>(() =>
-                    MercuryFactory.Instance.BuildEasyClient(cryptoProvider, EnvelopeCodec.Binary, null!));
+                    MercuryFactory.Instance.BuildEasyClient(AlphaClientId(), cryptoProvider, EnvelopeCodec.Binary, null!));
 
         Assert.Equal("transport", exception.ParamName);
     }
@@ -107,7 +118,7 @@ public sealed class MercuryFactoryExtensionsTests
         var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
 
         var pair = MercuryFactory.Instance.BuildEphemeralClientPair(ALPHA_NODE, BRAVO_NODE,
-                BuildCryptoProvider, EnvelopeCodec.Binary, alphaTransport, bravoTransport);
+                BuildCryptoProvider, EnvelopeCodec.Binary, alphaTransport, bravoTransport).Result;
 
         Assert.NotNull(pair);
         Assert.NotNull(pair.AlphaClient);
@@ -126,7 +137,7 @@ public sealed class MercuryFactoryExtensionsTests
 
         var pair =
             MercuryFactory.Instance.BuildEphemeralClientPair(ALPHA_NODE, BRAVO_NODE,
-                BuildCryptoProvider, EnvelopeCodec.Binary, alphaTransport, bravoTransport);
+                BuildCryptoProvider, EnvelopeCodec.Binary, alphaTransport, bravoTransport).Result;
 
         Assert.NotSame(pair.AlphaClient, pair.BravoClient);
     }
@@ -160,12 +171,12 @@ public sealed class MercuryFactoryExtensionsTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void BuildEphemeralClientPair_WithInvalidAlphaKeyName_ThrowsArgumentException(
+    public async Task BuildEphemeralClientPair_WithInvalidAlphaKeyName_ThrowsArgumentException(
         string? invalidKeyName)
     {
         var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
 
-        var exception = Assert.Throws<ArgumentException>(() => MercuryFactory.Instance.BuildEphemeralClientPair(
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => MercuryFactory.Instance.BuildEphemeralClientPair(
                         invalidKeyName!, BRAVO_NODE, BuildCryptoProvider, EnvelopeCodec.Binary,
                         alphaTransport, bravoTransport));
 
@@ -180,11 +191,11 @@ public sealed class MercuryFactoryExtensionsTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void BuildEphemeralClientPair_WithInvalidBravoKeyName_ThrowsArgumentException(string? invalidKeyName)
+    public async Task BuildEphemeralClientPair_WithInvalidBravoKeyName_ThrowsArgumentException(string? invalidKeyName)
     {
         var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
 
-        var exception = Assert.Throws<ArgumentException>(() =>
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
                     MercuryFactory.Instance.BuildEphemeralClientPair(ALPHA_NODE, invalidKeyName!,
                         BuildCryptoProvider, EnvelopeCodec.Binary, alphaTransport, bravoTransport));
 
@@ -195,11 +206,11 @@ public sealed class MercuryFactoryExtensionsTests
     /// Verifies that the two key names must be different.
     /// </summary>
     [Fact]
-    public void BuildEphemeralClientPair_WithMatchingKeyNames_ThrowsArgumentException()
+    public async Task BuildEphemeralClientPair_WithMatchingKeyNames_ThrowsArgumentException()
     {
         var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
 
-        Assert.Throws<ArgumentException>(() => MercuryFactory.Instance.BuildEphemeralClientPair(
+        await Assert.ThrowsAsync<ArgumentException>(() => MercuryFactory.Instance.BuildEphemeralClientPair(
                     ALPHA_NODE, ALPHA_NODE, BuildCryptoProvider,
                     EnvelopeCodec.Binary, alphaTransport, bravoTransport));
     }
@@ -208,9 +219,9 @@ public sealed class MercuryFactoryExtensionsTests
     /// Verifies that a null factory is rejected.
     /// </summary>
     [Fact]
-    public void BuildEphemeralClientPair_WithNullFactory_ThrowsArgumentNullException()
+    public async Task BuildEphemeralClientPair_WithNullFactory_ThrowsArgumentNullException()
     {
-        var exception = Assert.Throws<ArgumentNullException>(
+        var exception = await Assert.ThrowsAsync<ArgumentNullException>(
                 () => MercuryFactoryExtensions.BuildEphemeralClientPair(null!, ALPHA_NODE,
                         BRAVO_NODE, null!, EnvelopeCodec.Binary, null!, null!));
 
@@ -221,11 +232,11 @@ public sealed class MercuryFactoryExtensionsTests
     /// Verifies that a null provider factory is rejected.
     /// </summary>
     [Fact]
-    public void BuildEphemeralClientPair_WithNullProviderFactory_ThrowsArgumentNullException()
+    public async Task BuildEphemeralClientPair_WithNullProviderFactory_ThrowsArgumentNullException()
     {
         var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
 
-        var exception = Assert.Throws<ArgumentNullException>(() =>
+        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() =>
                     MercuryFactory.Instance.BuildEphemeralClientPair(ALPHA_NODE, BRAVO_NODE,
                         null!, EnvelopeCodec.Binary, alphaTransport, bravoTransport));
 
@@ -236,11 +247,11 @@ public sealed class MercuryFactoryExtensionsTests
     /// Verifies that a null Alpha transport is rejected.
     /// </summary>
     [Fact]
-    public void BuildEphemeralClientPair_WithNullAlphaTransport_ThrowsArgumentNullException()
+    public async Task BuildEphemeralClientPair_WithNullAlphaTransport_ThrowsArgumentNullException()
     {
         var (_, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
 
-        var exception = Assert.Throws<ArgumentNullException>(() =>
+        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() =>
                     MercuryFactory.Instance.BuildEphemeralClientPair(ALPHA_NODE, BRAVO_NODE,
                         BuildCryptoProvider, EnvelopeCodec.Binary, null!, bravoTransport));
 
@@ -251,11 +262,11 @@ public sealed class MercuryFactoryExtensionsTests
     /// Verifies that a null Bravo transport is rejected.
     /// </summary>
     [Fact]
-    public void BuildEphemeralClientPair_WithNullBravoTransport_ThrowsArgumentNullException()
+    public async Task BuildEphemeralClientPair_WithNullBravoTransport_ThrowsArgumentNullException()
     {
         var (alphaTransport, _) = InMemoryDuplexTransport.CreateConnectedPair();
 
-        var exception = Assert.Throws<ArgumentNullException>(() =>
+        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() =>
                     MercuryFactory.Instance.BuildEphemeralClientPair(ALPHA_NODE, BRAVO_NODE,
                         BuildCryptoProvider, EnvelopeCodec.Binary, alphaTransport, null!));
 
@@ -266,11 +277,11 @@ public sealed class MercuryFactoryExtensionsTests
     /// Verifies that a provider factory returning null fails safely.
     /// </summary>
     [Fact]
-    public void BuildEphemeralClientPair_WhenProviderFactoryReturnsNull_ThrowsInvalidOperationException()
+    public async Task BuildEphemeralClientPair_WhenProviderFactoryReturnsNull_ThrowsInvalidOperationException()
     {
         var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
 
-        Assert.Throws<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 MercuryFactory.Instance.BuildEphemeralClientPair(ALPHA_NODE, BRAVO_NODE,
                     _ => null!, EnvelopeCodec.Binary, alphaTransport, bravoTransport));
     }

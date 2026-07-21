@@ -94,6 +94,6 @@ public sealed class MercuryClientPairTests
         var (alphaTransport, bravoTransport) = InMemoryDuplexTransport.CreateConnectedPair();
 
         return MercuryFactory.Instance.BuildEphemeralClientPair(ALPHA_NODE, BRAVO_NODE, keyProvider 
-                => new AesGcmCryptoProvider(keyProvider), EnvelopeCodec.Binary, alphaTransport, bravoTransport);
+                => new AesGcmCryptoProvider(keyProvider), EnvelopeCodec.Binary, alphaTransport, bravoTransport).Result;
     }
 }
