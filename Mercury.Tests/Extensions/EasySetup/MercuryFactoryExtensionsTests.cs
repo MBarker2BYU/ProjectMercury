@@ -16,6 +16,7 @@
 using System.Security.Cryptography;
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
+using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Shared;
 using Mercury.Core.Factories;
 using Mercury.Extensions.EasySetup;
@@ -45,8 +46,8 @@ public sealed class MercuryFactoryExtensionsTests
     /// Gets the alpha client identifier.
     /// </summary>
     /// <value>The alpha client identifier.</value>
-    public static MercuryMemory AlphaClientId()
-        => RandomNumberGenerator.GetBytes(32);
+    public static KeyId AlphaClientId()
+        => ALPHA_NODE;
 
     /// <summary>
     /// Verifies that a valid easy client can be built.
@@ -59,10 +60,8 @@ public sealed class MercuryFactoryExtensionsTests
         var cryptoProvider = new AesGcmCryptoProvider(keyProvider);
 
         var (alphaTransport, _) = InMemoryDuplexTransport.CreateConnectedPair();
-
-        MercuryMemory clientId = await keyProvider.GetKeyAsync(ALPHA_NODE);
-
-        var client = MercuryFactory.Instance.BuildEasyClient(clientId, cryptoProvider, EnvelopeCodec.Binary, alphaTransport);
+        
+        var client = MercuryFactory.Instance.BuildEasyClient(ALPHA_NODE, cryptoProvider, EnvelopeCodec.Binary, alphaTransport);
 
         Assert.NotNull(client);
     }

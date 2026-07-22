@@ -73,7 +73,7 @@ public sealed class MercuryFactory : IMercuryFactory
     /// <param name="envelopeCodec"></param>
     /// <param name="transport">The transport.</param>
     /// <returns>IMercuryClientDependencies.</returns>
-    public IMercuryClientDependencies BuildDependencies(ReadOnlyMemory clientId, ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport)
+    public IMercuryClientDependencies BuildDependencies(KeyId clientId, ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport)
         => new MercuryClientDependencies(clientId, cryptoProvider, envelopeCodec, transport);
 
     /// <summary>
@@ -84,7 +84,7 @@ public sealed class MercuryFactory : IMercuryFactory
     /// <param name="transport">The transport.</param>
     /// <returns>IMercuryClientDependencies.</returns>
     [Obsolete("Remove prior to release", false)]
-    public IMercuryClientDependencies BuildDependencies(ReadOnlyMemory clientId, EnvelopeCodec envelopeCodec, ITransport transport)
+    public IMercuryClientDependencies BuildDependencies(KeyId clientId, EnvelopeCodec envelopeCodec, ITransport transport)
         => new MercuryClientDependencies(clientId, new PassThroughCryptoProvider(), envelopeCodec, transport);
 
     /// <summary>
@@ -92,7 +92,7 @@ public sealed class MercuryFactory : IMercuryFactory
     /// </summary>
     /// <returns>IMercuryClient.</returns>
     [Obsolete("Remove prior to release", false)]
-    public IMercuryClient BuildClient(ReadOnlyMemory clientId)
+    public IMercuryClient BuildClient(KeyId clientId)
     {
         var dependencies = BuildDependencies(clientId, new PassThroughCryptoProvider(), sm_EnvelopeCodec, new LoopbackTransport());
 

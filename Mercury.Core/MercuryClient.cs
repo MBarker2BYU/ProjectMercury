@@ -102,6 +102,10 @@ namespace Mercury.Core;
 /// <seealso cref="IMercuryClient"/>
 internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEnvelopeService envelopeService) : IMercuryClient
 {
+    public readonly KeyId m_ClientId = dependencies.ClientId.IsEmpty 
+            ? throw new ArgumentNullException(nameof(dependencies.ClientId))
+            : dependencies.ClientId;
+
     /// <summary>
     /// Protects outgoing payloads and authenticates incoming secure envelopes.
     /// </summary>
@@ -371,8 +375,7 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
 
             // The replay token is checked only after the envelope has been
             // authenticated by the crypto provider.
-            var replayAccepted =
-                await m_ReplayProtector
+            var replayAccepted = await m_ReplayProtector
                     .TryAcceptAsync(validatedHeader, cancellationToken)
                     .ConfigureAwait(false);
 

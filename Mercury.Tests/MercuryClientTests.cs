@@ -23,6 +23,10 @@ namespace Mercury.Tests;
 /// </summary>
 public class MercuryClientTests
 {
+
+    internal const string ALPHA = @"Alpha";
+    internal const string BRAVO = @"Bravo";
+
     /// <summary>
     /// Defines the test method BuildClient_ReturnsClient.
     /// </summary>
@@ -30,7 +34,7 @@ public class MercuryClientTests
     public void BuildClient_ReturnsClient()
     {
         var client =
-            MercuryFactory.Instance.BuildClient(RandomNumberGenerator.GetBytes(32));
+            MercuryFactory.Instance.BuildClient(ALPHA);
 
         Assert.NotNull(client);
     }
@@ -43,9 +47,9 @@ public class MercuryClientTests
     {
         
         var client =
-            MercuryFactory.Instance.BuildClient(RandomNumberGenerator.GetBytes(32));
+            MercuryFactory.Instance.BuildClient(ALPHA);
 
-        var cryptoContext = MercuryFactory.Instance.BuildCryptoContext("Alpha", "Bravo");
+        var cryptoContext = MercuryFactory.Instance.BuildCryptoContext(ALPHA, BRAVO);
 
         var expected = new byte[] { 1, 2, 3, 4 };
 

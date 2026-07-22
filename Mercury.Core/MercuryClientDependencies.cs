@@ -35,13 +35,13 @@ namespace Mercury.Core;
 /// <param name="envelopeCodec">The envelope codec.</param>
 /// <param name="transport">The transport.</param>
 /// <seealso cref="IMercuryClientDependencies" />
-internal sealed class MercuryClientDependencies(ReadOnlyMemory clientId, ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport, IReplayProtector? replayProtector = null, IMercuryLogger? logger = null) : IMercuryClientDependencies
+internal sealed class MercuryClientDependencies(KeyId clientId, ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport, IReplayProtector? replayProtector = null, IMercuryLogger? logger = null) : IMercuryClientDependencies
 {
     /// <summary>
     /// Gets the client identifier.
     /// </summary>
     /// <value>The client identifier.</value>
-    public ReadOnlyMemory ClientId { get; } = clientId.IsEmpty
+    public KeyId ClientId { get; } = clientId.IsEmpty
         ? throw new ArgumentNullException(nameof(clientId))
         : clientId;
 

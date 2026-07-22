@@ -82,9 +82,9 @@ internal sealed class MercuryDemoSession(Action<DemoLogEntry> log) : IAsyncDispo
 
             var envelopeCodec = BuildEnvelopeCodec(configuration.EnvelopeCodec);
 
-            var alphaDependencies = MercuryFactory.Instance.BuildDependencies(keys[DemoConstants.ALPHA_NODE], alphaCryptoProvider, envelopeCodec, m_AlphaCaptureTransport);
+            var alphaDependencies = MercuryFactory.Instance.BuildDependencies(DemoConstants.ALPHA_NODE, alphaCryptoProvider, envelopeCodec, m_AlphaCaptureTransport);
 
-            var bravoDependencies = MercuryFactory.Instance.BuildDependencies(keys[DemoConstants.BRAVO_NODE], bravoCryptoProvider, envelopeCodec, m_BravoTransport);
+            var bravoDependencies = MercuryFactory.Instance.BuildDependencies(DemoConstants.BRAVO_NODE, bravoCryptoProvider, envelopeCodec, m_BravoTransport);
 
             m_AlphaClient =
                 MercuryFactory.Instance.BuildClient(alphaDependencies);

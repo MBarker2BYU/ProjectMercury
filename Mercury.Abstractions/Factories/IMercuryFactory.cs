@@ -41,7 +41,7 @@ public interface IMercuryFactory
     /// <param name="envelopeCodec"></param>
     /// <param name="transport">The transport.</param>
     /// <returns>IMercuryClientDependencies.</returns>
-    IMercuryClientDependencies BuildDependencies(ReadOnlyMemory clientId, ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport);
+    IMercuryClientDependencies BuildDependencies(KeyId clientId, ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport);
 
     /// <summary>
     /// Builds the dependencies with a passthrough crypto provider
@@ -50,13 +50,13 @@ public interface IMercuryFactory
     /// <param name="envelopeCodec">The envelope codec.</param>
     /// <param name="transport">The transport.</param>
     /// <returns>IMercuryClientDependencies.</returns>
-    IMercuryClientDependencies BuildDependencies(ReadOnlyMemory clientId, EnvelopeCodec envelopeCodec, ITransport transport);
+    IMercuryClientDependencies BuildDependencies(KeyId clientId, EnvelopeCodec envelopeCodec, ITransport transport);
 
     /// <summary>
     /// Builds the client.
     /// </summary>
     /// <returns>IMercuryClient.</returns>
-    IMercuryClient BuildClient(ReadOnlyMemory clientId);
+    IMercuryClient BuildClient(KeyId clientId);
 
     /// <summary>
     /// Builds the client.

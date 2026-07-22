@@ -17,7 +17,7 @@ using Mercury.Abstractions.Enums;
 using Mercury.Core.Factories;
 using Mercury.Tests.Support;
 using System.Security.Cryptography;
-
+using Mercury.Abstractions.Primitives;
 using MercuryMemory = Mercury.Abstractions.Primitives.ReadOnlyMemory;
 
 namespace Mercury.Tests.Pipeline;
@@ -28,12 +28,17 @@ namespace Mercury.Tests.Pipeline;
 public sealed class MercuryFactoryTests
 {
 
+    internal const string ALPHA = @"Alpha";
+    internal const string BRAVO = @"Bravo";
+
     /// <summary>
     /// Gets the alpha client identifier.
     /// </summary>
     /// <value>The alpha client identifier.</value>
-    public static MercuryMemory AlphaClientId()
-        => RandomNumberGenerator.GetBytes(32);
+    public static KeyId AlphaClientId()
+        => ALPHA;
+        
+    
 
     /// <summary>
     /// Defines the test method BuildDependencies_NullProvider_ThrowsArgumentNullException.

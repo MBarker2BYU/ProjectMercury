@@ -50,12 +50,15 @@ public enum ProviderKind
 /// </summary>
 internal static class MercuryTestFactory
 {
+    internal const string ALPHA = @"Alpha";
+    internal const string BRAVO = @"Bravo";
+
     /// <summary>
     /// Gets the alpha client identifier.
     /// </summary>
     /// <value>The alpha client identifier.</value>
-    public static MercuryMemory AlphaClientId()
-        => RandomNumberGenerator.GetBytes(32);
+    public static KeyId AlphaClientId()
+        => ALPHA;
 
     /// <summary>
     /// The sender key identifier

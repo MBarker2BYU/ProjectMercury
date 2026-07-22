@@ -29,6 +29,9 @@ namespace Mercury.Tests.Pipeline;
 /// </summary>
 public sealed class MercuryPipelineFailureTests
 {
+    internal const string ALPHA = @"Alpha";
+    internal const string BRAVO = @"Bravo";
+
     /// <summary>
     /// Providers the codec cases.
     /// </summary>
@@ -40,9 +43,9 @@ public sealed class MercuryPipelineFailureTests
     /// Gets the alpha client identifier.
     /// </summary>
     /// <value>The alpha client identifier.</value>
-    public static MercuryMemory AlphaClientId()
-        => RandomNumberGenerator.GetBytes(32);
-
+    public static KeyId AlphaClientId()
+        => ALPHA;
+    
     /// <summary>
     /// Defines the test method ReceiveAsync_WrongKey_ReturnsAuthenticationFailureWithoutPayload.
     /// </summary>

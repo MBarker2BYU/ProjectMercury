@@ -255,7 +255,7 @@ internal sealed class TestDependencies : IMercuryClientDependencies
     /// <param name="replayProtector">The replay protector.</param>
     /// <param name="logger">The logger.</param>
     public TestDependencies(
-        MercuryMemory clientId,
+        KeyId clientId,
         ICryptoProvider cryptoProvider,
         IEnvelopeCodec envelopeCodec,
         ITransport transport,
@@ -270,7 +270,7 @@ internal sealed class TestDependencies : IMercuryClientDependencies
         Logger = logger ?? NoOpMercuryLogger.Instance;
     }
 
-    public ReadOnlyMemory ClientId { get; }
+    public KeyId ClientId { get; }
 
     /// <summary>
     /// Gets the crypto provider.

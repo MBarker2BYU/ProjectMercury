@@ -31,7 +31,7 @@ public interface IMercuryClientDependencies
     /// Gets the client identifier.
     /// </summary>
     /// <value>The client identifier.</value>
-    ReadOnlyMemory ClientId { get; }
+    KeyId ClientId { get; }
 
     /// <summary>
     /// Gets the crypto provider.

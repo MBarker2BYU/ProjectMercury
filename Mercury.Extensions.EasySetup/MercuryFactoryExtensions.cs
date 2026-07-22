@@ -41,7 +41,7 @@ public static class MercuryFactoryExtensions
     /// <returns>A configured Mercury client.</returns>
     public static IMercuryClient BuildEasyClient(
         this MercuryFactory factory,
-        ReadOnlyMemory clientId,
+        KeyId clientId,
         ICryptoProvider cryptoProvider,
         EnvelopeCodec envelopeCodec,
         ITransport transport)
@@ -137,14 +137,10 @@ public static class MercuryFactoryExtensions
         {
             throw new InvalidOperationException("The crypto provider factory returned a null Bravo provider.");
         }
-
-        var alphaClientId = await  keyProvider.GetKeyAsync(alphaKeyName).ConfigureAwait(false);
-
-        var alphaClient = factory.BuildEasyClient(alphaClientId , alphaCryptoProvider, envelopeCodec, alphaTransport);
-
-        var bravoClientId = await keyProvider.GetKeyAsync(alphaKeyName).ConfigureAwait(false);
-
-        var bravoClient = factory.BuildEasyClient(bravoClientId, bravoCryptoProvider, envelopeCodec, bravoTransport);
+        
+        var alphaClient = factory.BuildEasyClient(alphaKeyName , alphaCryptoProvider, envelopeCodec, alphaTransport);
+        
+        var bravoClient = factory.BuildEasyClient(bravoKeyName, bravoCryptoProvider, envelopeCodec, bravoTransport);
 
         var alphaToBravoContext = factory.BuildCryptoContext(alphaKeyName, bravoKeyName);
 
