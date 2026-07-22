@@ -364,6 +364,13 @@ internal sealed class MercuryClient(IMercuryClientDependencies dependencies, IEn
             // by the crypto provider.
             var validatedHeader = cryptoProviderResult.ValidatedEnvelope.Header;
 
+            // Reject messages not addressed to this client
+            if (!validatedHeader.RecipientKeyId.Equals(m_ClientId))
+            {
+                return new MercuryResult( false, ReadOnlyMemory.Empty, cryptoProviderResult.ValidatedEnvelope,
+                    FailureReason.AuthenticationFailed, "Message was not addressed to this client.");
+            }
+
             // Replay protection requires both the sender identity and a replay token.
             // An authenticated envelope missing either value is rejected before its
             // recovered payload can be delivered.
