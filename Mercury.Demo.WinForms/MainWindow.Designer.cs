@@ -135,9 +135,9 @@
             pnlHexPreview = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
             rtbHexPreview = new RichTextBox();
             pnlDemoActions = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
-            btnWrongKey = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            btnTamperAttack = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            btnReplayAttack = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
+            tglWrongKeyAttack = new Mercury.Demo.WinForms.Controls.MercuryGlassToggleButton();
+            tglTamperAttack = new Mercury.Demo.WinForms.Controls.MercuryGlassToggleButton();
+            tglReplayAttack = new Mercury.Demo.WinForms.Controls.MercuryGlassToggleButton();
             pnlReceivedData = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
             lblReceiveFooter = new Label();
             lblReceivePayload = new Label();
@@ -1468,9 +1468,9 @@
             pnlDemoActions.AlignTitle = ContentAlignment.TopLeft;
             pnlDemoActions.BackColor = Color.FromArgb(0, 15, 28);
             pnlDemoActions.BorderColor = Color.FromArgb(34, 61, 84);
-            pnlDemoActions.Controls.Add(btnWrongKey);
-            pnlDemoActions.Controls.Add(btnTamperAttack);
-            pnlDemoActions.Controls.Add(btnReplayAttack);
+            pnlDemoActions.Controls.Add(tglWrongKeyAttack);
+            pnlDemoActions.Controls.Add(tglTamperAttack);
+            pnlDemoActions.Controls.Add(tglReplayAttack);
             pnlDemoActions.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             pnlDemoActions.ForeColor = Color.FromArgb(0, 135, 191);
             pnlDemoActions.Location = new Point(12, 470);
@@ -1480,56 +1480,55 @@
             pnlDemoActions.TabIndex = 10;
             pnlDemoActions.Title = "SECURITY DEMONSTRATIONS";
             // 
-            // btnWrongKey
+            // tglWrongKeyAttack
             // 
-            btnWrongKey.BackColor = Color.Transparent;
-            btnWrongKey.ButtonColor = Color.DarkRed;
-            btnWrongKey.FillAlpha = 75;
-            btnWrongKey.Font = new Font("Segoe UI", 9F);
-            btnWrongKey.ForeColor = Color.FromArgb(225, 232, 238);
-            btnWrongKey.ImageAlign = ContentAlignment.MiddleLeft;
-            btnWrongKey.Location = new Point(19, 140);
-            btnWrongKey.Name = "btnWrongKey";
-            btnWrongKey.Padding = new Padding(10, 0, 10, 0);
-            btnWrongKey.Size = new Size(264, 49);
-            btnWrongKey.TabIndex = 10;
-            btnWrongKey.Text = "Wrong Key";
-            btnWrongKey.UseVisualStyleBackColor = false;
-            btnWrongKey.Click += btnWrongKey_Click;
+            tglWrongKeyAttack.BackColor = Color.Transparent;
+            tglWrongKeyAttack.ButtonColor = Color.FromArgb(192, 0, 0);
+            tglWrongKeyAttack.Font = new Font("Segoe UI", 9F);
+            tglWrongKeyAttack.ForeColor = Color.Gainsboro;
+            tglWrongKeyAttack.ImageAlign = ContentAlignment.MiddleLeft;
+            tglWrongKeyAttack.Location = new Point(19, 142);
+            tglWrongKeyAttack.Name = "tglWrongKeyAttack";
+            tglWrongKeyAttack.Padding = new Padding(10, 0, 10, 0);
+            tglWrongKeyAttack.Size = new Size(264, 49);
+            tglWrongKeyAttack.TabIndex = 2;
+            tglWrongKeyAttack.Text = "Wrong key Attack";
+            tglWrongKeyAttack.UseVisualStyleBackColor = false;
+            tglWrongKeyAttack.CheckedChanged += tglWrongKeyAttack_CheckedChanged;
             // 
-            // btnTamperAttack
+            // tglTamperAttack
             // 
-            btnTamperAttack.BackColor = Color.Transparent;
-            btnTamperAttack.ButtonColor = Color.DarkRed;
-            btnTamperAttack.FillAlpha = 75;
-            btnTamperAttack.Font = new Font("Segoe UI", 9F);
-            btnTamperAttack.ForeColor = Color.FromArgb(225, 232, 238);
-            btnTamperAttack.ImageAlign = ContentAlignment.MiddleLeft;
-            btnTamperAttack.Location = new Point(19, 85);
-            btnTamperAttack.Name = "btnTamperAttack";
-            btnTamperAttack.Padding = new Padding(10, 0, 10, 0);
-            btnTamperAttack.Size = new Size(264, 49);
-            btnTamperAttack.TabIndex = 9;
-            btnTamperAttack.Text = "Tamper Attack";
-            btnTamperAttack.UseVisualStyleBackColor = false;
-            btnTamperAttack.Click += btnTamperAttack_Click;
+            tglTamperAttack.BackColor = Color.Transparent;
+            tglTamperAttack.ButtonColor = Color.FromArgb(192, 0, 0);
+            tglTamperAttack.Enabled = false;
+            tglTamperAttack.Font = new Font("Segoe UI", 9F);
+            tglTamperAttack.ForeColor = Color.Gainsboro;
+            tglTamperAttack.ImageAlign = ContentAlignment.MiddleLeft;
+            tglTamperAttack.Location = new Point(19, 87);
+            tglTamperAttack.Name = "tglTamperAttack";
+            tglTamperAttack.Padding = new Padding(10, 0, 10, 0);
+            tglTamperAttack.Size = new Size(264, 49);
+            tglTamperAttack.TabIndex = 1;
+            tglTamperAttack.Text = "Tamper Attack";
+            tglTamperAttack.UseVisualStyleBackColor = false;
+            tglTamperAttack.CheckedChanged += tglTamperAttack_CheckedChanged;
             // 
-            // btnReplayAttack
+            // tglReplayAttack
             // 
-            btnReplayAttack.BackColor = Color.Transparent;
-            btnReplayAttack.ButtonColor = Color.DarkRed;
-            btnReplayAttack.FillAlpha = 75;
-            btnReplayAttack.Font = new Font("Segoe UI", 9F);
-            btnReplayAttack.ForeColor = Color.FromArgb(225, 232, 238);
-            btnReplayAttack.ImageAlign = ContentAlignment.MiddleLeft;
-            btnReplayAttack.Location = new Point(19, 30);
-            btnReplayAttack.Name = "btnReplayAttack";
-            btnReplayAttack.Padding = new Padding(10, 0, 10, 0);
-            btnReplayAttack.Size = new Size(264, 49);
-            btnReplayAttack.TabIndex = 8;
-            btnReplayAttack.Text = "Replay Attack";
-            btnReplayAttack.UseVisualStyleBackColor = false;
-            btnReplayAttack.Click += btnReplayAttack_Click;
+            tglReplayAttack.BackColor = Color.Transparent;
+            tglReplayAttack.ButtonColor = Color.FromArgb(192, 0, 0);
+            tglReplayAttack.Enabled = false;
+            tglReplayAttack.Font = new Font("Segoe UI", 9F);
+            tglReplayAttack.ForeColor = Color.Gainsboro;
+            tglReplayAttack.ImageAlign = ContentAlignment.MiddleLeft;
+            tglReplayAttack.Location = new Point(19, 32);
+            tglReplayAttack.Name = "tglReplayAttack";
+            tglReplayAttack.Padding = new Padding(10, 0, 10, 0);
+            tglReplayAttack.Size = new Size(264, 49);
+            tglReplayAttack.TabIndex = 0;
+            tglReplayAttack.Text = "Replay Attack";
+            tglReplayAttack.UseVisualStyleBackColor = false;
+            tglReplayAttack.CheckedChanged += tglReplayAttack_CheckedChanged;
             // 
             // pnlReceivedData
             // 
@@ -1739,9 +1738,6 @@
         private Label lblChunkSize;
         private Label lblChunking;
         private Label lblEnvelopeCodec;
-        private Controls.MercuryGlassButton btnWrongKey;
-        private Controls.MercuryGlassButton btnTamperAttack;
-        private Controls.MercuryGlassButton btnReplayAttack;
         private Controls.MercuryGlassPanel lblEventLog;
         private Controls.MercuryGlassButton btnClearLog;
         private RichTextBox rtbEventLog;
@@ -1834,5 +1830,8 @@
         private PictureBox pictureBox1;
         private Label lblTitle;
         private Label lblMotto;
+        private Controls.MercuryGlassToggleButton tglWrongKeyAttack;
+        private Controls.MercuryGlassToggleButton tglTamperAttack;
+        private Controls.MercuryGlassToggleButton tglReplayAttack;
     }
 }

@@ -1,109 +1,128 @@
 ﻿// ***********************************************************************
-// Assembly       : Mercury.Demo.WinForms
+// Assembly     : Mercury.Demo.WinForms
 // Author         : Matthew D. Barker
-// Created        : 07-19-2026
+// Created        : 07-22-2026
+//
+// Last Modified By : Matthew D. Barker
+// Last Modified On : 07-22-2026
 // ***********************************************************************
-
-using Mercury.Abstractions;
-using Mercury.Abstractions.Primitives;
-using Mercury.Demo.WinForms.Demo;
-using Mercury.Demo.WinForms.Services;
+// <copyright file="DemoController.cs">
+//     Copyright (c) Matthew D. Barker. All rights reserved.
+//     Submitted in partial fulfillment of CSE499 Senior Capstone Project
+//     at Brigham Young University-Idaho.
+// </copyright>
+// ***********************************************************************
 
 namespace Mercury.Demo.WinForms.Controllers;
 
-internal sealed class DemoController(Action<DemoLogEntry> log) : IAsyncDisposable
+/// <summary>
+/// Class DemoController. This class cannot be inherited.
+/// Implements the <see cref="System.IAsyncDisposable" />
+/// </summary>
+/// <seealso cref="System.IAsyncDisposable" />
+internal sealed partial class DemoController : IAsyncDisposable
 {
-    private readonly MercuryDemoSession m_Session = new(log);
-    private readonly CancellationTokenSource m_CancellationTokenSource = new();
 
-    public static IReadOnlyList<string> CryptoProviders =>
-    [
-        DemoConstants.AES_GCM,
-        DemoConstants.CHA_CHA_20
-    ];
+    #region Methods
 
-    public static IReadOnlyList<string> Transports =>
-    [
-        DemoConstants.IN_MEMORY_TRANSPORT,
-        DemoConstants.TCP_TRANSPORT
-    ];
+    #region Constructors
 
-    public static IReadOnlyList<string> EnvelopeCodecs =>
-    [
-        DemoConstants.BINARY_CODEC,
-        DemoConstants.JSON_CODEC
-    ];
-
-    public static IReadOnlyList<string> LoggingLevels =>
-    [
-        DemoConstants.QUIET_LOGGING,
-        DemoConstants.NORMAL_LOGGING,
-        DemoConstants.VERBOSE_LOGGING
-    ];
-
-
-    public async Task<(DemoConfiguration Configuration, bool IsConnected)> ConfigureAsync(DemoConfiguration configuration)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DemoController"/> class.
+    /// </summary>
+    /// <param name="view">The view.</param>
+    /// <exception cref="ArgumentNullException"></exception>
+    public DemoController(
+        MainWindow view)
     {
+        ArgumentNullException.ThrowIfNull(view);
 
-        ValidateConfiguration(configuration);
+        m_View = view;
 
-        await m_Session
-            .ConfigureAsync(configuration, m_CancellationTokenSource.Token)
-            .ConfigureAwait(true);
+        m_CancellationTokenSource =
+            new CancellationTokenSource();
 
-        return (
-            m_Session.Configuration,
-            m_Session.IsConnected);
+        m_OperationLock =
+            new SemaphoreSlim(1, 1);
     }
 
-    public static IReadOnlyList<int> ChunkSizes => BuildChunkSizes();
+    #endregion
 
-    private static IReadOnlyList<int> BuildChunkSizes()
+    /// <summary>
+    /// Updates the view.
+    /// </summary>
+    /// <param name="action">The action.</param>
+    private void UpdateView(Action<MainWindow> action)
     {
-        var chunkSizes = new List<int>();
-
-        for (var sizeKilobytes = 1;
-             sizeKilobytes <= 1024;
-             sizeKilobytes *= 2)
-        {
-            chunkSizes.Add(sizeKilobytes * 1024);
-        }
-
-        return chunkSizes;
+        m_View.RunOnUiThread(() => action(m_View));
     }
 
-    private static void ValidateConfiguration(
-        DemoConfiguration configuration)
+    /// <summary>
+    /// Reads the view.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="function">The function.</param>
+    /// <returns>T.</returns>
+    private T ReadView<T>(Func<MainWindow, T> function)
     {
-        if (string.IsNullOrWhiteSpace(configuration.CryptoProvider))
-            throw new InvalidOperationException("Select a crypto provider.");
-
-        if (string.IsNullOrWhiteSpace(configuration.Transport))
-            throw new InvalidOperationException("Select a transport.");
-
-        if (string.IsNullOrWhiteSpace(configuration.EnvelopeCodec))
-            throw new InvalidOperationException("Select an envelope codec.");
-
-        if (configuration is { ChunkingEnabled: true, ChunkSize: < 1024 })
-        {
-            throw new InvalidOperationException("Select a valid chunk size.");
-        }
+        return m_View.RunOnUiThread(() => function(m_View));
     }
 
-    public Task<IMercuryResult> SendAsync(ReadOnlyMemory payload)
-    {
-        return m_Session.SendAsync(payload, m_CancellationTokenSource.Token);
-    }
+    #endregion
+
+    #region Property and Fields
+
+    /// <summary>
+    /// The m view
+    /// </summary>
+    private readonly MainWindow m_View;
+    /// <summary>
+    /// The m cancellation token source
+    /// </summary>
+    private readonly CancellationTokenSource m_CancellationTokenSource;
+    /// <summary>
+    /// The m operation lock
+    /// </summary>
+    private readonly SemaphoreSlim m_OperationLock;
+
+    /// <summary>
+    /// The m is closing
+    /// </summary>
+    private bool m_IsClosing;
+
+    #endregion
 
     #region IAsyncDisposable Implementation
 
+    /// <summary>
+    /// Performs application-defined tasks associated with freeing, releasing, or
+    /// resetting unmanaged resources asynchronously.
+    /// </summary>
+    /// <returns>A Task&lt;ValueTask&gt; representing the asynchronous operation.</returns>
     public async ValueTask DisposeAsync()
     {
         if (!m_CancellationTokenSource.IsCancellationRequested)
-            await m_CancellationTokenSource.CancelAsync();
+        {
+            await m_CancellationTokenSource
+                .CancelAsync()
+                .ConfigureAwait(false);
+        }
 
-        await m_Session.DisposeAsync().ConfigureAwait(false);
+        await m_OperationLock
+            .WaitAsync()
+            .ConfigureAwait(false);
 
+        try
+        {
+            await DisposeTransportsAsync()
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            m_OperationLock.Release();
+        }
+
+        m_OperationLock.Dispose();
         m_CancellationTokenSource.Dispose();
     }
 

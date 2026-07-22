@@ -13,6 +13,8 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Enums;
+
 namespace Mercury.Abstractions.Logging;
 
 /// <summary>
@@ -34,18 +36,23 @@ public sealed class NoOpMercuryLogger : IMercuryLogger
     public static IMercuryLogger Instance => sm_NoOpMercuryLogger.Value;
 
     /// <inheritdoc />
-    public void Trace(string message)
-    {}
+    public void Trace(string message) 
+        => LogEntry(LogEntryType.Trace, message);
+    
 
     /// <inheritdoc />
     public void Info(string message)
-    {}
+        => LogEntry(LogEntryType.Information, message);
 
     /// <inheritdoc />
     public void Warn(string message)
-    {}
+        => LogEntry(LogEntryType.Warning, message);
 
     /// <inheritdoc />
     public void Error(string message, Exception? exception = null)
-    {}
+        => LogEntry(LogEntryType.Error, message);
+
+    /// <inheritdoc />
+    public void LogEntry(LogEntryType logEntryType, string entry, Exception? exception = null)
+    { }
 }

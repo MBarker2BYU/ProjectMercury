@@ -13,6 +13,8 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Enums;
+
 namespace Mercury.Abstractions.Logging;
 
 /// <summary>
@@ -44,4 +46,12 @@ public interface IMercuryLogger
     /// <param name="message">The message.</param>
     /// <param name="exception">The exception.</param>
     void Error(string message, Exception? exception = null);
+    
+    /// <summary>
+    /// Logs the entry.
+    /// </summary>
+    /// <param name="logEntryType">Type of the log entry.</param>
+    /// <param name="entry">The entry.</param>
+    /// <param name="exception">The exception.</param>
+    void LogEntry(LogEntryType logEntryType, string entry, Exception? exception = null);
 }

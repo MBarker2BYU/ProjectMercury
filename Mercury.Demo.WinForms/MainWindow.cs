@@ -1,3 +1,19 @@
+
+// ***********************************************************************
+// Assembly     : Mercury.Demo.WinForms
+// Author         : Matthew D. Barker
+// Created        : 07-22-2026
+//
+// Last Modified By : Matthew D. Barker
+// Last Modified On : 07-22-2026
+// ***********************************************************************
+// <copyright file="MainWindow.cs">
+//     Copyright (c) Matthew D. Barker. All rights reserved.
+//     Submitted in partial fulfillment of CSE499 Senior Capstone Project
+//     at Brigham Young University-Idaho.
+// </copyright>
+// ***********************************************************************
+
 using Mercury.Demo.WinForms.Controllers;
 using Mercury.Demo.WinForms.Controls;
 using Mercury.Demo.WinForms.Demo;
@@ -7,310 +23,155 @@ using System.Text;
 using Mercury.Abstractions;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
-using Mercury.Demo.WinForms.Services;
 
 namespace Mercury.Demo.WinForms
 {
+    /// <summary>
+    /// Class MainWindow.
+    /// Implements the <see cref="System.Windows.Forms.Form" />
+    /// </summary>
+    /// <seealso cref="System.Windows.Forms.Form" />
     public partial class MainWindow : Form
     {
 
         #region Events
 
+        /// <summary>
+        /// Handles the Click event of the btnApplyConfiguration control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void btnApplyConfiguration_Click(object sender, EventArgs e)
         {
-            
-            try
-            {
-                if (m_DemoController == null)
-                    return;
+            if (m_DemoController == null)
+                throw new Exception($"{nameof(DemoController)} is null.");
 
-                SetBusy(true);
+            await m_DemoController
+                .ApplyConfigurationAsync();
 
-                var cryptoProvider = cboCryptoProvider.Text;
-                var transport = cboTransport.Text;
-                var codec = cboEnvelopeCodec.Text;
-                var chunkingEnabled = tglChunking.Enabled;
-                
-                var logging = cboLogging.Text;
-
-                var demoConfiguration = new DemoConfiguration(cryptoProvider, transport, codec, chunkingEnabled, 64 * 1024, logging);
-
-                await m_DemoController.ConfigureAsync(demoConfiguration);
-
-            }
-            catch (Exception exception)
-            {
-                DisplayError(exception.Message);
-            }
-            finally
-            {
-                SetBusy(false);
-            }
         }
 
-        //Tmp Values
-        private bool m_InReplay = false;
-        public bool ReplayEnabled = true;
-        
-        private async Task SendOnceAsync()
-        {
-            var payload = new ReadOnlyMemory(Encoding.UTF8.GetBytes(txtSendPayload.Text));
-            var result = await m_DemoController.SendAsync(payload);
-
-            DisplayResult(result);
-        }
-
+        /// <summary>
+        /// Handles the Click event of the btnSend control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void btnSend_Click(object sender, EventArgs e)
         {
+            if (m_DemoController == null)
+                throw new Exception($"{nameof(DemoController)} is null.");
 
-            try
-            {
-                if (m_DemoController == null)
-                    return;
-
-                SetBusy(true);
-
-                await SendOnceAsync();
-
-                if (MercuryDemoSession.TcpAttackSimulatorProxy != null && MercuryDemoSession.TcpAttackSimulatorProxy.ReplayEnabled && !m_InReplay)
-                {
-                    m_InReplay = true;
-                    await Task.Delay(400);
-                    await SendOnceAsync();          // second send
-
-                    // Clear the cached frame in the attack simulator
-                    MercuryDemoSession.TcpAttackSimulatorProxy.ClearLastFrame();
-
-                    m_InReplay = false;
-                }
-
-
-                //var payload = new ReadOnlyMemory(Encoding.UTF8.GetBytes(txtSendPayload.Text));
-
-                //var result =
-                //    await m_DemoController.SendAsync(payload);
-
-                //DisplayResult(result);
-
-                //if (ReplayEnabled)
-                //{
-                //    if (!m_InReplay)
-                //    {
-                //        m_InReplay = true;
-
-                //        await Task.Delay(400); // short pause so it looks like an attack
-
-                //        btnSend_Click(sender, e);
-
-                //        m_InReplay = false;
-                //    }
-                //}
-
-            }
-            catch (Exception exception)
-            {
-                DisplayError(exception.Message);
-            }
-            finally
-            {
-                SetBusy(false);
-            }
+            await m_DemoController
+                .SendPayloadAsync();
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnSendFile control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void btnSendFile_Click(object sender, EventArgs e)
         {
-            try
-            {
-                if (m_DemoController == null)
-                    return;
+            if (m_DemoController == null)
+                throw new Exception($"{nameof(DemoController)} is null.");
 
-                using var dialog = new OpenFileDialog
-                {
-                    Title = @"Select an image to send",
-                    Filter =
-                        @"Image Files (*.png;*.jpg;*.jpeg;*.bmp;*.gif)|" +
-                       @"*.png;*.jpg;*.jpeg;*.bmp;*.gif",
-                    CheckFileExists = true,
-                    Multiselect = false,
-                    AddExtension = true,
-                    RestoreDirectory = true
-                };
-
-
-                if (dialog.ShowDialog(this) != DialogResult.OK)
-                    return;
-
-                if (!IsImageFile(dialog.FileName))
-                {
-                    DisplayError("The selected file is not a supported image.");
-                    return;
-                }
-
-                SetBusy(true);
-
-                var fileName =
-                    Path.GetFileName(dialog.FileName);
-
-                var payload =
-                    await File.ReadAllBytesAsync(
-                        dialog.FileName);
-
-                AppendLog(new DemoLogEntry("INFO", $"Sending image {fileName} | {FormatFileSize(payload.Length)}"));
-
-                var result =
-                    await m_DemoController.SendAsync(
-                        new ReadOnlyMemory(payload));
-
-                DisplayFileResult(result, fileName);
-
-            }
-            catch (Exception exception)
-            {
-                DisplayError(exception.Message);
-            }
-            finally
-            {
-                SetBusy(false);
-            }
+            await m_DemoController
+                .SendFileAsync();
         }
 
-        private async void btnReplayAttack_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Handles the CheckedChanged event of the tglReplayAttack control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void tglReplayAttack_CheckedChanged(object sender, EventArgs e)
         {
+            if (m_DemoController == null)
+                throw new Exception($"{nameof(DemoController)} is null.");
 
-            try
-            {
-                if (m_DemoController == null)
-                    return;
-
-                SetBusy(true);
-
-               
-            }
-            catch (Exception exception)
-            {
-                DisplayError(exception.Message);
-            }
-            finally
-            {
-                SetBusy(false);
-            }
+            m_DemoController.ReplayAttackChanged(
+                tglReplayAttack.Checked);
         }
 
-        private async void btnTamperAttack_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Handles the CheckedChanged event of the tglTamperAttack control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void tglTamperAttack_CheckedChanged(object sender, EventArgs e)
         {
-            try
-            {
-                if (m_DemoController == null)
-                    return;
+            if (m_DemoController == null)
+                throw new Exception($"{nameof(DemoController)} is null.");
 
-                SetBusy(true);
-
-                
-            }
-            catch (Exception exception)
-            {
-                DisplayError(exception.Message);
-            }
-            finally
-            {
-                SetBusy(false);
-            }
+            m_DemoController.TamperAttackChanged(
+                tglTamperAttack.Checked);
         }
 
-        private async void btnWrongKey_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Handles the CheckedChanged event of the tglWrongKeyAttack control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void tglWrongKeyAttack_CheckedChanged(object sender, EventArgs e)
         {
-            try
-            {
-                if (m_DemoController == null)
-                    return;
+            if (m_DemoController == null)
+                throw new Exception($"{nameof(DemoController)} is null.");
 
-                SetBusy(true);
-
-               
-            }
-            catch (Exception exception)
-            {
-                DisplayError(exception.Message);
-            }
-            finally
-            {
-                SetBusy(false);
-            }
+            m_DemoController.WrongKeyAttackChanged(
+                tglWrongKeyAttack.Checked);
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnClearLog control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void btnClearLog_Click(object sender, EventArgs e)
         {
-            rtbEventLog.Clear();
+            if (m_DemoController == null)
+                throw new Exception($"{nameof(DemoController)} is null.");
 
-            AppendLog(new DemoLogEntry("INFO", "Event log cleared"));
+            m_DemoController.ClearEventLog();
         }
 
-        private  void tglChunking_CheckedChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Handles the CheckedChanged event of the tglChunking control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void tglChunking_CheckedChanged(object sender, EventArgs e)
         {
-            cboChunkSize.Enabled = tglChunking.Checked;
-            lblChunkSize.Enabled = tglChunking.Checked;
+            if (m_DemoController == null)
+                throw new Exception($"{nameof(DemoController)} is null.");
+
+            m_DemoController.ChunkingChanged(tglChunking.Checked);
         }
 
+        /// <summary>
+        /// Handles the Load event of the MainWindow control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void MainWindow_Load(object sender, EventArgs e)
         {
-            try
-            {
-                SetBusy(true);
+            if (m_DemoController == null)
+                throw new Exception($"{nameof(DemoController)} is null.");
 
-                m_DemoController = new DemoController(AppendLog);
-
-                BindConfigurationOptions();
-
-                var configuration = BuildConfiguration();
-
-                var result = await m_DemoController
-                    .ConfigureAsync(configuration);
-
-                ApplyConfiguration(result.Configuration, result.IsConnected);
-            }
-            catch (Exception exception)
-            {
-                DisplayError(exception.Message);
-            }
-            finally
-            {
-                SetBusy(false);
-            }
+            await m_DemoController!.InitializeAsync();
         }
 
+        /// <summary>
+        /// Handles the FormClosing event of the MainWindow control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="FormClosingEventArgs"/> instance containing the event data.</param>
         private async void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            try
-            {
-                if (m_IsClosing)
-                    return;
+            if (m_DemoController == null)
+                throw new Exception($"{nameof(DemoController)} is null.");
 
-                var dialog = new MercuryDialog();
-                var dialogResult = dialog.ShowDialog();
-                
-                if (dialogResult != DialogResult.Yes)
-                {
-                    e.Cancel = true;
-                    return;
-                }
-
-                e.Cancel = true;
-                m_IsClosing = true;
-
-                if (m_DemoController != null)
-                {
-                    await m_DemoController.DisposeAsync();
-
-                    m_DemoController = null;
-                }
-
-                Close();
-            }
-            catch (Exception exception)
-            {
-                m_IsClosing = false;
-                DisplayError(exception.Message);
-            }
+            await m_DemoController
+                .FormClosingAsync(e);
         }
 
         #endregion
@@ -319,13 +180,42 @@ namespace Mercury.Demo.WinForms
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainWindow"/> class.
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
+
+            m_DemoController = new DemoController(this);
         }
 
         #endregion
-        
+
+        /// <summary>
+        /// Selects the image file.
+        /// </summary>
+        /// <returns>System.Nullable&lt;System.String&gt;.</returns>
+        internal string? SelectImageFile()
+        {
+            using var dialog = new OpenFileDialog();
+            dialog.Title = @"Select an image to send";
+            dialog.Filter = @"Image Files (*.png;*.jpg;*.jpeg;*.bmp;*.gif)|" +
+                            @"*.png;*.jpg;*.jpeg;*.bmp;*.gif";
+            dialog.CheckFileExists = true;
+            dialog.Multiselect = false;
+            dialog.AddExtension = true;
+            dialog.RestoreDirectory = true;
+
+            return dialog.ShowDialog(this) == DialogResult.OK
+                ? dialog.FileName
+                : null;
+        }
+
+        /// <summary>
+        /// Renders the border.
+        /// </summary>
+        /// <param name="graphics">The graphics.</param>
         private void RenderBorder(Graphics graphics)
         {
 
@@ -357,145 +247,24 @@ namespace Mercury.Demo.WinForms
 
         }
 
-        private void ApplyConfiguration(DemoConfiguration configuration, bool connected)
-        {
-            lblProviderValue.Text = configuration.CryptoProvider;
-            lblTransportValue.Text = configuration.Transport;
-
-            //lblConnectionValue.Text =
-            //    configuration.Transport.ToUpperInvariant();
-
-            //lblConnectionValue.ForeColor = connected
-            //    ? MercuryTheme.SuccessColor
-            //    : MercuryTheme.FailureColor;
-
-            lblTransportState.Text = connected
-                ? "CONNECTED"
-                : "OFFLINE";
-
-            lblTransportState.ForeColor = connected
-                ? MercuryTheme.SuccessColor
-                : MercuryTheme.FailureColor;
-
-            lblSystemState.Text = connected
-                ? "OPERATIONAL"
-                : "OFFLINE";
-
-            lblSystemState.ForeColor = connected
-                ? MercuryTheme.SuccessColor
-                : MercuryTheme.FailureColor;
-
-            lblFlowTransport.Text =
-                configuration.Transport.ToUpperInvariant();
-
-            lblFlowProvider.Text =
-                configuration.CryptoProvider.ToUpperInvariant();
-
-            //lblConfigurationState.Text = "CONFIGURATION APPLIED";
-            //lblConfigurationState.ForeColor =
-            //    MercuryTheme.SuccessColor;
-
-            lblIntegrityState.Text = "READY";
-            lblIntegrityState.ForeColor =
-                MercuryTheme.MutedColor;
-
-            lblReplayState.Text = "ACTIVE";
-            lblReplayState.ForeColor =
-                MercuryTheme.SuccessColor;
-
-            lblTamperState.Text = "CLEAN";
-            lblTamperState.ForeColor =
-                MercuryTheme.SuccessColor;
-
-            SetStatusIndicator(picProviderCheck, connected);
-            SetStatusIndicator(picTransportCheck, connected);
-            SetStatusIndicator(picIntegrityCheck, connected);
-            SetStatusIndicator(picReplayCheck, connected);
-            SetStatusIndicator(picTamperCheck, connected);
-        }
-
-        private void SetBusy(bool busy)
+        /// <summary>
+        /// Sets the busy.
+        /// </summary>
+        /// <param name="busy">if set to <c>true</c> [busy].</param>
+        internal void SetBusy(bool busy)
         {
             btnApplyConfiguration.Enabled = !busy;
             btnSend.Enabled = !busy;
             btnSendFile.Enabled = !busy;
-            btnReplayAttack.Enabled = !busy;
-            btnTamperAttack.Enabled = !busy;
-            btnWrongKey.Enabled = !busy;
 
             UseWaitCursor = busy;
         }
 
-        private void BindConfigurationOptions()
-        {
-            BindItems(cboCryptoProvider, DemoController.CryptoProviders);
-
-            BindItems(cboTransport, DemoController.Transports.Cast<object>());
-
-            BindItems(cboEnvelopeCodec, DemoController.EnvelopeCodecs.Cast<object>());
-
-            BindItems(cboLogging, DemoController.LoggingLevels.Cast<object>());
-
-            var chunkSizes = DemoController.ChunkSizes
-                .Select(bytes => new ChunkSizeOption(bytes))
-                .Cast<object>();
-
-            BindItems(cboChunkSize, chunkSizes);
-
-            cboCryptoProvider.Text = DemoConstants.AES_GCM;
-            cboTransport.Text = DemoConstants.IN_MEMORY_TRANSPORT;
-            cboEnvelopeCodec.Text = DemoConstants.BINARY_CODEC;
-            cboLogging.Text = DemoConstants.VERBOSE_LOGGING;
-            cboChunkSize.Text = "64 KB";
-
-            tglChunking.Checked = true;
-            cboChunkSize.Enabled = true;
-            lblChunkSize.Enabled = true;
-        }
-
-        private DemoConfiguration BuildConfiguration()
-        {
-            var chunkSize = cboChunkSize.SelectedItem is ChunkSizeOption option
-                ? option.Bytes
-                : DemoConstants.DEFAULT_CHUNK_SIZE;
-
-            return new DemoConfiguration(cboCryptoProvider.Text, cboTransport.Text, 
-                cboEnvelopeCodec.Text, tglChunking.Checked, chunkSize, cboLogging.Text);
-        }
-
-        private void AppendLog(DemoLogEntry logEntry)
-        {
-            if (InvokeRequired)
-            {
-                BeginInvoke(() => AppendLog(logEntry));
-                return;
-            }
-
-            var levelColor = logEntry.Level switch
-            {
-                "ERROR" => MercuryTheme.FailureColor,
-                "WARN" => MercuryTheme.WarningColor,
-                "TRACE" => MercuryTheme.MutedColor,
-                _ => MercuryTheme.SuccessColor
-            };
-
-            rtbEventLog.SelectionStart = rtbEventLog.TextLength;
-            rtbEventLog.SelectionLength = 0;
-
-            rtbEventLog.SelectionColor = MercuryTheme.MutedColor;
-            rtbEventLog.AppendText($"{logEntry.Timestamp:HH:mm:ss.fff}  ");
-
-            rtbEventLog.SelectionColor = levelColor;
-            rtbEventLog.AppendText($"[{logEntry.Level}] ");
-
-            rtbEventLog.SelectionColor = MercuryTheme.ForeColor;
-            rtbEventLog.AppendText(logEntry.Entry + Environment.NewLine);
-
-            rtbEventLog.SelectionStart = rtbEventLog.TextLength;
-            rtbEventLog.ScrollToCaret();
-        }
-
-        private void DisplayError(string message)
+        /// <summary>
+        /// Displays the error.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        internal void DisplayError(string message)
         {
             lblReceiveResult.Text = @$"FAILED: {message}";
             lblReceiveResult.ForeColor = MercuryTheme.FailureColor;
@@ -505,11 +274,25 @@ namespace Mercury.Demo.WinForms
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        private void DisplayResult(IMercuryResult result)
+        /// <summary>
+        /// Gets the send payload.
+        /// </summary>
+        /// <returns>System.String.</returns>
+        internal string GetSendPayload()
+        {
+            return txtSendPayload.Text;
+        }
+
+        /// <summary>
+        /// Displays the result.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        internal void DisplayResult(IMercuryResult result)
         {
             if (!result.Success)
             {
                 DisplayFailedResult(result);
+
                 return;
             }
 
@@ -517,58 +300,47 @@ namespace Mercury.Demo.WinForms
 
             if (secureEnvelope == null)
             {
-                DisplayError(
-                    "Mercury reported success but did not return a validated SecureEnvelope.");
+                DisplayError(@"Mercury reported success but did not return a validated SecureEnvelope.");
 
                 return;
             }
 
-            txtReceivePayload.Text =
-                Encoding.UTF8.GetString(
-                    result.Payload.ToArray());
+            txtReceivePayload.Text = Encoding.UTF8.GetString(result.Payload.ToArray());
 
-            txtReceiveHeader.Text =
-                FormatMetadata(secureEnvelope.Header.Meta);
+            txtReceiveHeader.Text = FormatMetadata(secureEnvelope.Header.Meta);
 
-            txtReceiveFooter.Text =
-                FormatMetadata(secureEnvelope.Footer.Meta);
+            txtReceiveFooter.Text = FormatMetadata(secureEnvelope.Footer.Meta);
 
-            lblReceiveResult.Text =
-                $"RECEIVED OK | {result.Payload.Length:N0} bytes";
+            lblReceiveResult.Text = @$"RECEIVED OK | {result.Payload.Length:N0} bytes";
 
-            lblReceiveResult.ForeColor =
-                MercuryTheme.SuccessColor;
+            lblReceiveResult.ForeColor = MercuryTheme.SuccessColor;
 
-            lblReceiveResult.BackColor =
-                Color.FromArgb(
-                    32,
-                    MercuryTheme.SuccessColor);
+            lblReceiveResult.BackColor = Color.FromArgb(32, MercuryTheme.SuccessColor);
 
             DisplayValidatedEnvelope(secureEnvelope);
 
-            lblIntegrityState.Text = "VERIFIED";
-            lblIntegrityState.ForeColor =
-                MercuryTheme.SuccessColor;
+            lblIntegrityState.Text = @"VERIFIED";
+            lblIntegrityState.ForeColor = MercuryTheme.SuccessColor;
 
-            lblReplayState.Text = "ACCEPTED";
-            lblReplayState.ForeColor =
-                MercuryTheme.SuccessColor;
+            lblReplayState.Text = @"ACCEPTED";
+            lblReplayState.ForeColor = MercuryTheme.SuccessColor;
 
-            lblTamperState.Text = "CLEAN";
-            lblTamperState.ForeColor =
-                MercuryTheme.SuccessColor;
+            lblTamperState.Text = @"CLEAN";
+            lblTamperState.ForeColor = MercuryTheme.SuccessColor;
 
-            lblLastCheck.Text =
-                $"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
+            lblLastCheck.Text = @$"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
 
             SetStatusIndicator(picIntegrityCheck, true);
             SetStatusIndicator(picReplayCheck, true);
             SetStatusIndicator(picTamperCheck, true);
         }
 
-        private void DisplayFileResult(
-            IMercuryResult result,
-            string fileName)
+        /// <summary>
+        /// Displays the file result.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        /// <param name="fileName">Name of the file.</param>
+        internal void DisplayFileResult(IMercuryResult result, string fileName)
         {
             if (!result.Success)
             {
@@ -581,107 +353,75 @@ namespace Mercury.Demo.WinForms
 
             if (secureEnvelope == null)
             {
-                DisplayError(
-                    "Mercury reported success but did not return a validated SecureEnvelope.");
+                DisplayError(@"Mercury reported success but did not return a validated SecureEnvelope.");
 
                 return;
             }
 
-            txtReceiveHeader.Text =
-                FormatMetadata(
-                    secureEnvelope.Header.Meta);
+            txtReceiveHeader.Text = FormatMetadata(secureEnvelope.Header.Meta);
 
-            txtReceivePayload.Text =
-                @$"{fileName}{Environment.NewLine}" +
-                @$"{FormatFileSize(result.Payload.Length)} received";
+            txtReceivePayload.Text = @$"{fileName}{Environment.NewLine}" +
+                                     @$"{FormatFileSize(result.Payload.Length)} received";
 
-            txtReceiveFooter.Text =
-                FormatMetadata(
-                    secureEnvelope.Footer.Meta);
+            txtReceiveFooter.Text = FormatMetadata(secureEnvelope.Footer.Meta);
 
             lblReceiveResult.Text =
                 @$"IMAGE RECEIVED OK | {FormatFileSize(result.Payload.Length)}";
 
-            lblReceiveResult.ForeColor =
-                MercuryTheme.SuccessColor;
+            lblReceiveResult.ForeColor = MercuryTheme.SuccessColor;
 
-            lblReceiveResult.BackColor =
-                Color.FromArgb(
-                    32,
-                    MercuryTheme.SuccessColor);
+            lblReceiveResult.BackColor = Color.FromArgb(32, MercuryTheme.SuccessColor);
 
-            DisplayValidatedEnvelope(
-                secureEnvelope);
+            DisplayValidatedEnvelope(secureEnvelope);
 
             lblIntegrityState.Text = @"VERIFIED";
 
-            lblIntegrityState.ForeColor =
-                MercuryTheme.SuccessColor;
+            lblIntegrityState.ForeColor = MercuryTheme.SuccessColor;
 
             lblLastCheck.Text =
                 @$"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
 
-            SetStatusIndicator(
-                picIntegrityCheck,
-                true);
+            SetStatusIndicator(picIntegrityCheck, true);
 
-            AppendLog(
-                new DemoLogEntry(
-                    "INFO",
-                    $"File received and authenticated: {fileName}"));
+            AppendLog(new DemoLogEntry("INFO", $"File received and authenticated: {fileName}"));
 
             if (IsImageFile(fileName))
             {
-                ShowReceivedImage(
-                    result.Payload,
-                    fileName);
+                ShowReceivedImage(result.Payload, fileName);
             }
         }
 
-        private static bool IsImageFile(
-            string fileName)
+        /// <summary>
+        /// Determines whether [is image file] [the specified file name].
+        /// </summary>
+        /// <param name="fileName">Name of the file.</param>
+        /// <returns><c>true</c> if [is image file] [the specified file name]; otherwise, <c>false</c>.</returns>
+        private static bool IsImageFile(string fileName)
         {
-            var extension =
-                Path.GetExtension(fileName);
+            var extension = Path.GetExtension(fileName);
 
-            return extension.Equals(
-                       ".png",
-                       StringComparison.OrdinalIgnoreCase)
-                   ||
-                   extension.Equals(
-                       ".jpg",
-                       StringComparison.OrdinalIgnoreCase)
-                   ||
-                   extension.Equals(
-                       ".jpeg",
-                       StringComparison.OrdinalIgnoreCase)
-                   ||
-                   extension.Equals(
-                       ".bmp",
-                       StringComparison.OrdinalIgnoreCase)
-                   ||
-                   extension.Equals(
-                       ".gif",
-                       StringComparison.OrdinalIgnoreCase);
+            return extension.Equals(".png", StringComparison.OrdinalIgnoreCase)
+                   || extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase)
+                   || extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase)
+                   || extension.Equals(".bmp", StringComparison.OrdinalIgnoreCase)
+                   || extension.Equals(".gif", StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// Displays the validated envelope.
+        /// </summary>
+        /// <param name="secureEnvelope">The secure envelope.</param>
         private void DisplayValidatedEnvelope(ISecureEnvelope secureEnvelope)
         {
-            lblEnvelopeVersionValue.Text =
-                secureEnvelope.Version.ToString();
+            lblEnvelopeVersionValue.Text = secureEnvelope.Version.ToString();
 
-            lblEnvelopeIdValue.Text =
-                secureEnvelope.Header.EnvelopeId.ToString();
+            lblEnvelopeIdValue.Text = secureEnvelope.Header.EnvelopeId.ToString();
 
-            lblAlgorithmValue.Text =
-                secureEnvelope.Header.Encryption.ToString();
+            lblAlgorithmValue.Text = secureEnvelope.Header.Encryption.ToString();
 
-            lblReplayTokenValue.Text =
-                Convert.ToHexString(
-                    secureEnvelope.Header.ReplayToken.ToArray());
+            lblReplayTokenValue.Text = Convert.ToHexString(secureEnvelope.Header.ReplayToken.ToArray());
 
-            lblProtectedSizeValue.Text =
-                $"{secureEnvelope.Payload.Length:N0} bytes";
+            lblProtectedSizeValue.Text = $"{secureEnvelope.Payload.Length:N0} bytes";
 
             txtHeaderMetadata.Text = FormatMetadata(secureEnvelope.Header.Meta);
 
@@ -694,15 +434,18 @@ namespace Mercury.Demo.WinForms
 
             lblFrameSizeValue.Text = "NOT AVAILABLE";
             lblRawPayloadValue.Text = "NOT AVAILABLE";
+
             rtbHexPreview.Clear();
 
-            lblFrameSizeValue.ForeColor =
-                MercuryTheme.MutedColor;
+            lblFrameSizeValue.ForeColor = MercuryTheme.MutedColor;
 
-            lblRawPayloadValue.ForeColor =
-                MercuryTheme.MutedColor;
+            lblRawPayloadValue.ForeColor = MercuryTheme.MutedColor;
         }
 
+        /// <summary>
+        /// Displays the failed result.
+        /// </summary>
+        /// <param name="result">The result.</param>
         private void DisplayFailedResult(
             IMercuryResult result)
         {
@@ -716,76 +459,132 @@ namespace Mercury.Demo.WinForms
                 result.Message ??
                 result.FailureReason.ToString();
 
-            lblReceiveResult.Text =
-                $"FAILED | {failureMessage}";
+            lblReceiveResult.Text = @$"FAILED | {failureMessage}";
 
-            lblReceiveResult.ForeColor =
-                MercuryTheme.FailureColor;
+            lblReceiveResult.ForeColor = MercuryTheme.FailureColor;
 
-            lblReceiveResult.BackColor =
-                Color.FromArgb(
-                    32,
-                    MercuryTheme.FailureColor);
+            lblReceiveResult.BackColor = Color.FromArgb(32, MercuryTheme.FailureColor);
 
-            lblIntegrityState.Text = "FAILED";
-            lblIntegrityState.ForeColor =
-                MercuryTheme.FailureColor;
+            lblIntegrityState.Text = @"FAILED";
+            lblIntegrityState.ForeColor = MercuryTheme.FailureColor;
 
-            lblLastCheck.Text =
-                $"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
+            lblLastCheck.Text = @$"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
 
             SetStatusIndicator(picIntegrityCheck, false);
 
-            AppendLog(
-                new DemoLogEntry(
-                    "ERROR",
-                    failureMessage));
+            AppendLog(new DemoLogEntry(@"ERROR", failureMessage));
         }
 
+        /// <summary>
+        /// Clears the envelope display.
+        /// </summary>
         private void ClearEnvelopeDisplay()
         {
-            lblEnvelopeVersionValue.Text = "-";
-            lblEnvelopeIdValue.Text = "-";
-            lblAlgorithmValue.Text = "-";
-            lblReplayTokenValue.Text = "-";
-            lblProtectedSizeValue.Text = "-";
-            lblFrameSizeValue.Text = "-";
-            lblRawPayloadValue.Text = "-";
+            lblEnvelopeVersionValue.Text = @"-";
+            lblEnvelopeIdValue.Text = @"-";
+            lblAlgorithmValue.Text = @"-";
+            lblReplayTokenValue.Text = @"-";
+            lblProtectedSizeValue.Text = @"-";
+            lblFrameSizeValue.Text = @"-";
+            lblRawPayloadValue.Text = @"-";
 
             txtHeaderMetadata.Clear();
             txtFooterMetadata.Clear();
             rtbHexPreview.Clear();
         }
 
-        private static string FormatMetadata(
-            Metadata metadata)
+        /// <summary>
+        /// Formats the metadata.
+        /// </summary>
+        /// <param name="metadata">The metadata.</param>
+        /// <returns>System.String.</returns>
+        private static string FormatMetadata(Metadata metadata)
         {
             if (metadata.Count == 0)
                 return string.Empty;
 
-            return string.Join(
-                Environment.NewLine,
-                metadata.Select(
-                    item => $"{item.Key}: {item.Value}"));
+            return string.Join(Environment.NewLine,
+                metadata.Select(item => $"{item.Key}: {item.Value}"));
         }
 
-        //private DemoExchangeRequest BuildExchangeRequest()
-        //{
-        //    return new DemoExchangeRequest(txtSendHeader.Text, txtSendPayload.Text, txtSendFooter.Text);
-        //}
-
+        /// <summary>
+        /// Shows the received image.
+        /// </summary>
+        /// <param name="payload">The payload.</param>
+        /// <param name="fileName">Name of the file.</param>
+        /// <exception cref="InvalidOperationException">Mercury did not return an image payload.</exception>
         private void ShowReceivedImage(ReadOnlyMemory payload, string fileName)
         {
             if (payload.IsEmpty)
-                throw new InvalidOperationException("Mercury did not return an image payload.");
-            
+                throw new InvalidOperationException(@"Mercury did not return an image payload.");
+
             using var window = new FileReceivedDialog(fileName, payload);
 
             window.ShowDialog(this);
         }
 
+        /// <summary>
+        /// Runs the on UI thread.
+        /// </summary>
+        /// <param name="action">The action.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        internal void RunOnUiThread(Action action)
+        {
+            ArgumentNullException.ThrowIfNull(action);
+
+            if (IsDisposed || Disposing)
+                return;
+
+            if (InvokeRequired)
+            {
+                Invoke(action);
+                return;
+            }
+
+            action();
+        }
+
+        /// <summary>
+        /// Runs the on UI thread.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="function">The function.</param>
+        /// <returns>T.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ObjectDisposedException">MainWindow</exception>
+        internal T RunOnUiThread<T>(
+            Func<T> function)
+        {
+            ArgumentNullException.ThrowIfNull(function);
+
+            if (IsDisposed || Disposing)
+                throw new ObjectDisposedException(nameof(MainWindow));
+
+            if (InvokeRequired)
+                return (T)Invoke(function)!;
+
+            return function();
+        }
+
+        /// <summary>
+        /// Sets the attack selection.
+        /// </summary>
+        /// <param name="tamper">if set to <c>true</c> [tamper].</param>
+        /// <param name="replay">if set to <c>true</c> [replay].</param>
+        /// <param name="wrongKey">if set to <c>true</c> [wrong key].</param>
+        internal void SetAttackSelection(bool tamper, bool replay, bool wrongKey)
+        {
+            tglTamperAttack.Checked = tamper;
+            tglReplayAttack.Checked = replay;
+            tglWrongKeyAttack.Checked = wrongKey;
+        }
+
         #region Overrides
 
+        /// <summary>
+        /// Raises the <see cref="E:System.Windows.Forms.Control.Paint" /> event.
+        /// </summary>
+        /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs" /> that contains the event data.</param>
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -797,6 +596,11 @@ namespace Mercury.Demo.WinForms
 
         #region Static
 
+        /// <summary>
+        /// Formats the size of the file.
+        /// </summary>
+        /// <param name="byteCount">The byte count.</param>
+        /// <returns>System.String.</returns>
         private static string FormatFileSize(long byteCount)
         {
             const double kilobyte = 1024;
@@ -811,17 +615,11 @@ namespace Mercury.Demo.WinForms
             return $"{byteCount:N0} bytes";
         }
 
-        private static void BindItems(MercuryGlassComboBox comboBox, IEnumerable<object> items, int defaultIndex = 0)
-        {
-            comboBox.Items.Clear();
-
-            foreach (var item in items)
-                comboBox.Items.Add(item);
-
-            if (comboBox.Items.Count > 0)
-                comboBox.SelectedIndex = defaultIndex;
-        }
-
+        /// <summary>
+        /// Sets the status indicator.
+        /// </summary>
+        /// <param name="pictureBox">The picture box.</param>
+        /// <param name="success">if set to <c>true</c> [success].</param>
         private static void SetStatusIndicator(PictureBox pictureBox, bool success)
         {
             pictureBox.BackColor = success
@@ -829,15 +627,34 @@ namespace Mercury.Demo.WinForms
                 : Color.FromArgb(32, MercuryTheme.FailureColor);
         }
 
+        /// <summary>
+        /// Confirms the close.
+        /// </summary>
+        /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
+        internal bool ConfirmClose()
+        {
+            using var dialog = new MercuryDialog();
+
+            return dialog.ShowDialog(this) == DialogResult.Yes;
+        }
+
+        /// <summary>
+        /// Closes the window.
+        /// </summary>
+        internal void CloseWindow()
+            => Close();
+
         #endregion
 
         #endregion
 
         #region Properties and Fields
 
-        private DemoController? m_DemoController;
-        private bool m_IsClosing;
-
+        /// <summary>
+        /// The m demo controller
+        /// </summary>
+        private readonly DemoController? m_DemoController;
+        
         #endregion
     }
 }
