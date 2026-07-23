@@ -1,10 +1,10 @@
 ﻿// ***********************************************************************
-// Assembly       : Mercury.Transport.Tcp
+// Assembly     : Mercury.Transport.Tcp
 // Author         : Matthew D. Barker
 // Created        : 07-11-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-11-2026
+// Last Modified On : 07-23-2026
 // ***********************************************************************
 // <copyright file="TcpTransport.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -28,8 +28,7 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     /// <summary>
     /// The maximum permitted frame size.
     /// </summary>
-    private const uint MAX_FRAME_BYTES =
-        8 * 1024 * 1024;
+    private const uint MAX_FRAME_BYTES = 8 * 1024 * 1024;
 
     /// <summary>
     /// The TCP client.
@@ -40,6 +39,28 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     /// The network stream.
     /// </summary>
     private readonly NetworkStream m_Stream;
+
+    /// <summary>
+    /// Prevents multiple send operations from writing
+    /// into the TCP stream at the same time.
+    /// </summary>
+    private readonly SemaphoreSlim m_SendLock = new(1, 1);
+
+    /// <summary>
+    /// Prevents multiple receive operations from reading
+    /// from the TCP stream at the same time.
+    /// </summary>
+    private readonly SemaphoreSlim m_ReceiveLock = new(1, 1);
+
+    /// <summary>
+    /// Indicates that the TCP stream can no longer be trusted.
+    /// </summary>
+    private int m_IsFaulted;
+
+    /// <summary>
+    /// Indicates that the transport has been disposed.
+    /// </summary>
+    private int m_IsDisposed;
 
     /// <summary>
     /// Initializes a new instance of the
@@ -55,14 +76,10 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     public TcpTransport(TcpClient client)
     {
         m_Client = client
-            ?? throw new ArgumentNullException(
-                nameof(client));
+            ?? throw new ArgumentNullException(nameof(client));
 
         if (!m_Client.Connected)
-        {
-            throw new InvalidOperationException(
-                "The TCP client must be connected.");
-        }
+            throw new InvalidOperationException(@"The TCP client must be connected.");
 
         m_Stream = m_Client.GetStream();
     }
@@ -76,37 +93,22 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     /// The cancellation token.
     /// </param>
     /// <returns>The connected TCP transport.</returns>
-    /// <exception cref="ArgumentException">
-    /// The host is missing.
-    /// </exception>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// The port is outside the valid TCP port range.
-    /// </exception>
     public static async Task<TcpTransport> ConnectAsync(string host, int port, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(host))
         {
-            throw new ArgumentException(
-                "Host is required.",
-                nameof(host));
+            throw new ArgumentException("Host is required.", nameof(host));
         }
 
         if (port is < 1 or > 65535)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(port),
-                "Port must be between 1 and 65535.");
-        }
-
+            throw new ArgumentOutOfRangeException(nameof(port), "Port must be between 1 and 65535.");
+        
         var client = new TcpClient();
 
         try
         {
             await client
-                .ConnectAsync(
-                    host,
-                    port,
-                    cancellationToken)
+                .ConnectAsync(host, port, cancellationToken)
                 .ConfigureAwait(false);
 
             return new TcpTransport(client);
@@ -126,16 +128,11 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     /// The cancellation token.
     /// </param>
     /// <returns>The accepted TCP transport.</returns>
-    /// <exception cref="ArgumentNullException">
-    /// The listener is null.
-    /// </exception>
-    public static async Task<TcpTransport> AcceptAsync(
-        TcpListener listener, CancellationToken cancellationToken = default)
+    public static async Task<TcpTransport> AcceptAsync(TcpListener listener, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(listener);
 
-        var client =
-            await listener
+        var client = await listener
                 .AcceptTcpClientAsync(cancellationToken)
                 .ConfigureAwait(false);
 
@@ -143,13 +140,17 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     }
 
     /// <summary>
-    /// Gets a value indicating whether the underlying socket is connected.
+    /// Gets a value indicating whether this transport
+    /// is available for communication.
     /// </summary>
     /// <remarks>
-    /// This reflects the last known socket state. A remote disconnect may not
-    /// be detected until the next send or receive operation.
+    /// The underlying socket may still detect a remote disconnect
+    /// only when the next operation is attempted.
     /// </remarks>
-    public bool IsConnected => m_Client.Connected;
+    public bool IsConnected =>
+        Volatile.Read(ref m_IsDisposed) == 0 &&
+        Volatile.Read(ref m_IsFaulted) == 0 &&
+        m_Client.Connected;
 
     /// <summary>
     /// Sends one complete frame.
@@ -159,15 +160,7 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     /// The cancellation token.
     /// </param>
     /// <returns>A task representing the operation.</returns>
-    /// <exception cref="ArgumentException">
-    /// The frame is empty.
-    /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// The frame exceeds the maximum permitted size.
-    /// </exception>
-    public async Task SendAsync(
-        ReadOnlyMemory frame,
-        CancellationToken cancellationToken = default)
+    public async Task SendAsync(ReadOnlyMemory frame, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -184,31 +177,43 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
                 $"Frame is too large: {frame.Length} bytes.");
         }
 
-        var header = new byte[4];
+        await m_SendLock
+            .WaitAsync(cancellationToken)
+            .ConfigureAwait(false);
 
-        WriteUInt32BigEndian(
-            header,
-            (uint)frame.Length);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
 
-        var frameBytes =
-            frame.ToArray();
+            var header = new byte[4];
 
-        await m_Stream
-            .WriteAsync(
+            WriteUInt32BigEndian(
                 header,
-                cancellationToken)
-            .ConfigureAwait(false);
+                (uint)frame.Length);
 
-        await m_Stream
-            .WriteAsync(
-                frameBytes,
-                cancellationToken)
-            .ConfigureAwait(false);
+            var frameBytes =
+                frame.ToArray();
 
-        await m_Stream
-            .FlushAsync(
-                cancellationToken)
-            .ConfigureAwait(false);
+            await m_Stream
+                .WriteAsync(
+                    header,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            await m_Stream
+                .WriteAsync(
+                    frameBytes,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            await m_Stream
+                .FlushAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            m_SendLock.Release();
+        }
     }
 
     /// <summary>
@@ -218,47 +223,57 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     /// The cancellation token.
     /// </param>
     /// <returns>The received frame.</returns>
-    /// <exception cref="InvalidOperationException">
-    /// The frame is empty or exceeds the maximum permitted size.
-    /// </exception>
     public async Task<ReadOnlyMemory> ReceiveAsync(
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var header = new byte[4];
-
-        await ReadExactAsync(
-                m_Stream,
-                header,
-                cancellationToken)
+        await m_ReceiveLock
+            .WaitAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        var frameLength =
-            ReadUInt32BigEndian(header);
-
-        if (frameLength == 0)
+        try
         {
-            throw new InvalidOperationException(
-                "The remote endpoint sent an empty frame.");
-        }
+            cancellationToken.ThrowIfCancellationRequested();
 
-        if (frameLength > MAX_FRAME_BYTES)
+            var header = new byte[4];
+
+            await ReadExactAsync(
+                    m_Stream,
+                    header,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            var frameLength =
+                ReadUInt32BigEndian(header);
+
+            if (frameLength == 0)
+            {
+                throw new InvalidOperationException(
+                    "The remote endpoint sent an empty frame.");
+            }
+
+            if (frameLength > MAX_FRAME_BYTES)
+            {
+                throw new InvalidOperationException(
+                    $"Frame is too large: {frameLength} bytes.");
+            }
+
+            var frame =
+                new byte[(int)frameLength];
+
+            await ReadExactAsync(
+                    m_Stream,
+                    frame,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            return new ReadOnlyMemory(frame);
+        }
+        finally
         {
-            throw new InvalidOperationException(
-                $"Frame is too large: {frameLength} bytes.");
+            m_ReceiveLock.Release();
         }
-
-        var frame =
-            new byte[(int)frameLength];
-
-        await ReadExactAsync(
-                m_Stream,
-                frame,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        return new ReadOnlyMemory(frame);
     }
 
     /// <summary>
@@ -288,13 +303,7 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     /// The cancellation token.
     /// </param>
     /// <returns>A task representing the operation.</returns>
-    /// <exception cref="IOException">
-    /// The remote endpoint closed the connection before the frame was complete.
-    /// </exception>
-    private static async Task ReadExactAsync(
-        NetworkStream stream,
-        byte[] buffer,
-        CancellationToken cancellationToken)
+    private static async Task ReadExactAsync(NetworkStream stream, byte[] buffer, CancellationToken cancellationToken)
     {
         var offset = 0;
 
@@ -302,20 +311,61 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
         {
             var bytesRead =
                 await stream
-                    .ReadAsync(
-                        buffer.AsMemory(
-                            offset,
-                            buffer.Length - offset),
-                        cancellationToken)
+                    .ReadAsync(buffer.AsMemory(offset, buffer.Length - offset), cancellationToken)
                     .ConfigureAwait(false);
 
             if (bytesRead == 0)
             {
-                throw new IOException(
-                    "The remote endpoint closed the connection while a frame was being received.");
+                throw new IOException("The remote endpoint closed the connection while a frame was being received.");
             }
 
             offset += bytesRead;
+        }
+    }
+
+    /// <summary>
+    /// Marks this transport as unusable and closes
+    /// only its current TCP connection.
+    /// </summary>
+    private void FaultTransport()
+    {
+        if (Interlocked.Exchange(ref m_IsFaulted, 1) != 0)
+            return;
+        
+
+        try
+        {
+            /*
+             * Closing the client also interrupts any send or receive
+             * currently waiting on the associated network stream.
+             *
+             * This does not stop the TcpListener used by the server
+             * or the MITM proxy.
+             */
+            m_Client.Dispose();
+        }
+        catch
+        {
+            /*
+             * Fault cleanup must not replace the original
+             * communication exception.
+             */
+        }
+    }
+
+    /// <summary>
+    /// Throws when the transport cannot be used.
+    /// </summary>
+    private void ThrowIfUnavailable()
+    {
+        if (Volatile.Read(ref m_IsDisposed) != 0)
+        {
+            throw new ObjectDisposedException(nameof(TcpTransport));
+        }
+
+        if (Volatile.Read(ref m_IsFaulted) != 0)
+        {
+            throw new InvalidOperationException("The TCP transport is faulted. Establish a new connection before continuing.");
         }
     }
 
@@ -326,21 +376,15 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     /// The four-byte destination.
     /// </param>
     /// <param name="value">The value.</param>
-    private static void WriteUInt32BigEndian(
-        byte[] destination,
-        uint value)
+    private static void WriteUInt32BigEndian(byte[] destination, uint value)
     {
-        destination[0] =
-            (byte)(value >> 24);
+        destination[0] = (byte)(value >> 24);
 
-        destination[1] =
-            (byte)(value >> 16);
+        destination[1] = (byte)(value >> 16);
 
-        destination[2] =
-            (byte)(value >> 8);
+        destination[2] = (byte)(value >> 8);
 
-        destination[3] =
-            (byte)value;
+        destination[3] = (byte)value;
     }
 
     /// <summary>
@@ -348,8 +392,7 @@ public sealed class TcpTransport : ITransport, IAsyncDisposable
     /// </summary>
     /// <param name="source">The four-byte source.</param>
     /// <returns>The decoded value.</returns>
-    private static uint ReadUInt32BigEndian(
-        byte[] source)
+    private static uint ReadUInt32BigEndian(byte[] source)
     {
         return
             ((uint)source[0] << 24) |

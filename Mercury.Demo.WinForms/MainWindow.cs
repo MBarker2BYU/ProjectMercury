@@ -270,7 +270,7 @@ namespace Mercury.Demo.WinForms
         {
             lblReceiveResult.Text = @$"FAILED: {message}";
             lblReceiveResult.ForeColor = MercuryTheme.FailureColor;
-            lblReceiveResult.BackColor = Color.FromArgb(35, MercuryTheme.FailureColor);
+            lblReceiveResult.BackColor = Color.FromArgb( 255, MercuryTheme.FailureColor);
 
             MessageBox.Show(this, message, @"Mercury Demo",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -427,145 +427,98 @@ namespace Mercury.Demo.WinForms
             
             ClearEnvelopeDisplay();
 
-            SetReceiveResult(
-                $"FAILED | {failureMessage}",
-                MercuryTheme.FailureColor);
+            SetReceiveResult($"FAILED | {failureMessage}", MercuryTheme.FailureColor);
 
             switch (attackMode)
             {
                 case DemoAttackMode.Tamper:
-                    SetState(
-                        lblIntegrityState,
-                        "FAILED",
-                        MercuryTheme.FailureColor);
+                    SetState(lblIntegrityState, "FAILED", MercuryTheme.FailureColor);
 
-                    SetState(
-                        lblReplayState,
-                        "ACTIVE",
-                        MercuryTheme.SuccessColor);
+                    SetState(lblReplayState, "ACTIVE", MercuryTheme.SuccessColor);
 
-                    SetState(
-                        lblTamperState,
-                        "DETECTED",
-                        MercuryTheme.FailureColor);
+                    SetState(lblTamperState, "DETECTED", MercuryTheme.FailureColor);
 
-                    SetStatusIndicator(
-                        picIntegrityCheck,
-                        false);
+                    SetStatusIndicator(picIntegrityCheck, false);
 
-                    SetStatusIndicator(
-                        picReplayCheck,
-                        true);
+                    SetStatusIndicator(picReplayCheck, true);
 
-                    SetStatusIndicator(
-                        picTamperCheck,
-                        false);
+                    SetStatusIndicator(picTamperCheck, false);
 
                     break;
 
                 case DemoAttackMode.Replay:
-                    SetState(
-                        lblIntegrityState,
-                        "VERIFIED",
-                        MercuryTheme.SuccessColor);
+                    SetState(lblIntegrityState, "VERIFIED", MercuryTheme.SuccessColor);
 
-                    SetState(
-                        lblReplayState,
-                        "BLOCKED",
-                        MercuryTheme.FailureColor);
+                    SetState(lblReplayState, "BLOCKED", MercuryTheme.FailureColor);
 
-                    SetState(
-                        lblTamperState,
-                        "CLEAN",
-                        MercuryTheme.SuccessColor);
+                    SetState(lblTamperState, "CLEAN", MercuryTheme.SuccessColor);
 
-                    SetStatusIndicator(
-                        picIntegrityCheck,
-                        true);
+                    SetStatusIndicator(picIntegrityCheck, true);
 
-                    SetStatusIndicator(
-                        picReplayCheck,
-                        false);
+                    SetStatusIndicator(picReplayCheck, false);
 
-                    SetStatusIndicator(
-                        picTamperCheck,
-                        true);
+                    SetStatusIndicator(picTamperCheck, true);
 
                     break;
 
                 case DemoAttackMode.WrongKey:
-                    SetState(
-                        lblIntegrityState,
-                        "AUTH FAILED",
-                        MercuryTheme.FailureColor);
+                    SetState(lblIntegrityState, "AUTH FAILED", MercuryTheme.FailureColor);
 
-                    SetState(
-                        lblReplayState,
-                        "ACTIVE",
-                        MercuryTheme.SuccessColor);
+                    SetState(lblReplayState, "ACTIVE", MercuryTheme.SuccessColor);
 
-                    SetState(
-                        lblTamperState,
-                        "CLEAN",
-                        MercuryTheme.SuccessColor);
+                    SetState(lblTamperState, "CLEAN", MercuryTheme.SuccessColor);
 
-                    SetStatusIndicator(
-                        picIntegrityCheck,
-                        false);
+                    SetStatusIndicator(picIntegrityCheck, false);
 
-                    SetStatusIndicator(
-                        picReplayCheck,
-                        true);
+                    SetStatusIndicator(picReplayCheck, true);
 
-                    SetStatusIndicator(
-                        picTamperCheck,
-                        true);
+                    SetStatusIndicator(picTamperCheck, true);
 
                     break;
 
                 default:
-                    SetState(
-                        lblIntegrityState,
-                        "FAILED",
-                        MercuryTheme.FailureColor);
+                    SetState(lblIntegrityState, "FAILED", MercuryTheme.FailureColor);
 
-                    SetState(
-                        lblReplayState,
-                        "UNKNOWN",
-                        MercuryTheme.WarningColor);
+                    SetState(lblReplayState, "UNKNOWN", MercuryTheme.WarningColor);
 
-                    SetState(
-                        lblTamperState,
-                        "UNKNOWN",
-                        MercuryTheme.WarningColor);
+                    SetState(lblTamperState, "UNKNOWN", MercuryTheme.WarningColor);
 
-                    SetStatusIndicator(
-                        picIntegrityCheck,
-                        false);
+                    SetStatusIndicator(picIntegrityCheck, false);
 
-                    SetStatusIndicator(
-                        picReplayCheck,
-                        false);
+                    SetStatusIndicator(picReplayCheck, false);
 
-                    SetStatusIndicator(
-                        picTamperCheck,
-                        false);
+                    SetStatusIndicator(picTamperCheck, false);
 
                     break;
             }
 
             UpdateLastSecurityCheck();
 
-            DisplayExchangeFlow(
-                success: false,
-                attackMode);
+            DisplayExchangeFlow(success: false, attackMode);
         }
 
-        private void SetReceiveResult(string message, Color color)
+        private void SetReceiveResult(
+            string message,
+            Color color)
         {
             lblReceiveResult.Text = message;
-            lblReceiveResult.ForeColor = color;
-            lblReceiveResult.BackColor = Color.FromArgb(32, color);
+
+            if (color == MercuryTheme.FailureColor)
+            {
+                lblReceiveResult.ForeColor = Color.White;
+                lblReceiveResult.BackColor = Color.FromArgb(96, 0, 0);
+                return;
+            }
+
+            if (color == MercuryTheme.WarningColor)
+            {
+                lblReceiveResult.ForeColor = Color.White;
+                lblReceiveResult.BackColor = Color.FromArgb(96, 72, 0);
+                return;
+            }
+
+            lblReceiveResult.ForeColor = Color.White;
+            lblReceiveResult.BackColor = Color.FromArgb(0, 72, 32);
         }
 
         private static void SetState(Label label, string state, Color color)

@@ -112,59 +112,22 @@ internal sealed partial class DemoController
 
         var builder =
             new StringBuilder(
-                bytes.Length * 4);
+                bytes.Length * 3);
 
-        for (var offset = 0;
-             offset < bytes.Length;
-             offset += bytesPerLine)
+        for (var index = 0;
+             index < bytes.Length;
+             index++)
         {
-            var count =
-                Math.Min(
-                    bytesPerLine,
-                    bytes.Length - offset);
+            if (index > 0)
+            {
+                builder.Append(
+                    index % bytesPerLine == 0
+                        ? Environment.NewLine
+                        : " ");
+            }
 
             builder.Append(
-                offset.ToString("X8"));
-
-            builder.Append("  ");
-
-            for (var index = 0;
-                 index < bytesPerLine;
-                 index++)
-            {
-                if (index < count)
-                {
-                    builder.Append(
-                        bytes[offset + index]
-                            .ToString("X2"));
-
-                    builder.Append(' ');
-                }
-                else
-                {
-                    builder.Append("   ");
-                }
-
-                if (index == 7)
-                    builder.Append(' ');
-            }
-
-            builder.Append(" |");
-
-            for (var index = 0;
-                 index < count;
-                 index++)
-            {
-                var value =
-                    bytes[offset + index];
-
-                builder.Append(
-                    value is >= 32 and <= 126
-                        ? (char)value
-                        : '.');
-            }
-
-            builder.AppendLine("|");
+                bytes[index].ToString("X2"));
         }
 
         return builder.ToString();

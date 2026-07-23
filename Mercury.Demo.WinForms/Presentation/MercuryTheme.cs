@@ -6,7 +6,7 @@ internal static class MercuryTheme
 
     public static Color WarningColor => Color.Gold;
 
-    public static Color FailureColor => Color.DarkRed;
+    public static Color FailureColor => Color.FromArgb(192, 0, 0);
 
     public static Color ForeColor => Color.Gainsboro;
 

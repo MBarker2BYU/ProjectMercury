@@ -18,6 +18,7 @@ using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Primitives;
 using Mercury.Core.Factories;
 using Mercury.Demo.WinForms.Demo;
+using Mercury.Demo.WinForms.Enums;
 using System.Text;
 
 namespace Mercury.Demo.WinForms.Controllers;
@@ -99,19 +100,25 @@ internal sealed partial class DemoController
     }
 
     /// <summary>
-    /// Send as an asynchronous operation.
+    /// Sends one Mercury exchange asynchronously.
     /// </summary>
     /// <param name="payload">The payload.</param>
-    /// <returns>A Task&lt;IMercuryResult&gt; representing the asynchronous operation.</returns>
-    /// <exception cref="ArgumentException">Payload must not be empty. - payload</exception>
-    public async Task<IMercuryResult> SendAsync(ReadOnlyMemory payload)
+    /// <returns>The Mercury result.</returns>
+    /// <exception cref="ArgumentException">
+    /// Payload must not be empty.
+    /// </exception>
+    public async Task<IMercuryResult> SendAsync(
+        ReadOnlyMemory payload)
     {
         if (payload.IsEmpty)
         {
-            throw new ArgumentException(@"Payload must not be empty.", nameof(payload));
+            throw new ArgumentException(
+                @"Payload must not be empty.",
+                nameof(payload));
         }
 
-        var cancellationToken = m_CancellationTokenSource.Token;
+        var cancellationToken =
+            m_CancellationTokenSource.Token;
 
         await m_OperationLock
             .WaitAsync(cancellationToken)
@@ -119,26 +126,10 @@ internal sealed partial class DemoController
 
         try
         {
-            var result =
-                await SendOnceAsync(payload, cancellationToken)
-                    .ConfigureAwait(false);
-
-            if (!result.Success || !ReplayAttackEnabled)
-                return result;
-            
-
-            await Task.Delay(400, cancellationToken)
+            return await SendOnceAsync(
+                    payload,
+                    cancellationToken)
                 .ConfigureAwait(false);
-
-            try
-            {
-                return await SendOnceAsync(payload, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            finally
-            {
-                ClearReplayFrame();
-            }
         }
         finally
         {
@@ -147,9 +138,9 @@ internal sealed partial class DemoController
     }
 
     /// <summary>
-    /// Send payload as an asynchronous operation.
+    /// Executes the payload-send demonstration asynchronously.
     /// </summary>
-    /// <returns>A Task representing the asynchronous operation.</returns>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task SendPayloadAsync()
     {
         try
@@ -168,31 +159,98 @@ internal sealed partial class DemoController
             var attackMode =
                 CurrentAttackMode;
 
-            var result =
+            /*
+             * First exchange:
+             * This must be displayed immediately. During the replay
+             * demonstration, this is the valid frame that Mercury accepts.
+             */
+            var firstResult =
                 await SendAsync(payload);
 
-            if (!result.Success)
+            if (!firstResult.Success)
             {
                 var failureMessage =
-                    GetFailureMessage(result);
+                    GetFailureMessage(firstResult);
 
-                UpdateView(view => view.DisplayFailure(failureMessage, attackMode));
+                UpdateView(
+                    view => view.DisplayFailure(
+                        failureMessage,
+                        attackMode));
+
+                ClearReplayFrame();
 
                 return;
             }
 
-            var envelopeDisplay =
-                BuildEnvelopeDisplay(result);
+            var firstEnvelope =
+                BuildEnvelopeDisplay(firstResult);
 
             var recoveredPayload =
                 Encoding.UTF8.GetString(
-                    result.Payload.ToArray());
+                    firstResult.Payload.ToArray());
 
             UpdateView(
                 view => view.DisplaySuccessfulPayload(
                     recoveredPayload,
-                    result.Payload.Length,
-                    envelopeDisplay));
+                    firstResult.Payload.Length,
+                    firstEnvelope));
+
+            if (attackMode != DemoAttackMode.Replay)
+                return;
+
+            try
+            {
+                /*
+                 * Allow the successful first exchange to remain visible
+                 * before the captured frame is submitted again.
+                 */
+                await Task.Delay(
+                    500,
+                    m_CancellationTokenSource.Token);
+
+                var replayResult =
+                    await SendAsync(payload);
+
+                if (!replayResult.Success)
+                {
+                    var failureMessage =
+                        GetFailureMessage(replayResult);
+
+                    UpdateView(
+                        view => view.DisplayFailure(
+                            failureMessage,
+                            DemoAttackMode.Replay));
+
+                    return;
+                }
+
+                /*
+                 * This should not normally happen. If the second frame is
+                 * accepted, show the result honestly instead of manufacturing
+                 * a replay failure.
+                 */
+                var replayEnvelope =
+                    BuildEnvelopeDisplay(replayResult);
+
+                var replayPayload =
+                    Encoding.UTF8.GetString(
+                        replayResult.Payload.ToArray());
+
+                UpdateView(
+                    view => view.DisplaySuccessfulPayload(
+                        replayPayload,
+                        replayResult.Payload.Length,
+                        replayEnvelope));
+            }
+            finally
+            {
+                ClearReplayFrame();
+            }
+        }
+        catch (OperationCanceledException)
+            when (m_CancellationTokenSource.IsCancellationRequested)
+        {
+            // Application shutdown.
         }
         catch (Exception exception)
         {

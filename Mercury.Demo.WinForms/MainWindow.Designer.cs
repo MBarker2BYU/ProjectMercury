@@ -1442,6 +1442,7 @@
             // lblReceiveResult
             // 
             lblReceiveResult.BackColor = Color.FromArgb(22, 153, 170, 187);
+            lblReceiveResult.BorderStyle = BorderStyle.FixedSingle;
             lblReceiveResult.ForeColor = Color.Gainsboro;
             lblReceiveResult.Location = new Point(19, 378);
             lblReceiveResult.Name = "lblReceiveResult";
