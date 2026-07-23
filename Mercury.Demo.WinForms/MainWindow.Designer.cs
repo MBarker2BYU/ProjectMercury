@@ -101,20 +101,14 @@
             picFlowApplication = new PictureBox();
             pnlSendData = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
             btnSendFile = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
-            lblSendFooter = new Label();
             lblSendPayload = new Label();
-            lblSendHeader = new Label();
-            txtSendHeader = new Mercury.Demo.WinForms.Controls.MercuryGlassTextBox();
             txtSendPayload = new Mercury.Demo.WinForms.Controls.MercuryGlassTextBox();
-            txtSendFooter = new Mercury.Demo.WinForms.Controls.MercuryGlassTextBox();
             btnSend = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
             pnlEventLog = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
             btnClearLog = new Mercury.Demo.WinForms.Controls.MercuryGlassButton();
             lblEventLog = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
             rtbEventLog = new RichTextBox();
             pnlEnvelopeViewer = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
-            txtFooterMetadata = new Mercury.Demo.WinForms.Controls.MercuryGlassTextBox();
-            txtHeaderMetadata = new Mercury.Demo.WinForms.Controls.MercuryGlassTextBox();
             lblRawPayloadValue = new Label();
             lblFrameSizeValue = new Label();
             lblProtectedSizeValue = new Label();
@@ -122,8 +116,6 @@
             lblAlgorithmValue = new Label();
             lblEnvelopeIdValue = new Label();
             lblEnvelopeVersionValue = new Label();
-            lblFooterMetadata = new Label();
-            lblHeaderMetadata = new Label();
             lblRawPayload = new Label();
             lblFrameSize = new Label();
             lblProtectedSize = new Label();
@@ -139,13 +131,9 @@
             tglTamperAttack = new Mercury.Demo.WinForms.Controls.MercuryGlassToggleButton();
             tglReplayAttack = new Mercury.Demo.WinForms.Controls.MercuryGlassToggleButton();
             pnlReceivedData = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
-            lblReceiveFooter = new Label();
             lblReceivePayload = new Label();
-            lblReceiveHeader = new Label();
             lblReceiveResult = new Label();
-            txtReceiveHeader = new Mercury.Demo.WinForms.Controls.MercuryGlassTextBox();
             txtReceivePayload = new Mercury.Demo.WinForms.Controls.MercuryGlassTextBox();
-            txtReceiveFooter = new Mercury.Demo.WinForms.Controls.MercuryGlassTextBox();
             pnlHeaderLogo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             pnlSystemStatus.SuspendLayout();
@@ -1020,12 +1008,8 @@
             pnlSendData.BackColor = Color.FromArgb(0, 15, 28);
             pnlSendData.BorderColor = Color.FromArgb(34, 61, 84);
             pnlSendData.Controls.Add(btnSendFile);
-            pnlSendData.Controls.Add(lblSendFooter);
             pnlSendData.Controls.Add(lblSendPayload);
-            pnlSendData.Controls.Add(lblSendHeader);
-            pnlSendData.Controls.Add(txtSendHeader);
             pnlSendData.Controls.Add(txtSendPayload);
-            pnlSendData.Controls.Add(txtSendFooter);
             pnlSendData.Controls.Add(btnSend);
             pnlSendData.ForeColor = Color.FromArgb(0, 135, 191);
             pnlSendData.Location = new Point(323, 232);
@@ -1050,49 +1034,15 @@
             btnSendFile.UseVisualStyleBackColor = false;
             btnSendFile.Click += btnSendFile_Click;
             // 
-            // lblSendFooter
-            // 
-            lblSendFooter.AutoSize = true;
-            lblSendFooter.ForeColor = Color.Gainsboro;
-            lblSendFooter.Location = new Point(19, 316);
-            lblSendFooter.Name = "lblSendFooter";
-            lblSendFooter.Size = new Size(151, 15);
-            lblSendFooter.TabIndex = 6;
-            lblSendFooter.Text = "Footer Metadata (Optional)";
-            // 
             // lblSendPayload
             // 
             lblSendPayload.AutoSize = true;
             lblSendPayload.ForeColor = Color.Gainsboro;
-            lblSendPayload.Location = new Point(19, 103);
+            lblSendPayload.Location = new Point(19, 31);
             lblSendPayload.Name = "lblSendPayload";
             lblSendPayload.Size = new Size(49, 15);
             lblSendPayload.TabIndex = 5;
             lblSendPayload.Text = "Payload";
-            // 
-            // lblSendHeader
-            // 
-            lblSendHeader.AutoSize = true;
-            lblSendHeader.ForeColor = Color.Gainsboro;
-            lblSendHeader.Location = new Point(19, 29);
-            lblSendHeader.Name = "lblSendHeader";
-            lblSendHeader.Size = new Size(155, 15);
-            lblSendHeader.TabIndex = 4;
-            lblSendHeader.Text = "Header Metadata (Optional)";
-            // 
-            // txtSendHeader
-            // 
-            txtSendHeader.BackColor = Color.FromArgb(0, 15, 28);
-            txtSendHeader.BorderColor = Color.FromArgb(34, 61, 84);
-            txtSendHeader.CornerStyle = WinForms.Controls.Enums.CornerStyle.Squared;
-            txtSendHeader.Font = new Font("Segoe UI", 9F);
-            txtSendHeader.ForeColor = Color.FromArgb(225, 232, 238);
-            txtSendHeader.Location = new Point(19, 47);
-            txtSendHeader.MinimumSize = new Size(50, 32);
-            txtSendHeader.Name = "txtSendHeader";
-            txtSendHeader.Padding = new Padding(10, 6, 10, 6);
-            txtSendHeader.Size = new Size(558, 34);
-            txtSendHeader.TabIndex = 1;
             // 
             // txtSendPayload
             // 
@@ -1101,27 +1051,13 @@
             txtSendPayload.CornerStyle = WinForms.Controls.Enums.CornerStyle.Squared;
             txtSendPayload.Font = new Font("Segoe UI", 9F);
             txtSendPayload.ForeColor = Color.FromArgb(225, 232, 238);
-            txtSendPayload.Location = new Point(19, 124);
+            txtSendPayload.Location = new Point(19, 52);
             txtSendPayload.MinimumSize = new Size(50, 32);
             txtSendPayload.Multiline = true;
             txtSendPayload.Name = "txtSendPayload";
             txtSendPayload.Padding = new Padding(10, 6, 10, 6);
-            txtSendPayload.Size = new Size(558, 172);
+            txtSendPayload.Size = new Size(558, 316);
             txtSendPayload.TabIndex = 2;
-            // 
-            // txtSendFooter
-            // 
-            txtSendFooter.BackColor = Color.FromArgb(0, 15, 28);
-            txtSendFooter.BorderColor = Color.FromArgb(34, 61, 84);
-            txtSendFooter.CornerStyle = WinForms.Controls.Enums.CornerStyle.Squared;
-            txtSendFooter.Font = new Font("Segoe UI", 9F);
-            txtSendFooter.ForeColor = Color.FromArgb(225, 232, 238);
-            txtSendFooter.Location = new Point(19, 334);
-            txtSendFooter.MinimumSize = new Size(50, 32);
-            txtSendFooter.Name = "txtSendFooter";
-            txtSendFooter.Padding = new Padding(10, 6, 10, 6);
-            txtSendFooter.Size = new Size(558, 34);
-            txtSendFooter.TabIndex = 3;
             // 
             // btnSend
             // 
@@ -1204,8 +1140,6 @@
             pnlEnvelopeViewer.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             pnlEnvelopeViewer.BackColor = Color.FromArgb(0, 15, 28);
             pnlEnvelopeViewer.BorderColor = Color.FromArgb(34, 61, 84);
-            pnlEnvelopeViewer.Controls.Add(txtFooterMetadata);
-            pnlEnvelopeViewer.Controls.Add(txtHeaderMetadata);
             pnlEnvelopeViewer.Controls.Add(lblRawPayloadValue);
             pnlEnvelopeViewer.Controls.Add(lblFrameSizeValue);
             pnlEnvelopeViewer.Controls.Add(lblProtectedSizeValue);
@@ -1213,8 +1147,6 @@
             pnlEnvelopeViewer.Controls.Add(lblAlgorithmValue);
             pnlEnvelopeViewer.Controls.Add(lblEnvelopeIdValue);
             pnlEnvelopeViewer.Controls.Add(lblEnvelopeVersionValue);
-            pnlEnvelopeViewer.Controls.Add(lblFooterMetadata);
-            pnlEnvelopeViewer.Controls.Add(lblHeaderMetadata);
             pnlEnvelopeViewer.Controls.Add(lblRawPayload);
             pnlEnvelopeViewer.Controls.Add(lblFrameSize);
             pnlEnvelopeViewer.Controls.Add(lblProtectedSize);
@@ -1232,38 +1164,6 @@
             pnlEnvelopeViewer.Size = new Size(1167, 387);
             pnlEnvelopeViewer.TabIndex = 8;
             pnlEnvelopeViewer.Title = "PROTECTED FRAME / SECUREENVELOPE VIEWER";
-            // 
-            // txtFooterMetadata
-            // 
-            txtFooterMetadata.BackColor = Color.FromArgb(26, 30, 33);
-            txtFooterMetadata.BorderColor = Color.FromArgb(34, 61, 84);
-            txtFooterMetadata.CornerStyle = WinForms.Controls.Enums.CornerStyle.Squared;
-            txtFooterMetadata.Font = new Font("Segoe UI", 9F);
-            txtFooterMetadata.ForeColor = Color.FromArgb(225, 232, 238);
-            txtFooterMetadata.Location = new Point(187, 311);
-            txtFooterMetadata.MinimumSize = new Size(50, 32);
-            txtFooterMetadata.Multiline = true;
-            txtFooterMetadata.Name = "txtFooterMetadata";
-            txtFooterMetadata.Padding = new Padding(10, 6, 10, 6);
-            txtFooterMetadata.ScrollBars = ScrollBars.Vertical;
-            txtFooterMetadata.Size = new Size(389, 56);
-            txtFooterMetadata.TabIndex = 20;
-            // 
-            // txtHeaderMetadata
-            // 
-            txtHeaderMetadata.BackColor = Color.FromArgb(26, 30, 33);
-            txtHeaderMetadata.BorderColor = Color.FromArgb(34, 61, 84);
-            txtHeaderMetadata.CornerStyle = WinForms.Controls.Enums.CornerStyle.Squared;
-            txtHeaderMetadata.Font = new Font("Segoe UI", 9F);
-            txtHeaderMetadata.ForeColor = Color.FromArgb(225, 232, 238);
-            txtHeaderMetadata.Location = new Point(187, 243);
-            txtHeaderMetadata.MinimumSize = new Size(50, 32);
-            txtHeaderMetadata.Multiline = true;
-            txtHeaderMetadata.Name = "txtHeaderMetadata";
-            txtHeaderMetadata.Padding = new Padding(10, 6, 10, 6);
-            txtHeaderMetadata.ScrollBars = ScrollBars.Vertical;
-            txtHeaderMetadata.Size = new Size(389, 56);
-            txtHeaderMetadata.TabIndex = 19;
             // 
             // lblRawPayloadValue
             // 
@@ -1334,24 +1234,6 @@
             lblEnvelopeVersionValue.TabIndex = 12;
             lblEnvelopeVersionValue.Text = "-";
             lblEnvelopeVersionValue.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblFooterMetadata
-            // 
-            lblFooterMetadata.ForeColor = Color.Gainsboro;
-            lblFooterMetadata.Location = new Point(16, 311);
-            lblFooterMetadata.Name = "lblFooterMetadata";
-            lblFooterMetadata.Size = new Size(162, 56);
-            lblFooterMetadata.TabIndex = 11;
-            lblFooterMetadata.Text = "Footer Metadata";
-            // 
-            // lblHeaderMetadata
-            // 
-            lblHeaderMetadata.ForeColor = Color.Gainsboro;
-            lblHeaderMetadata.Location = new Point(19, 243);
-            lblHeaderMetadata.Name = "lblHeaderMetadata";
-            lblHeaderMetadata.Size = new Size(162, 56);
-            lblHeaderMetadata.TabIndex = 10;
-            lblHeaderMetadata.Text = "Header Metadata";
             // 
             // lblRawPayload
             // 
@@ -1536,13 +1418,9 @@
             pnlReceivedData.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pnlReceivedData.BackColor = Color.FromArgb(0, 15, 28);
             pnlReceivedData.BorderColor = Color.FromArgb(34, 61, 84);
-            pnlReceivedData.Controls.Add(lblReceiveFooter);
             pnlReceivedData.Controls.Add(lblReceivePayload);
-            pnlReceivedData.Controls.Add(lblReceiveHeader);
             pnlReceivedData.Controls.Add(lblReceiveResult);
-            pnlReceivedData.Controls.Add(txtReceiveHeader);
             pnlReceivedData.Controls.Add(txtReceivePayload);
-            pnlReceivedData.Controls.Add(txtReceiveFooter);
             pnlReceivedData.ForeColor = Color.FromArgb(0, 135, 191);
             pnlReceivedData.Location = new Point(925, 232);
             pnlReceivedData.Name = "pnlReceivedData";
@@ -1551,35 +1429,15 @@
             pnlReceivedData.TabIndex = 11;
             pnlReceivedData.Title = "RECEIVED DATA";
             // 
-            // lblReceiveFooter
-            // 
-            lblReceiveFooter.AutoSize = true;
-            lblReceiveFooter.ForeColor = Color.Gainsboro;
-            lblReceiveFooter.Location = new Point(19, 316);
-            lblReceiveFooter.Name = "lblReceiveFooter";
-            lblReceiveFooter.Size = new Size(151, 15);
-            lblReceiveFooter.TabIndex = 10;
-            lblReceiveFooter.Text = "Footer Metadata (Optional)";
-            // 
             // lblReceivePayload
             // 
             lblReceivePayload.AutoSize = true;
             lblReceivePayload.ForeColor = Color.Gainsboro;
-            lblReceivePayload.Location = new Point(19, 103);
+            lblReceivePayload.Location = new Point(19, 31);
             lblReceivePayload.Name = "lblReceivePayload";
             lblReceivePayload.Size = new Size(150, 15);
             lblReceivePayload.TabIndex = 9;
             lblReceivePayload.Text = "Recovered Payload / Result";
-            // 
-            // lblReceiveHeader
-            // 
-            lblReceiveHeader.AutoSize = true;
-            lblReceiveHeader.ForeColor = Color.Gainsboro;
-            lblReceiveHeader.Location = new Point(19, 29);
-            lblReceiveHeader.Name = "lblReceiveHeader";
-            lblReceiveHeader.Size = new Size(155, 15);
-            lblReceiveHeader.TabIndex = 8;
-            lblReceiveHeader.Text = "Header Metadata (Optional)";
             // 
             // lblReceiveResult
             // 
@@ -1592,21 +1450,6 @@
             lblReceiveResult.Text = "WAITING FOR EXCHANGE";
             lblReceiveResult.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // txtReceiveHeader
-            // 
-            txtReceiveHeader.BackColor = Color.FromArgb(0, 15, 28);
-            txtReceiveHeader.BorderColor = Color.FromArgb(34, 61, 84);
-            txtReceiveHeader.CornerStyle = WinForms.Controls.Enums.CornerStyle.Squared;
-            txtReceiveHeader.Font = new Font("Segoe UI", 9F);
-            txtReceiveHeader.ForeColor = Color.FromArgb(225, 232, 238);
-            txtReceiveHeader.Location = new Point(19, 52);
-            txtReceiveHeader.MinimumSize = new Size(50, 32);
-            txtReceiveHeader.Name = "txtReceiveHeader";
-            txtReceiveHeader.Padding = new Padding(10, 6, 10, 6);
-            txtReceiveHeader.ReadOnly = true;
-            txtReceiveHeader.Size = new Size(558, 34);
-            txtReceiveHeader.TabIndex = 6;
-            // 
             // txtReceivePayload
             // 
             txtReceivePayload.BackColor = Color.FromArgb(0, 15, 28);
@@ -1614,29 +1457,14 @@
             txtReceivePayload.CornerStyle = WinForms.Controls.Enums.CornerStyle.Squared;
             txtReceivePayload.Font = new Font("Segoe UI", 9F);
             txtReceivePayload.ForeColor = Color.FromArgb(225, 232, 238);
-            txtReceivePayload.Location = new Point(19, 124);
+            txtReceivePayload.Location = new Point(19, 52);
             txtReceivePayload.MinimumSize = new Size(50, 32);
             txtReceivePayload.Multiline = true;
             txtReceivePayload.Name = "txtReceivePayload";
             txtReceivePayload.Padding = new Padding(10, 6, 10, 6);
             txtReceivePayload.ReadOnly = true;
-            txtReceivePayload.Size = new Size(558, 172);
+            txtReceivePayload.Size = new Size(558, 316);
             txtReceivePayload.TabIndex = 5;
-            // 
-            // txtReceiveFooter
-            // 
-            txtReceiveFooter.BackColor = Color.FromArgb(0, 15, 28);
-            txtReceiveFooter.BorderColor = Color.FromArgb(34, 61, 84);
-            txtReceiveFooter.CornerStyle = WinForms.Controls.Enums.CornerStyle.Squared;
-            txtReceiveFooter.Font = new Font("Segoe UI", 9F);
-            txtReceiveFooter.ForeColor = Color.FromArgb(225, 232, 238);
-            txtReceiveFooter.Location = new Point(19, 334);
-            txtReceiveFooter.MinimumSize = new Size(50, 32);
-            txtReceiveFooter.Name = "txtReceiveFooter";
-            txtReceiveFooter.Padding = new Padding(10, 6, 10, 6);
-            txtReceiveFooter.ReadOnly = true;
-            txtReceiveFooter.Size = new Size(558, 34);
-            txtReceiveFooter.TabIndex = 4;
             // 
             // MainWindow
             // 
@@ -1745,8 +1573,6 @@
         private Controls.MercuryGlassPanel pnlHexPreview;
         private RichTextBox rtbHexPreview;
         private Label lblHexPreview;
-        private Label lblFooterMetadata;
-        private Label lblHeaderMetadata;
         private Label lblRawPayload;
         private Label lblFrameSize;
         private Label lblProtectedSize;
@@ -1761,8 +1587,6 @@
         private Label lblAlgorithmValue;
         private Label lblEnvelopeIdValue;
         private Label lblEnvelopeVersionValue;
-        private Controls.MercuryGlassTextBox txtFooterMetadata;
-        private Controls.MercuryGlassTextBox txtHeaderMetadata;
         private PictureBox picFlowApplication;
         private PictureBox picFlowMercuryReceived;
         private PictureBox picFlowMercurySend;
@@ -1813,19 +1637,11 @@
         private Label lblTimeCaption;
         private Label lblSystemState;
         private Controls.MercuryGlassButton btnSend;
-        private Controls.MercuryGlassTextBox txtSendHeader;
         private Controls.MercuryGlassTextBox txtSendPayload;
-        private Controls.MercuryGlassTextBox txtSendFooter;
-        private Controls.MercuryGlassTextBox txtReceiveHeader;
         private Controls.MercuryGlassTextBox txtReceivePayload;
-        private Controls.MercuryGlassTextBox txtReceiveFooter;
-        private Label lblSendHeader;
         private Label lblReceiveResult;
-        private Label lblSendFooter;
         private Label lblSendPayload;
-        private Label lblReceiveFooter;
         private Label lblReceivePayload;
-        private Label lblReceiveHeader;
         private Controls.MercuryGlassButton btnSendFile;
         private PictureBox pictureBox1;
         private Label lblTitle;

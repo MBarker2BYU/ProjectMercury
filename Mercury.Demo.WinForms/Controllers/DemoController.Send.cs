@@ -154,25 +154,56 @@ internal sealed partial class DemoController
     {
         try
         {
-            UpdateView(view => view.SetBusy(true));
+            UpdateView(
+                view => view.SetBusy(true));
 
-            var value = ReadView(view => m_View.GetSendPayload());
+            var value =
+                ReadView(
+                    view => view.GetSendPayload());
 
-            var payload = new ReadOnlyMemory(Encoding.UTF8.GetBytes(value));
+            var payload =
+                new ReadOnlyMemory(
+                    Encoding.UTF8.GetBytes(value));
 
-            var result = await SendAsync(payload)
-                    .ConfigureAwait(true);
+            var attackMode =
+                CurrentAttackMode;
 
-            UpdateView(view => m_View.DisplayResult(result));
+            var result =
+                await SendAsync(payload);
+
+            if (!result.Success)
+            {
+                var failureMessage =
+                    GetFailureMessage(result);
+
+                UpdateView(view => view.DisplayFailure(failureMessage, attackMode));
+
+                return;
+            }
+
+            var envelopeDisplay =
+                BuildEnvelopeDisplay(result);
+
+            var recoveredPayload =
+                Encoding.UTF8.GetString(
+                    result.Payload.ToArray());
+
+            UpdateView(
+                view => view.DisplaySuccessfulPayload(
+                    recoveredPayload,
+                    result.Payload.Length,
+                    envelopeDisplay));
         }
         catch (Exception exception)
         {
-            m_View.DisplayError(
-                exception.Message);
+            UpdateView(
+                view => view.DisplayError(
+                    exception.Message));
         }
         finally
         {
-            UpdateView(view => view.SetBusy(false));
+            UpdateView(
+                view => view.SetBusy(false));
         }
     }
 
@@ -184,30 +215,68 @@ internal sealed partial class DemoController
     {
         try
         {
-            var filePath = ReadView(view => m_View.SelectImageFile());
+            var filePath =
+                ReadView(
+                    view => view.SelectImageFile());
 
             if (string.IsNullOrWhiteSpace(filePath))
                 return;
 
-            m_View.SetBusy(true);
+            UpdateView(
+                view => view.SetBusy(true));
 
-            var fileName = Path.GetFileName(filePath);
+            var fileName =
+                Path.GetFileName(filePath);
 
-            var payload = await File.ReadAllBytesAsync(filePath, m_CancellationTokenSource.Token);
+            var payload =
+                await File.ReadAllBytesAsync(
+                    filePath,
+                    m_CancellationTokenSource.Token);
 
-            Log("INFO", $"Sending image {fileName} | " + $"{FormatFileSize(payload.Length)}");
+            Log(
+                "INFO",
+                $"Sending image {fileName} | " +
+                FormatFileSize(payload.Length));
 
-            var result = await SendAsync(new ReadOnlyMemory(payload));;
+            var attackMode =
+                CurrentAttackMode;
 
-            m_View.DisplayFileResult(result, fileName);
+            var result =
+                await SendAsync(
+                    new ReadOnlyMemory(payload));
+
+            if (!result.Success)
+            {
+                var failureMessage =
+                    GetFailureMessage(result);
+
+                UpdateView(
+                    view => view.DisplayFailure(
+                        failureMessage,
+                        attackMode));
+
+                return;
+            }
+
+            var envelopeDisplay =
+                BuildEnvelopeDisplay(result);
+
+            UpdateView(
+                view => view.DisplaySuccessfulFile(
+                    fileName,
+                    result.Payload,
+                    envelopeDisplay));
         }
         catch (Exception exception)
         {
-            m_View.DisplayError(exception.Message);
+            UpdateView(
+                view => view.DisplayError(
+                    exception.Message));
         }
         finally
         {
-            m_View.SetBusy(false);
+            UpdateView(
+                view => view.SetBusy(false));
         }
     }
 

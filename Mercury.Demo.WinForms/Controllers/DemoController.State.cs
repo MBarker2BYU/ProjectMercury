@@ -13,6 +13,8 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Demo.WinForms.Enums;
+
 namespace Mercury.Demo.WinForms.Controllers;
 
 /// <summary>
@@ -21,4 +23,25 @@ namespace Mercury.Demo.WinForms.Controllers;
 /// </summary>
 /// <seealso cref="System.IAsyncDisposable" />
 internal sealed partial class DemoController
-{}
+{
+    /// <summary>
+    /// Gets the current attack mode.
+    /// </summary>
+    /// <value>The current attack mode.</value>
+    internal DemoAttackMode CurrentAttackMode
+    {
+        get
+        {
+            if (m_WrongKeyEnabled)
+                return DemoAttackMode.WrongKey;
+
+            if (m_AttackSimulator?.TamperEnabled == true)
+                return DemoAttackMode.Tamper;
+
+            if (m_AttackSimulator?.ReplayEnabled == true)
+                return DemoAttackMode.Replay;
+
+            return DemoAttackMode.None;
+        }
+    }
+}

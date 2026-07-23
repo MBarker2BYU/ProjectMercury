@@ -23,6 +23,7 @@ using System.Text;
 using Mercury.Abstractions;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
+using Mercury.Demo.WinForms.Enums;
 
 namespace Mercury.Demo.WinForms
 {
@@ -188,6 +189,7 @@ namespace Mercury.Demo.WinForms
             InitializeComponent();
 
             m_DemoController = new DemoController(this);
+            EventLog = rtbEventLog;
         }
 
         #endregion
@@ -283,112 +285,40 @@ namespace Mercury.Demo.WinForms
             return txtSendPayload.Text;
         }
 
-        /// <summary>
-        /// Displays the result.
-        /// </summary>
-        /// <param name="result">The result.</param>
-        internal void DisplayResult(IMercuryResult result)
+        
+
+        
+
+        private void DisplaySuccessfulSecurityState()
         {
-            if (!result.Success)
-            {
-                DisplayFailedResult(result);
+            SetState(
+                lblIntegrityState,
+                "VERIFIED",
+                MercuryTheme.SuccessColor);
 
-                return;
-            }
+            SetState(
+                lblReplayState,
+                "ACCEPTED",
+                MercuryTheme.SuccessColor);
 
-            var secureEnvelope = result.ValidatedEnvelope;
+            SetState(
+                lblTamperState,
+                "CLEAN",
+                MercuryTheme.SuccessColor);
 
-            if (secureEnvelope == null)
-            {
-                DisplayError(@"Mercury reported success but did not return a validated SecureEnvelope.");
+            SetStatusIndicator(
+                picIntegrityCheck,
+                true);
 
-                return;
-            }
+            SetStatusIndicator(
+                picReplayCheck,
+                true);
 
-            txtReceivePayload.Text = Encoding.UTF8.GetString(result.Payload.ToArray());
+            SetStatusIndicator(
+                picTamperCheck,
+                true);
 
-            txtReceiveHeader.Text = FormatMetadata(secureEnvelope.Header.Meta);
-
-            txtReceiveFooter.Text = FormatMetadata(secureEnvelope.Footer.Meta);
-
-            lblReceiveResult.Text = @$"RECEIVED OK | {result.Payload.Length:N0} bytes";
-
-            lblReceiveResult.ForeColor = MercuryTheme.SuccessColor;
-
-            lblReceiveResult.BackColor = Color.FromArgb(32, MercuryTheme.SuccessColor);
-
-            DisplayValidatedEnvelope(secureEnvelope);
-
-            lblIntegrityState.Text = @"VERIFIED";
-            lblIntegrityState.ForeColor = MercuryTheme.SuccessColor;
-
-            lblReplayState.Text = @"ACCEPTED";
-            lblReplayState.ForeColor = MercuryTheme.SuccessColor;
-
-            lblTamperState.Text = @"CLEAN";
-            lblTamperState.ForeColor = MercuryTheme.SuccessColor;
-
-            lblLastCheck.Text = @$"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
-
-            SetStatusIndicator(picIntegrityCheck, true);
-            SetStatusIndicator(picReplayCheck, true);
-            SetStatusIndicator(picTamperCheck, true);
-        }
-
-        /// <summary>
-        /// Displays the file result.
-        /// </summary>
-        /// <param name="result">The result.</param>
-        /// <param name="fileName">Name of the file.</param>
-        internal void DisplayFileResult(IMercuryResult result, string fileName)
-        {
-            if (!result.Success)
-            {
-                DisplayFailedResult(result);
-                return;
-            }
-
-            var secureEnvelope =
-                result.ValidatedEnvelope;
-
-            if (secureEnvelope == null)
-            {
-                DisplayError(@"Mercury reported success but did not return a validated SecureEnvelope.");
-
-                return;
-            }
-
-            txtReceiveHeader.Text = FormatMetadata(secureEnvelope.Header.Meta);
-
-            txtReceivePayload.Text = @$"{fileName}{Environment.NewLine}" +
-                                     @$"{FormatFileSize(result.Payload.Length)} received";
-
-            txtReceiveFooter.Text = FormatMetadata(secureEnvelope.Footer.Meta);
-
-            lblReceiveResult.Text =
-                @$"IMAGE RECEIVED OK | {FormatFileSize(result.Payload.Length)}";
-
-            lblReceiveResult.ForeColor = MercuryTheme.SuccessColor;
-
-            lblReceiveResult.BackColor = Color.FromArgb(32, MercuryTheme.SuccessColor);
-
-            DisplayValidatedEnvelope(secureEnvelope);
-
-            lblIntegrityState.Text = @"VERIFIED";
-
-            lblIntegrityState.ForeColor = MercuryTheme.SuccessColor;
-
-            lblLastCheck.Text =
-                @$"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
-
-            SetStatusIndicator(picIntegrityCheck, true);
-
-            AppendLog(new DemoLogEntry("INFO", $"File received and authenticated: {fileName}"));
-
-            if (IsImageFile(fileName))
-            {
-                ShowReceivedImage(result.Payload, fileName);
-            }
+            UpdateLastSecurityCheck();
         }
 
         /// <summary>
@@ -407,72 +337,326 @@ namespace Mercury.Demo.WinForms
                    || extension.Equals(".gif", StringComparison.OrdinalIgnoreCase);
         }
 
-        /// <summary>
-        /// Displays the validated envelope.
-        /// </summary>
-        /// <param name="secureEnvelope">The secure envelope.</param>
-        private void DisplayValidatedEnvelope(ISecureEnvelope secureEnvelope)
+        internal void DisplaySuccessfulPayload(string recoveredPayload, int payloadLength, DemoEnvelopeDisplay envelope)
         {
-            lblEnvelopeVersionValue.Text = secureEnvelope.Version.ToString();
+            txtReceivePayload.Text =
+                recoveredPayload;
+            
+            ApplyEnvelopeDisplay(envelope);
 
-            lblEnvelopeIdValue.Text = secureEnvelope.Header.EnvelopeId.ToString();
+            SetReceiveResult(
+                $"RECEIVED OK | {payloadLength:N0} bytes", MercuryTheme.SuccessColor);
 
-            lblAlgorithmValue.Text = secureEnvelope.Header.Encryption.ToString();
+            DisplaySuccessfulSecurityState();
 
-            lblReplayTokenValue.Text = Convert.ToHexString(secureEnvelope.Header.ReplayToken.ToArray());
-
-            lblProtectedSizeValue.Text = $"{secureEnvelope.Payload.Length:N0} bytes";
-
-            txtHeaderMetadata.Text = FormatMetadata(secureEnvelope.Header.Meta);
-
-            txtFooterMetadata.Text = FormatMetadata(secureEnvelope.Footer.Meta);
-
-            /*
-             * These values are not returned by IMercuryResult or
-             * ISecureEnvelope. Do not manufacture them.
-             */
-
-            lblFrameSizeValue.Text = "NOT AVAILABLE";
-            lblRawPayloadValue.Text = "NOT AVAILABLE";
-
-            rtbHexPreview.Clear();
-
-            lblFrameSizeValue.ForeColor = MercuryTheme.MutedColor;
-
-            lblRawPayloadValue.ForeColor = MercuryTheme.MutedColor;
+            DisplayExchangeFlow(success: true, DemoAttackMode.None);
         }
 
-        /// <summary>
-        /// Displays the failed result.
-        /// </summary>
-        /// <param name="result">The result.</param>
-        private void DisplayFailedResult(
-            IMercuryResult result)
+        internal void DisplaySuccessfulFile(string fileName, ReadOnlyMemory payload, DemoEnvelopeDisplay envelope)
         {
-            txtReceiveHeader.Clear();
-            txtReceivePayload.Clear();
-            txtReceiveFooter.Clear();
+           
+            txtReceivePayload.Text =
+                @$"{fileName}{Environment.NewLine}" +
+                @$"{FormatFileSize(payload.Length)} received";
 
+            
+
+            ApplyEnvelopeDisplay(envelope);
+
+            SetReceiveResult(
+                @$"IMAGE RECEIVED OK | {FormatFileSize(payload.Length)}",
+                MercuryTheme.SuccessColor);
+
+            DisplaySuccessfulSecurityState();
+
+            DisplayExchangeFlow(
+                success: true,
+                DemoAttackMode.None);
+
+            if (IsImageFile(fileName))
+            {
+                ShowReceivedImage(payload, fileName);
+            }
+        }
+
+        private void ApplyEnvelopeDisplay(
+            DemoEnvelopeDisplay envelope)
+        {
+            lblEnvelopeVersionValue.Text =
+                envelope.Version;
+
+            lblEnvelopeIdValue.Text =
+                envelope.EnvelopeId;
+
+            lblAlgorithmValue.Text =
+                envelope.Algorithm;
+
+            lblReplayTokenValue.Text =
+                envelope.ReplayToken;
+
+            lblProtectedSizeValue.Text =
+                envelope.ProtectedPayloadSize;
+
+            lblFrameSizeValue.Text =
+                envelope.TotalFrameSize;
+
+            lblRawPayloadValue.Text =
+                envelope.RawPayloadVisible;
+
+           rtbHexPreview.Text =
+                envelope.HexPreview;
+
+            rtbHexPreview.ForeColor =
+                MercuryTheme.SuccessColor;
+
+            rtbHexPreview.SelectionStart = 0;
+            rtbHexPreview.SelectionLength = 0;
+
+            lblFrameSizeValue.ForeColor =
+                MercuryTheme.MutedColor;
+
+            lblRawPayloadValue.ForeColor =
+                MercuryTheme.SuccessColor;
+        }
+
+        internal void DisplayFailure(
+     string failureMessage,
+     DemoAttackMode attackMode)
+        {
+            txtReceivePayload.Clear();
+            
             ClearEnvelopeDisplay();
 
-            var failureMessage =
-                result.Message ??
-                result.FailureReason.ToString();
+            SetReceiveResult(
+                $"FAILED | {failureMessage}",
+                MercuryTheme.FailureColor);
 
-            lblReceiveResult.Text = @$"FAILED | {failureMessage}";
+            switch (attackMode)
+            {
+                case DemoAttackMode.Tamper:
+                    SetState(
+                        lblIntegrityState,
+                        "FAILED",
+                        MercuryTheme.FailureColor);
 
-            lblReceiveResult.ForeColor = MercuryTheme.FailureColor;
+                    SetState(
+                        lblReplayState,
+                        "ACTIVE",
+                        MercuryTheme.SuccessColor);
 
-            lblReceiveResult.BackColor = Color.FromArgb(32, MercuryTheme.FailureColor);
+                    SetState(
+                        lblTamperState,
+                        "DETECTED",
+                        MercuryTheme.FailureColor);
 
-            lblIntegrityState.Text = @"FAILED";
-            lblIntegrityState.ForeColor = MercuryTheme.FailureColor;
+                    SetStatusIndicator(
+                        picIntegrityCheck,
+                        false);
 
+                    SetStatusIndicator(
+                        picReplayCheck,
+                        true);
+
+                    SetStatusIndicator(
+                        picTamperCheck,
+                        false);
+
+                    break;
+
+                case DemoAttackMode.Replay:
+                    SetState(
+                        lblIntegrityState,
+                        "VERIFIED",
+                        MercuryTheme.SuccessColor);
+
+                    SetState(
+                        lblReplayState,
+                        "BLOCKED",
+                        MercuryTheme.FailureColor);
+
+                    SetState(
+                        lblTamperState,
+                        "CLEAN",
+                        MercuryTheme.SuccessColor);
+
+                    SetStatusIndicator(
+                        picIntegrityCheck,
+                        true);
+
+                    SetStatusIndicator(
+                        picReplayCheck,
+                        false);
+
+                    SetStatusIndicator(
+                        picTamperCheck,
+                        true);
+
+                    break;
+
+                case DemoAttackMode.WrongKey:
+                    SetState(
+                        lblIntegrityState,
+                        "AUTH FAILED",
+                        MercuryTheme.FailureColor);
+
+                    SetState(
+                        lblReplayState,
+                        "ACTIVE",
+                        MercuryTheme.SuccessColor);
+
+                    SetState(
+                        lblTamperState,
+                        "CLEAN",
+                        MercuryTheme.SuccessColor);
+
+                    SetStatusIndicator(
+                        picIntegrityCheck,
+                        false);
+
+                    SetStatusIndicator(
+                        picReplayCheck,
+                        true);
+
+                    SetStatusIndicator(
+                        picTamperCheck,
+                        true);
+
+                    break;
+
+                default:
+                    SetState(
+                        lblIntegrityState,
+                        "FAILED",
+                        MercuryTheme.FailureColor);
+
+                    SetState(
+                        lblReplayState,
+                        "UNKNOWN",
+                        MercuryTheme.WarningColor);
+
+                    SetState(
+                        lblTamperState,
+                        "UNKNOWN",
+                        MercuryTheme.WarningColor);
+
+                    SetStatusIndicator(
+                        picIntegrityCheck,
+                        false);
+
+                    SetStatusIndicator(
+                        picReplayCheck,
+                        false);
+
+                    SetStatusIndicator(
+                        picTamperCheck,
+                        false);
+
+                    break;
+            }
+
+            UpdateLastSecurityCheck();
+
+            DisplayExchangeFlow(
+                success: false,
+                attackMode);
+        }
+
+        private void SetReceiveResult(string message, Color color)
+        {
+            lblReceiveResult.Text = message;
+            lblReceiveResult.ForeColor = color;
+            lblReceiveResult.BackColor = Color.FromArgb(32, color);
+        }
+
+        private static void SetState(Label label, string state, Color color)
+        {
+            label.Text = state;
+            label.ForeColor = color;
+        }
+
+        private void UpdateLastSecurityCheck()
+        {
             lblLastCheck.Text = @$"LAST CHECK: {DateTimeOffset.UtcNow:HH:mm:ss} UTC";
+        }
 
-            SetStatusIndicator(picIntegrityCheck, false);
+        private void DisplayExchangeFlow(bool success, DemoAttackMode attackMode)
+        {
+            ResetExchangeFlow();
 
-            AppendLog(new DemoLogEntry(@"ERROR", failureMessage));
+            if (success)
+                return;
+
+            /*
+             * The frame reached the validation boundary but was not allowed
+             * to continue to the Mercury receive side.
+             */
+            lblFlowArrow5.Image = Properties.Resources.Stop;
+
+            lblFlowArrow5.SizeMode = PictureBoxSizeMode.Zoom;
+
+            lblValidateEnveleope.ForeColor = MercuryTheme.FailureColor;
+
+            lblFlowMercuryReceive.ForeColor = MercuryTheme.MutedColor;
+
+            lblFlowMercuryReceive.Text = @"RECEIVE BLOCKED";
+
+            switch (attackMode)
+            {
+                case DemoAttackMode.Tamper:
+                    lblFlowTransport.ForeColor = MercuryTheme.WarningColor;
+
+                    lblValidateEnveleope.Text = @"TAMPER DETECTED";
+
+                    break;
+
+                case DemoAttackMode.Replay:
+                    lblValidateEnveleope.Text = @"REPLAY BLOCKED";
+
+                    break;
+
+                case DemoAttackMode.WrongKey:
+                    lblFlowProvider.ForeColor = MercuryTheme.WarningColor;
+
+                    lblValidateEnveleope.Text = @"AUTH FAILED";
+
+                    break;
+
+                default:
+                    lblValidateEnveleope.Text = @"FRAME REJECTED";
+
+                    break;
+            }
+        }
+
+        private void ResetExchangeFlow()
+        {
+            var arrows = new[]
+            {
+                lblFlowArrow1,
+                lblFlowArrow2,
+                lblFlowArrow3,
+                lblFlowArrow4,
+                lblFlowArrow5
+            };
+
+            foreach (var arrow in arrows)
+            {
+                arrow.Image = Properties.Resources.GreenArrow;
+
+                arrow.SizeMode = PictureBoxSizeMode.Zoom;
+            }
+
+            lblFlowProvider.ForeColor = MercuryTheme.ForeColor;
+
+            lblFlowTransport.ForeColor = MercuryTheme.ForeColor;
+
+            lblValidateEnveleope.ForeColor = MercuryTheme.ForeColor;
+
+            lblFlowMercuryReceive.ForeColor = MercuryTheme.ForeColor;
+
+            lblValidateEnveleope.Text =@"VALIDATE ENVELOPE";
+
+            lblFlowMercuryReceive.Text = @"MERCURY RECEIVE SIDE";
         }
 
         /// <summary>
@@ -487,9 +671,7 @@ namespace Mercury.Demo.WinForms
             lblProtectedSizeValue.Text = @"-";
             lblFrameSizeValue.Text = @"-";
             lblRawPayloadValue.Text = @"-";
-
-            txtHeaderMetadata.Clear();
-            txtFooterMetadata.Clear();
+            
             rtbHexPreview.Clear();
         }
 
@@ -654,7 +836,13 @@ namespace Mercury.Demo.WinForms
         /// The m demo controller
         /// </summary>
         private readonly DemoController? m_DemoController;
-        
+
+        /// <summary>
+        /// Gets the event log.
+        /// </summary>
+        /// <value>The event log.</value>
+        internal RichTextBox EventLog { get; }
+
         #endregion
     }
 }
