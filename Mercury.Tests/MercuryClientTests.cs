@@ -4,7 +4,7 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-09-2026
+// Last Modified On : 07-23-2026
 // ***********************************************************************
 // <copyright file="MercuryClientTests.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -15,7 +15,6 @@
 
 using Mercury.Abstractions.Primitives;
 using Mercury.Core.Factories;
-using System.Security.Cryptography;
 
 namespace Mercury.Tests;
 /// <summary>
@@ -25,7 +24,7 @@ public class MercuryClientTests
 {
 
     internal const string ALPHA = @"Alpha";
-    internal const string BRAVO = @"Bravo";
+    //internal const string BRAVO = @"Bravo";
 
     /// <summary>
     /// Defines the test method BuildClient_ReturnsClient.
@@ -33,8 +32,7 @@ public class MercuryClientTests
     [Fact]
     public void BuildClient_ReturnsClient()
     {
-        var client =
-            MercuryFactory.Instance.BuildClient(ALPHA);
+        var client = MercuryFactory.Instance.BuildClient(ALPHA);
 
         Assert.NotNull(client);
     }
@@ -49,14 +47,13 @@ public class MercuryClientTests
         var client =
             MercuryFactory.Instance.BuildClient(ALPHA);
 
-        var cryptoContext = MercuryFactory.Instance.BuildCryptoContext(ALPHA, BRAVO);
+        var cryptoContext = MercuryFactory.Instance.BuildCryptoContext(ALPHA, ALPHA);
 
         var expected = new byte[] { 1, 2, 3, 4 };
 
         await client.SendAsync(cryptoContext, new ReadOnlyMemory(expected));
 
-        var result =
-            await client.ReceiveAsync();
+        var result = await client.ReceiveAsync();
 
         Assert.True(result.Success);
         Assert.Equal(expected, result.Payload.ToArray());

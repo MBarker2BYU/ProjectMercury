@@ -4,7 +4,7 @@
 // Created          : 07-17-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-17-2026
+// Last Modified On : 07-23-2026
 // ***********************************************************************
 // <copyright file="MercuryTestFactory.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -50,28 +50,36 @@ public enum ProviderKind
 /// </summary>
 internal static class MercuryTestFactory
 {
-    internal const string ALPHA = @"Alpha";
-    internal const string BRAVO = @"Bravo";
+    internal const string ALPHA = "Alpha";
+    internal const string BRAVO = "Bravo";
+    internal const string CHARLIE = "Charlie";
+    
+    /// <summary>
+    /// The sender key identifier
+    /// </summary>
+    public const string SENDER_KEY_ID = ALPHA;
+    /// <summary>
+    /// The recipient key identifier
+    /// </summary>
+    public const string RECIPIENT_KEY_ID = BRAVO;
+    /// <summary>
+    /// The alternate recipient key identifier
+    /// </summary>
+    public const string ALTERNATE_RECIPIENT_KEY_ID = CHARLIE;
 
     /// <summary>
-    /// Gets the alpha client identifier.
+    /// Gets the Alpha client identifier.
     /// </summary>
-    /// <value>The alpha client identifier.</value>
+    /// <value>The Alpha client identifier.</value>
     public static KeyId AlphaClientId()
         => ALPHA;
 
     /// <summary>
-    /// The sender key identifier
+    /// Gets the Bravo client identifier.
     /// </summary>
-    public const string SenderKeyId = "alpha";
-    /// <summary>
-    /// The recipient key identifier
-    /// </summary>
-    public const string RecipientKeyId = "bravo";
-    /// <summary>
-    /// The alternate recipient key identifier
-    /// </summary>
-    public const string AlternateRecipientKeyId = "charlie";
+    /// <value>The Bravo client identifier.</value>
+    public static KeyId BravoClientId()
+        => BRAVO;
 
     /// <summary>
     /// The primary key
@@ -114,8 +122,8 @@ internal static class MercuryTestFactory
     /// <param name="recipientKey">The recipient key.</param>
     /// <returns>ISymmetricKeyProvider.</returns>
     public static ISymmetricKeyProvider BuildKeyProvider(byte[]? recipientKey = null)
-        => new TestSymmetricKeyProvider((RecipientKeyId, recipientKey ?? PrimaryKey),
-            (AlternateRecipientKeyId, recipientKey ?? PrimaryKey));
+        => new TestSymmetricKeyProvider((RECIPIENT_KEY_ID, recipientKey ?? PrimaryKey),
+            (ALTERNATE_RECIPIENT_KEY_ID, recipientKey ?? PrimaryKey));
 
     /// <summary>
     /// Builds the provider.
@@ -142,7 +150,7 @@ internal static class MercuryTestFactory
     /// <param name="senderKeyId">The sender key identifier.</param>
     /// <param name="recipientKeyId">The recipient key identifier.</param>
     /// <returns>ICryptoContext.</returns>
-    public static ICryptoContext BuildContext(string senderKeyId = SenderKeyId, string recipientKeyId = RecipientKeyId)
+    public static ICryptoContext BuildContext(string senderKeyId = SENDER_KEY_ID, string recipientKeyId = RECIPIENT_KEY_ID)
         => new TestCryptoContext(new KeyId(senderKeyId), new KeyId(recipientKeyId));
 
     /// <summary>
@@ -165,19 +173,20 @@ internal static class MercuryTestFactory
     /// <summary>
     /// Builds the client.
     /// </summary>
+    /// <param name="clientId"></param>
     /// <param name="provider">The provider.</param>
     /// <param name="codec">The codec.</param>
     /// <param name="transport">The transport.</param>
     /// <param name="replayProtector">The replay protector.</param>
     /// <returns>IMercuryClient.</returns>
-    public static IMercuryClient BuildClient(ICryptoProvider provider, EnvelopeCodec codec,
-        ITransport transport, IReplayProtector? replayProtector = null)
+    public static IMercuryClient BuildClient(KeyId clientId, ICryptoProvider provider, EnvelopeCodec codec, ITransport transport, IReplayProtector? replayProtector = null)
     {
         var envelopeCodec = BuildCodec(codec, provider, transport);
 
-        var dependencies = new TestDependencies(AlphaClientId(), provider, envelopeCodec, transport, replayProtector);
+        var dependencies = new TestDependencies(clientId, provider, envelopeCodec, transport, replayProtector);
 
-        return MercuryFactory.Instance.BuildClient(dependencies);
+        return MercuryFactory.Instance
+            .BuildClient(dependencies);
     }
 
     /// <summary>
@@ -248,4 +257,10 @@ internal static class MercuryTestFactory
         RandomNumberGenerator.Fill(payload);
         return payload;
     }
+
+    public static ICryptoContext AlphaToBravoContext()
+        => BuildContext(ALPHA, BRAVO);
+
+    public static ICryptoContext BravoToAlphaContext()
+        => BuildContext(BRAVO, ALPHA);
 }

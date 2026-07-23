@@ -4,7 +4,7 @@
 // Created          : 07-17-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-17-2026
+// Last Modified On : 07-23-2026
 // ***********************************************************************
 // <copyright file="CryptoProviderContractTests.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -81,9 +81,9 @@ public abstract class CryptoProviderContractTests
         Assert.Equal(payload.Length + 29, result.Payload.Length);
         Assert.Equal(ExpectedProviderName,
             result.ValidatedEnvelope.Header.Encryption.Value);
-        Assert.Equal(MercuryTestFactory.SenderKeyId,
+        Assert.Equal(MercuryTestFactory.SENDER_KEY_ID,
             result.ValidatedEnvelope.Header.SenderKeyId.Value);
-        Assert.Equal(MercuryTestFactory.RecipientKeyId,
+        Assert.Equal(MercuryTestFactory.RECIPIENT_KEY_ID,
             result.ValidatedEnvelope.Header.RecipientKeyId.Value);
         Assert.Equal(16,
             result.ValidatedEnvelope.Header.ReplayToken.Length);
@@ -209,7 +209,7 @@ public abstract class CryptoProviderContractTests
         var provider = CreateProvider(MercuryTestFactory.BuildKeyProvider());
 
         var result = await provider.SealAsync(new TestSealRequest(new TestCryptoContext(KeyId.Empty,
-                    new KeyId(MercuryTestFactory.RecipientKeyId)), new MercuryMemory(MercuryTestFactory.CreatePayload())),
+                    new KeyId(MercuryTestFactory.RECIPIENT_KEY_ID)), new MercuryMemory(MercuryTestFactory.CreatePayload())),
             EnvelopeService.Instance);
 
         Assert.False(result.Success);
@@ -226,7 +226,7 @@ public abstract class CryptoProviderContractTests
         var provider = CreateProvider(MercuryTestFactory.BuildKeyProvider());
 
         var result = await provider.SealAsync(new TestSealRequest(new TestCryptoContext(
-                    new KeyId(MercuryTestFactory.SenderKeyId), KeyId.Empty),
+                    new KeyId(MercuryTestFactory.SENDER_KEY_ID), KeyId.Empty),
                 new MercuryMemory(MercuryTestFactory.CreatePayload())),
             EnvelopeService.Instance);
 
@@ -419,7 +419,7 @@ public abstract class CryptoProviderContractTests
         var provider = CreateProvider(MercuryTestFactory.BuildKeyProvider());
         var envelope = await MercuryTestFactory.SealAsync(provider, MercuryTestFactory.CreatePayload());
         var header = MercuryTestFactory.CloneHeader(envelope.Header, recipientKeyId: new KeyId(
-                MercuryTestFactory.AlternateRecipientKeyId));
+                MercuryTestFactory.ALTERNATE_RECIPIENT_KEY_ID));
         var tamperedEnvelope = MercuryTestFactory.CloneEnvelope(envelope, header: header);
 
         var result = await provider.OpenAsync(new TestOpenRequest(tamperedEnvelope), EnvelopeService.Instance);
