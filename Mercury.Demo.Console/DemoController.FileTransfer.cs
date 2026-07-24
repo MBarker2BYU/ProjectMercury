@@ -64,9 +64,10 @@ internal sealed partial class DemoController
 
             if (!result.Success)
             {
-                throw new InvalidOperationException(
-                    result.Message ?? "Mercury failed to receive the protected file.");
+                throw new InvalidOperationException(FormatFailure(result));
             }
+
+            DisplayValidatedEnvelope(result);
 
             var receivedFile = FileTransferPayload.Decode(result.Payload.ToArray());
             var receivedHash = SHA256.HashData(receivedFile.FileBytes);

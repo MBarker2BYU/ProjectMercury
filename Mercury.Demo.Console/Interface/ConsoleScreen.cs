@@ -1,10 +1,10 @@
 // ***********************************************************************
-// Assembly       : Mercury.Demo.Console
-// Author           : Matthew D. Barker
-// Created          : 07-16-2026
+// Assembly     : Mercury.Demo.Console
+// Author         : Matthew D. Barker
+// Created        : 07-16-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-16-2026
+// Last Modified On : 07-24-2026
 // ***********************************************************************
 // <copyright file="ConsoleScreen.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -60,7 +60,7 @@ internal static class ConsoleScreen
 
         ConsoleTheme.WriteLine(new string('═', width), ConsoleTheme.PRIMARY);
         WriteCentered("MERCURY SECURE COMMUNICATIONS FRAMEWORK", ConsoleTheme.PRIMARY);
-        WriteCentered("CROSS-PLATFORM COMMAND HOST", ConsoleTheme.SECONDARY);
+        WriteCentered("CROSS-PLATFORM CONSOLE DEMONSTRATION | RC 1.2", ConsoleTheme.SECONDARY);
         ConsoleTheme.WriteLine(new string('═', width), ConsoleTheme.PRIMARY);
         Terminal.WriteLine();
     }
@@ -85,9 +85,7 @@ internal static class ConsoleScreen
         var normalizedTitle = title.ToUpperInvariant();
         var remaining = Math.Max(0, Width - normalizedTitle.Length - 4);
 
-        ConsoleTheme.WriteLine(
-            $"┌─ {normalizedTitle} {new string('─', remaining)}",
-            ConsoleTheme.SECONDARY);
+        ConsoleTheme.WriteLine($"┌─ {normalizedTitle} {new string('─', remaining)}", ConsoleTheme.SECONDARY);
     }
 
     /// <summary>
@@ -102,12 +100,9 @@ internal static class ConsoleScreen
     /// <param name="label">The label.</param>
     /// <param name="value">The value.</param>
     /// <param name="valueColor">Color of the value.</param>
-    public static void WriteLabel(
-        string label,
-        string value,
-        ConsoleColor valueColor = ConsoleColor.Gray)
+    public static void WriteLabel(string label, string value, ConsoleColor valueColor = ConsoleColor.Gray)
     {
-        ConsoleTheme.WriteSecondary($"  {label.ToUpperInvariant(),-14}");
+        ConsoleTheme.WriteSecondary($"  {label.ToUpperInvariant(),-20}");
         ConsoleTheme.WriteLine(value, valueColor);
     }
 
@@ -118,11 +113,7 @@ internal static class ConsoleScreen
     /// <param name="marker">The marker.</param>
     /// <param name="message">The message.</param>
     /// <param name="color">The color.</param>
-    public static void WriteStatus(
-        string endpoint,
-        string marker,
-        string message,
-        ConsoleColor color)
+    public static void WriteStatus(string endpoint, string marker, string message, ConsoleColor color)
     {
         ConsoleTheme.WriteSecondary($"  [{endpoint,-6}] ");
         ConsoleTheme.WriteLine($"[{marker,-4}] {message}", color);
@@ -165,7 +156,6 @@ internal static class ConsoleScreen
                 return value.Trim();
 
             ConsoleTheme.WriteLine("  A value is required.", ConsoleTheme.WARNING);
-
             Terminal.WriteLine();
         }
     }
@@ -189,7 +179,6 @@ internal static class ConsoleScreen
                         continue;
 
                     input.Length--;
-
                     Terminal.Write("\b \b");
                     break;
 
@@ -199,7 +188,6 @@ internal static class ConsoleScreen
                         input.Length--;
                         Terminal.Write("\b \b");
                     }
-
                     break;
 
                 default:

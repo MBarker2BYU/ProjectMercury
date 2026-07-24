@@ -1,8 +1,10 @@
 // ***********************************************************************
-// Assembly       : Mercury.Demo.Console
+// Assembly     : Mercury.Demo.Console
 // Author         : Matthew D. Barker
 // Created        : 07-16-2026
 //
+// Last Modified By : Matthew D. Barker
+// Last Modified On : 07-24-2026
 // ***********************************************************************
 // <copyright file="DemoController.Diagnostics.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -12,23 +14,25 @@
 //
 // ***********************************************************************
 
+using Mercury.Abstractions.Enums;
 using Mercury.Demo.Console.Enums;
 using Mercury.Demo.Console.Interface;
-using Mercury.Demo.Console.Wrappers;
 using System.Text;
+
+using Terminal = System.Console;
 
 namespace Mercury.Demo.Console;
 
 
 /// <summary>
-/// Coordinates the Mercury cross-platform demonstration host.
+/// Coordinates the Mercury RC 1.2 console demonstration application.
 /// </summary>
 internal sealed partial class DemoController
 {
     /// <summary>
-    /// Run security diagnostics as an asynchronous operation.
+    /// Displays and executes the RC 1.2 security demonstrations.
     /// </summary>
-    /// <returns>A Task representing the asynchronous operation.</returns>
+    /// <returns>A task representing the asynchronous operation.</returns>
     private async Task RunSecurityDiagnosticsAsync()
     {
         var returnRequested = false;
@@ -37,39 +41,27 @@ internal sealed partial class DemoController
         {
             ConsoleScreen.Clear();
             ConsoleScreen.DisplayHeader();
+            DisplayConfiguration();
 
             var menu = new ConsoleMenu<DiagnosticMenuSelection>(
-                "Security Diagnostics",
-                new ConsoleMenuItem<DiagnosticMenuSelection>(DiagnosticMenuSelection.ReplayLastFrame, "Replay Last Protected Frame"),
-                new ConsoleMenuItem<DiagnosticMenuSelection>(DiagnosticMenuSelection.TamperReplayMetadata, "Tamper Replay Metadata"),
-                new ConsoleMenuItem<DiagnosticMenuSelection>(DiagnosticMenuSelection.TamperAuthenticationTag, "Tamper Authentication Tag"),
-                new ConsoleMenuItem<DiagnosticMenuSelection>(DiagnosticMenuSelection.TamperProtectedPayload, "Tamper Protected Payload"),
-                new ConsoleMenuItem<DiagnosticMenuSelection>(DiagnosticMenuSelection.RunAll, "Run All Security Diagnostics"),
+                "Security Demonstration",
+                new ConsoleMenuItem<DiagnosticMenuSelection>(DiagnosticMenuSelection.Replay, "Replay Protected TCP Frame"),
+                new ConsoleMenuItem<DiagnosticMenuSelection>(DiagnosticMenuSelection.Tamper, "Tamper Protected TCP Payload"),
+                new ConsoleMenuItem<DiagnosticMenuSelection>(DiagnosticMenuSelection.WrongKey, "Wrong-Key Rejection"),
                 new ConsoleMenuItem<DiagnosticMenuSelection>(DiagnosticMenuSelection.Return, "Return to Main Menu", isEscapeSelection: true));
 
             switch (menu.Display())
             {
-                case DiagnosticMenuSelection.ReplayLastFrame:
+                case DiagnosticMenuSelection.Replay:
                     await RunReplayDiagnosticAsync();
                     break;
 
-                case DiagnosticMenuSelection.TamperReplayMetadata:
-                    await RunTamperDiagnosticAsync("Replay Metadata Tamper",
-                        static transport => transport.SendReplayMetadataTamperedFrameAsync());
+                case DiagnosticMenuSelection.Tamper:
+                    await RunTamperDiagnosticAsync();
                     break;
 
-                case DiagnosticMenuSelection.TamperAuthenticationTag:
-                    await RunTamperDiagnosticAsync("Authentication Tag Tamper",
-                        static transport => transport.SendAuthenticationTagTamperedFrameAsync());
-                    break;
-
-                case DiagnosticMenuSelection.TamperProtectedPayload:
-                    await RunTamperDiagnosticAsync("Protected Payload Tamper",
-                        static transport => transport.SendProtectedPayloadTamperedFrameAsync());
-                    break;
-
-                case DiagnosticMenuSelection.RunAll:
-                    await RunAllSecurityDiagnosticsAsync();
+                case DiagnosticMenuSelection.WrongKey:
+                    await RunWrongKeyDiagnosticAsync();
                     break;
 
                 case DiagnosticMenuSelection.Return:
@@ -80,18 +72,24 @@ internal sealed partial class DemoController
     }
 
     /// <summary>
-    /// Run replay diagnostic as an asynchronous operation.
+    /// Demonstrates replay rejection through the TCP attack simulator.
     /// </summary>
-    /// <returns>A Task representing the asynchronous operation.</returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    /// <exception cref="InvalidOperationException">No protected frame was captured.</exception>
+    /// <returns>A task representing the asynchronous operation.</returns>
     private async Task RunReplayDiagnosticAsync()
     {
         ConsoleScreen.Clear();
         ConsoleScreen.DisplayHeader();
-        ConsoleScreen.WriteSection("Replay Diagnostic");
+        ConsoleScreen.WriteSection("TCP Replay Attack");
 
-        var payload = "Mercury replay protection diagnostic."u8.ToArray();
+        if (m_Configuration.Transport != TCP_TRANSPORT)
+        {
+            ConsoleTheme.WriteLine("  TEST NOT AVAILABLE IN THIS TRANSPORT", ConsoleTheme.WARNING);
+            ConsoleScreen.WriteSectionEnd();
+            ConsoleScreen.Pause();
+            return;
+        }
+
+        var payload = Encoding.UTF8.GetBytes("Mercury RC 1.2 replay protection demonstration.");
         var started = DateTimeOffset.Now;
         var originalChunking = m_Configuration.ChunkingEnabled;
 
@@ -100,40 +98,43 @@ internal sealed partial class DemoController
             m_Configuration.ChunkingEnabled = false;
             await ApplyConfigurationAsync();
 
-            var baseline = await ExecuteExchangeAsync(payload);
+            var attackSimulator = m_AttackSimulator ??
+                throw new InvalidOperationException("The TCP attack simulator is not available.");
 
-            if (!baseline.Success)
-            {
-                throw new InvalidOperationException(baseline.Message ?? "Baseline protected exchange failed.");
-            }
+            attackSimulator.ClearLastFrame();
+            attackSimulator.TamperEnabled = false;
+            attackSimulator.ReplayEnabled = true;
 
-            if (m_AlphaCaptureTransport is null || !m_AlphaCaptureTransport.HasLastFrame)
-                throw new InvalidOperationException("No protected frame was captured.");
+            ConsoleScreen.WriteStatus("MITM", "ARM", "Replay attack armed on the TCP proxy", ConsoleTheme.WARNING);
 
-            ConsoleScreen.WriteStatus("TEST", "INFO", "Replaying the captured protected frame", ConsoleTheme.WARNING);
-            await m_AlphaCaptureTransport.ReplayLastFrameAsync();
+            var baselineResult = await ExecuteExchangeAsync(payload);
 
-            var replayResult = await m_BravoClient!.ReceiveAsync();
-            var success = !replayResult.Success;
+            if (!baselineResult.Success)
+                throw new InvalidOperationException(baselineResult.Message ?? "The baseline protected exchange failed.");
 
-            ConsoleScreen.WriteStatus("TEST", success ? "PASS" : "FAIL", success
-                    ? "Replayed frame was rejected."
-                    : "Replayed frame was accepted.",
-                success ? ConsoleTheme.SUCCESS : ConsoleTheme.FAILURE);
+            ConsoleScreen.WriteStatus("BRAVO", "PASS", "Original protected frame accepted", ConsoleTheme.SUCCESS);
+            ConsoleScreen.WriteStatus("MITM", "SEND", "Submitting the captured frame again", ConsoleTheme.WARNING);
 
-            RecordTelemetry(started, "Replay Diagnostic",
-                payload.Length, success,
-                success ? "Replay rejected." : "Replay accepted.");
+            var replayResult = await ExecuteExchangeAsync(payload);
+            var passed = !replayResult.Success && replayResult.FailureReason == FailureReason.ReplayDetected;
+
+            DisplaySecurityResult(passed,
+                passed ? "Replayed frame rejected as ReplayDetected." :
+                $"Expected ReplayDetected; received {FormatFailure(replayResult)}.");
+
+            RecordTelemetry(started, "TCP Replay Attack", payload.Length, passed,
+                passed ? "Replay rejected." : FormatFailure(replayResult));
         }
         catch (Exception exception)
         {
-            ConsoleTheme.WriteLine($"  DIAGNOSTIC FAILURE: {exception.Message}", ConsoleTheme.FAILURE);
-
-            RecordTelemetry(started, "Replay Diagnostic",
-                payload.Length, false, exception.Message);
+            DisplaySecurityResult(false, exception.Message);
+            RecordTelemetry(started, "TCP Replay Attack", payload.Length, false, exception.Message);
         }
         finally
         {
+            if (m_AttackSimulator is not null)
+                m_AttackSimulator.ReplayEnabled = false;
+
             m_Configuration.ChunkingEnabled = originalChunking;
             ConsoleScreen.WriteSectionEnd();
             ConsoleScreen.Pause();
@@ -141,23 +142,24 @@ internal sealed partial class DemoController
     }
 
     /// <summary>
-    /// Run tamper diagnostic as an asynchronous operation.
+    /// Demonstrates protected-payload tamper rejection through the TCP attack simulator.
     /// </summary>
-    /// <param name="diagnosticName">Name of the diagnostic.</param>
-    /// <param name="transmitTamperedFrameAsync">The transmit tampered frame asynchronous.</param>
-    /// <returns>A Task representing the asynchronous operation.</returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    /// <exception cref="InvalidOperationException">No protected frame was captured.</exception>
-    private async Task RunTamperDiagnosticAsync(string diagnosticName,
-        Func<CaptureTransport, Task> transmitTamperedFrameAsync)
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private async Task RunTamperDiagnosticAsync()
     {
         ConsoleScreen.Clear();
         ConsoleScreen.DisplayHeader();
-        ConsoleScreen.WriteSection(diagnosticName);
+        ConsoleScreen.WriteSection("TCP Tamper Attack");
 
-        var payload = Encoding.UTF8.GetBytes(
-            $"Mercury {diagnosticName} diagnostic.");
+        if (m_Configuration.Transport != TCP_TRANSPORT)
+        {
+            ConsoleTheme.WriteLine("  TEST NOT AVAILABLE IN THIS TRANSPORT", ConsoleTheme.WARNING);
+            ConsoleScreen.WriteSectionEnd();
+            ConsoleScreen.Pause();
+            return;
+        }
 
+        var payload = Encoding.UTF8.GetBytes("Mercury RC 1.2 protected-payload tamper demonstration.");
         var started = DateTimeOffset.Now;
         var originalChunking = m_Configuration.ChunkingEnabled;
 
@@ -166,42 +168,80 @@ internal sealed partial class DemoController
             m_Configuration.ChunkingEnabled = false;
             await ApplyConfigurationAsync();
 
-            var baseline = await ExecuteExchangeAsync(payload);
+            var attackSimulator = m_AttackSimulator ??
+                throw new InvalidOperationException("The TCP attack simulator is not available.");
 
-            if (!baseline.Success)
-            {
-                throw new InvalidOperationException(baseline.Message ?? "Baseline protected exchange failed.");
-            }
+            attackSimulator.ClearLastFrame();
+            attackSimulator.ReplayEnabled = false;
+            attackSimulator.TamperEnabled = true;
 
-            if (m_AlphaCaptureTransport is null || !m_AlphaCaptureTransport.HasLastFrame)
-            {
-                throw new InvalidOperationException("No protected frame was captured.");
-            }
+            ConsoleScreen.WriteStatus("MITM", "ARM", "Protected-payload tamper attack armed", ConsoleTheme.WARNING);
+            ConsoleScreen.WriteStatus("MITM", "EDIT", $"Preserving the {m_Configuration.EnvelopeCodec} envelope structure", ConsoleTheme.WARNING);
 
-            ConsoleScreen.WriteStatus("TEST", "INFO", "Transmitting a modified protected frame",
-                ConsoleTheme.WARNING);
+            var tamperResult = await ExecuteExchangeAsync(payload);
+            var passed = !tamperResult.Success &&
+                         tamperResult.FailureReason is FailureReason.AuthenticationFailed or FailureReason.TamperDetected;
 
-            await transmitTamperedFrameAsync(m_AlphaCaptureTransport);
+            DisplaySecurityResult(passed,
+                passed ? $"Tampered protected payload rejected as {tamperResult.FailureReason}." :
+                $"Expected authentication or tamper failure; received {FormatFailure(tamperResult)}.");
 
-            var tamperResult = await m_BravoClient!.ReceiveAsync();
-            var passed = !tamperResult.Success;
-
-            ConsoleScreen.WriteStatus("TEST", passed ? "PASS" : "FAIL", passed
-                    ? "Modified frame was rejected."
-                    : "Modified frame was accepted.",
-                passed ? ConsoleTheme.SUCCESS : ConsoleTheme.FAILURE);
-
-            RecordTelemetry(started, diagnosticName, payload.Length,
-                passed, passed ? "Tamper rejected." : "Tamper accepted.");
+            RecordTelemetry(started, "TCP Tamper Attack", payload.Length, passed,
+                passed ? "Tamper rejected." : FormatFailure(tamperResult));
         }
         catch (Exception exception)
         {
-            ConsoleTheme.WriteLine(
-                $"  DIAGNOSTIC FAILURE: {exception.Message}",
-                ConsoleTheme.FAILURE);
+            DisplaySecurityResult(false, exception.Message);
+            RecordTelemetry(started, "TCP Tamper Attack", payload.Length, false, exception.Message);
+        }
+        finally
+        {
+            if (m_AttackSimulator is not null)
+                m_AttackSimulator.TamperEnabled = false;
 
-            RecordTelemetry(started, diagnosticName, payload.Length,
-                false, exception.Message);
+            m_Configuration.ChunkingEnabled = originalChunking;
+            ConsoleScreen.WriteSectionEnd();
+            ConsoleScreen.Pause();
+        }
+    }
+
+    /// <summary>
+    /// Demonstrates that Bravo rejects a message protected for Charlie.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private async Task RunWrongKeyDiagnosticAsync()
+    {
+        ConsoleScreen.Clear();
+        ConsoleScreen.DisplayHeader();
+        ConsoleScreen.WriteSection("Wrong-Key Attack");
+
+        var payload = Encoding.UTF8.GetBytes("Mercury RC 1.2 wrong-key rejection demonstration.");
+        var started = DateTimeOffset.Now;
+        var originalChunking = m_Configuration.ChunkingEnabled;
+
+        try
+        {
+            m_Configuration.ChunkingEnabled = false;
+            await ApplyConfigurationAsync();
+
+            ConsoleScreen.WriteStatus("ALPHA", "KEY", $"Protecting the payload for {CHARLIE_NODE}", ConsoleTheme.WARNING);
+            ConsoleScreen.WriteStatus("BRAVO", "RX", "Attempting receive as Bravo Node", ConsoleTheme.WARNING);
+
+            var wrongKeyResult = await ExecuteExchangeAsync(payload, CHARLIE_NODE);
+            var passed = !wrongKeyResult.Success &&
+                         wrongKeyResult.FailureReason is FailureReason.WrongKey or FailureReason.AuthenticationFailed;
+
+            DisplaySecurityResult(passed,
+                passed ? $"Wrong-key message rejected as {wrongKeyResult.FailureReason}." :
+                $"Expected wrong-key or authentication failure; received {FormatFailure(wrongKeyResult)}.");
+
+            RecordTelemetry(started, "Wrong-Key Attack", payload.Length, passed,
+                passed ? "Wrong key rejected." : FormatFailure(wrongKeyResult));
+        }
+        catch (Exception exception)
+        {
+            DisplaySecurityResult(false, exception.Message);
+            RecordTelemetry(started, "Wrong-Key Attack", payload.Length, false, exception.Message);
         }
         finally
         {
@@ -212,20 +252,15 @@ internal sealed partial class DemoController
     }
 
     /// <summary>
-    /// Run all security diagnostics as an asynchronous operation.
+    /// Displays a security demonstration result.
     /// </summary>
-    /// <returns>A Task representing the asynchronous operation.</returns>
-    private async Task RunAllSecurityDiagnosticsAsync()
+    /// <param name="passed">Whether the security control passed.</param>
+    /// <param name="message">The result message.</param>
+    private static void DisplaySecurityResult(bool passed, string message)
     {
-        await RunReplayDiagnosticAsync();
-
-        await RunTamperDiagnosticAsync("Replay Metadata Tamper",
-            static transport => transport.SendReplayMetadataTamperedFrameAsync());
-
-        await RunTamperDiagnosticAsync("Authentication Tag Tamper",
-            static transport => transport.SendAuthenticationTagTamperedFrameAsync());
-
-        await RunTamperDiagnosticAsync("Protected Payload Tamper",
-            static transport => transport.SendProtectedPayloadTamperedFrameAsync());
+        Terminal.WriteLine();
+        ConsoleTheme.WriteLine(passed ? "  RESULT: SECURITY CONTROL PASSED" : "  RESULT: SECURITY CONTROL FAILED",
+            passed ? ConsoleTheme.SUCCESS : ConsoleTheme.FAILURE);
+        ConsoleTheme.WriteLine($"  {message}", passed ? ConsoleTheme.SUCCESS : ConsoleTheme.FAILURE);
     }
 }

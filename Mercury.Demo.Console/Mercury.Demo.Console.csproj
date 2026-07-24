@@ -5,11 +5,11 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Version>1.2.0-rc.1</Version>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
+    <InformationalVersion>1.2.0-rc.1</InformationalVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="DemoControllerBU.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Mercury.Abstractions\Mercury.Abstractions.csproj" />

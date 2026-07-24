@@ -1,9 +1,10 @@
-
 // ***********************************************************************
 // Assembly     : Mercury.Demo.Console
 // Author         : Matthew D. Barker
 // Created        : 07-16-2026
 //
+// Last Modified By : Matthew D. Barker
+// Last Modified On : 07-24-2026
 // ***********************************************************************
 // <copyright file="DemoController.Builders.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -17,44 +18,44 @@ using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Shared;
-using Mercury.Abstractions.Transport;
 using Mercury.Core.Factories;
 using Mercury.Demo.Console.Wrappers;
 using Mercury.Provider.AesGcm;
 using Mercury.Provider.ChaCha20;
-using Mercury.Transport.InMemory;
-using Mercury.Transport.Tcp;
-using System.Net;
-using System.Net.Sockets;
 using System.Security.Cryptography;
 
 namespace Mercury.Demo.Console;
 
 
 /// <summary>
-/// Coordinates the Mercury cross-platform demonstration host.
+/// Coordinates the Mercury RC 1.2 console demonstration application.
 /// </summary>
 internal sealed partial class DemoController
 {
     /// <summary>
-    /// Apply configuration as an asynchronous operation.
+    /// Applies the current provider, transport, and codec configuration.
     /// </summary>
-    /// <returns>A Task representing the asynchronous operation.</returns>
+    /// <returns>A task representing the asynchronous operation.</returns>
     private async Task ApplyConfigurationAsync()
     {
+        await DisposeTransportsAsync().ConfigureAwait(false);
+
         var keys = new Dictionary<KeyId, byte[]>
         {
             [ALPHA_NODE] = RandomNumberGenerator.GetBytes(32),
-            [BRAVO_NODE] = RandomNumberGenerator.GetBytes(32)
+            [BRAVO_NODE] = RandomNumberGenerator.GetBytes(32),
+            [CHARLIE_NODE] = RandomNumberGenerator.GetBytes(32)
         };
 
         var keyProvider = new SymmetricKeyProviderDictionary(keys);
         var alphaCryptoProvider = BuildCryptoProvider(keyProvider);
         var bravoCryptoProvider = BuildCryptoProvider(keyProvider);
-        var (alphaTransport, bravoTransport) = await BuildTransportAsync();
+        var transports = await BuildTransportAsync().ConfigureAwait(false);
         var envelopeCodec = BuildEnvelopeCodec();
 
-        m_AlphaCaptureTransport = new CaptureTransport(alphaTransport);
+        m_AlphaTransport = transports.Alpha;
+        m_BravoTransport = transports.Bravo;
+        m_AlphaCaptureTransport = new CaptureTransport(transports.Alpha);
 
         var alphaDependencies = MercuryFactory.Instance.BuildDependencies(ALPHA_NODE,
             alphaCryptoProvider,
@@ -64,17 +65,17 @@ internal sealed partial class DemoController
         var bravoDependencies = MercuryFactory.Instance.BuildDependencies(BRAVO_NODE,
             bravoCryptoProvider,
             envelopeCodec,
-            bravoTransport);
+            transports.Bravo);
 
         m_AlphaClient = MercuryFactory.Instance.BuildClient(alphaDependencies);
         m_BravoClient = MercuryFactory.Instance.BuildClient(bravoDependencies);
     }
 
     /// <summary>
-    /// Builds the crypto provider.
+    /// Builds the configured cryptographic provider.
     /// </summary>
-    /// <param name="keys">The keys.</param>
-    /// <returns>ICryptoProvider.</returns>
+    /// <param name="keys">The key provider.</param>
+    /// <returns>The configured cryptographic provider.</returns>
     private ICryptoProvider BuildCryptoProvider(SymmetricKeyProviderDictionary keys)
     {
         return m_Configuration.CryptoProvider switch
@@ -86,53 +87,9 @@ internal sealed partial class DemoController
     }
 
     /// <summary>
-    /// Build transport as an asynchronous operation.
+    /// Builds the configured envelope codec.
     /// </summary>
-    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns>A Task&lt;System.ValueTuple&gt; representing the asynchronous operation.</returns>
-    /// <exception cref="ArgumentException">The selected transport is not supported.</exception>
-    private async Task<(ITransport alphaTransport, ITransport bravoTransport)> BuildTransportAsync(
-        CancellationToken cancellationToken = default)
-    {
-        switch (m_Configuration.Transport)
-        {
-            case IN_MEMORY_TRANSPORT:
-                return InMemoryDuplexTransport.CreateConnectedPair();
-
-            case TCP_TRANSPORT:
-            {
-                var listener = new TcpListener(IPAddress.Loopback, 0);
-                listener.Start();
-
-                try
-                {
-                    var localEndpoint = (IPEndPoint)listener.LocalEndpoint;
-
-                    var bravoTransportTask = TcpTransport.AcceptAsync(listener, cancellationToken);
-                    var alphaTransportTask = TcpTransport.ConnectAsync(IPAddress.Loopback.ToString(),
-                        localEndpoint.Port, cancellationToken);
-
-                    await Task.WhenAll(alphaTransportTask, bravoTransportTask).ConfigureAwait(false);
-
-                    return (
-                        await alphaTransportTask.ConfigureAwait(false),
-                        await bravoTransportTask.ConfigureAwait(false));
-                }
-                finally
-                {
-                    listener.Stop();
-                }
-            }
-
-            default:
-                throw new ArgumentException("The selected transport is not supported.");
-        }
-    }
-
-    /// <summary>
-    /// Builds the envelope codec.
-    /// </summary>
-    /// <returns>EnvelopeCodec.</returns>
+    /// <returns>The configured envelope codec.</returns>
     private EnvelopeCodec BuildEnvelopeCodec()
     {
         return m_Configuration.EnvelopeCodec switch

@@ -1,10 +1,10 @@
 // ***********************************************************************
-// Assembly       : Mercury.Demo.Console
-// Author           : Matthew D. Barker
-// Created          : 07-16-2026
+// Assembly     : Mercury.Demo.Console
+// Author         : Matthew D. Barker
+// Created        : 07-16-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-16-2026
+// Last Modified On : 07-24-2026
 // ***********************************************************************
 // <copyright file="Program.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -26,7 +26,7 @@ internal static class Program
     /// </summary>
     private static async Task Main()
     {
-        var demoController = new DemoController();
+        await using var demoController = new DemoController();
 
         await demoController.RunAsync();
     }

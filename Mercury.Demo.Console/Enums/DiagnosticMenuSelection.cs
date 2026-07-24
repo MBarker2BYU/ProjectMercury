@@ -1,10 +1,10 @@
 // ***********************************************************************
-// Assembly       : Mercury.Demo.Console
-// Author           : Matthew D. Barker
-// Created          : 07-16-2026
+// Assembly     : Mercury.Demo.Console
+// Author         : Matthew D. Barker
+// Created        : 07-16-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-16-2026
+// Last Modified On : 07-24-2026
 // ***********************************************************************
 // <copyright file="DiagnosticMenuSelection.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -16,32 +16,24 @@
 namespace Mercury.Demo.Console.Enums;
 
 /// <summary>
-/// Enum DiagnosticMenuSelection
+/// Security demonstration menu selections.
 /// </summary>
 internal enum DiagnosticMenuSelection
 {
     /// <summary>
-    /// The replay last frame
+    /// Replay a protected TCP frame.
     /// </summary>
-    ReplayLastFrame,
+    Replay,
     /// <summary>
-    /// The tamper replay metadata
+    /// Tamper with the protected payload of a TCP frame.
     /// </summary>
-    TamperReplayMetadata,
+    Tamper,
     /// <summary>
-    /// The tamper authentication tag
+    /// Send using the Charlie recipient key while Bravo receives.
     /// </summary>
-    TamperAuthenticationTag,
+    WrongKey,
     /// <summary>
-    /// The tamper protected payload
-    /// </summary>
-    TamperProtectedPayload,
-    /// <summary>
-    /// The run all
-    /// </summary>
-    RunAll,
-    /// <summary>
-    /// The return
+    /// Return to the main menu.
     /// </summary>
     Return
 }
