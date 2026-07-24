@@ -743,12 +743,12 @@ Formal project documentation is maintained separately from this README.
 
 Planned documentation set:
 
-- [Mercury Requirements](docs/Mercury_Requirements.docx)
-- [Mercury Design](docs/Mercury_Design.docx)
-- [Mercury Threat Model](docs/Mercury_Threat_Model.docx)
-- [Mercury Test Plan](docs/Mercury_Test_Plan_and_Report.docx)
-- [Mercury User Manual](docs/Mercury_User_Manual.docx)
-- [Mercury Final Report](docs/Mercury_Final_Report.docx)
+- [Mercury Requirements](Docs/Mercury_Requirements.docx)
+- [Mercury Design](Docs/Mercury_Design.docx)
+- [Mercury Threat Model](Docs/Mercury_Threat_Model.docx)
+- [Mercury Test Plan](Docs/Mercury_Test_Plan_and_Report.docx)
+- [Mercury User Manual](Docs/Mercury_User_Manual.docx)
+- [Mercury Final Report](Docs/Mercury_Final_Report.docx)
 
 The README provides the project overview, release status, build instructions, test instructions, and operating summary. The formal documents provide the detailed academic requirements, architecture, threat model, test evidence, user guidance, and final project analysis.
 
