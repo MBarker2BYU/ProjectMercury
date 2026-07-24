@@ -4,7 +4,7 @@
 // Created          : 07-02-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-09-2026
+// Last Modified On : 07-23-2026
 // ***********************************************************************
 // <copyright file="PrimitiveTests.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -59,6 +59,60 @@ public sealed class PrimitiveTests
     }
 
     /// <summary>
+    /// Defines the test method AlgorithmId_Default_EqualsEmpty.
+    /// </summary>
+    [Fact]
+    public void AlgorithmId_Default_EqualsEmpty()
+    {
+        var defaultValue = default(AlgorithmId);
+
+        Assert.Equal(AlgorithmId.Empty, defaultValue);
+        Assert.True(AlgorithmId.Empty == defaultValue);
+        Assert.False(AlgorithmId.Empty != defaultValue);
+        Assert.True(defaultValue.IsEmpty);
+        Assert.Equal(string.Empty, defaultValue.Value);
+    }
+
+    /// <summary>
+    /// Defines the test method AlgorithmId_Equality_IsCaseSensitive.
+    /// </summary>
+    [Fact]
+    public void AlgorithmId_Equality_IsCaseSensitive()
+    {
+        var upperCase = new AlgorithmId("AES-GCM");
+        var lowerCase = new AlgorithmId("aes-gcm");
+
+        Assert.NotEqual(upperCase, lowerCase);
+        Assert.False(upperCase == lowerCase);
+        Assert.True(upperCase != lowerCase);
+    }
+
+    /// <summary>
+    /// Defines the test method AlgorithmId_EqualValues_HaveEqualHashCodes.
+    /// </summary>
+    [Fact]
+    public void AlgorithmId_EqualValues_HaveEqualHashCodes()
+    {
+        var first = new AlgorithmId("AES-GCM");
+        var second = new AlgorithmId("AES-GCM");
+
+        Assert.Equal(first, second);
+        Assert.Equal(first.GetHashCode(), second.GetHashCode());
+    }
+
+    /// <summary>
+    /// Defines the test method AlgorithmId_Constructor_WithPipe_StoresValue.
+    /// </summary>
+    [Fact]
+    public void AlgorithmId_Constructor_WithPipe_StoresValue()
+    {
+        var algorithmId = new AlgorithmId("AES|GCM");
+
+        Assert.Equal("AES|GCM", algorithmId.Value);
+        Assert.Equal("AES|GCM", algorithmId.ToString());
+    }
+
+    /// <summary>
     /// Defines the test method KeyId_Constructor_StoresValue.
     /// </summary>
     [Fact]
@@ -93,6 +147,48 @@ public sealed class PrimitiveTests
         Assert.Equal(string.Empty, keyId.ToString());
     }
 
+    /// <summary>
+    /// Defines the test method KeyId_Default_EqualsEmpty.
+    /// </summary>
+    [Fact]
+    public void KeyId_Default_EqualsEmpty()
+    {
+        var defaultValue = default(KeyId);
+
+        Assert.Equal(KeyId.Empty, defaultValue);
+        Assert.True(KeyId.Empty == defaultValue);
+        Assert.False(KeyId.Empty != defaultValue);
+        Assert.True(defaultValue.IsEmpty);
+        Assert.Equal(string.Empty, defaultValue.Value);
+    }
+
+    /// <summary>
+    /// Defines the test method KeyId_Equality_IsCaseSensitive.
+    /// </summary>
+    [Fact]
+    public void KeyId_Equality_IsCaseSensitive()
+    {
+        var upperCase = new KeyId("Sender-Key");
+        var lowerCase = new KeyId("sender-key");
+
+        Assert.NotEqual(upperCase, lowerCase);
+        Assert.False(upperCase == lowerCase);
+        Assert.True(upperCase != lowerCase);
+    }
+
+    /// <summary>
+    /// Defines the test method KeyId_EqualValues_HaveEqualHashCodes.
+    /// </summary>
+    [Fact]
+    public void KeyId_EqualValues_HaveEqualHashCodes()
+    {
+        var first = new KeyId("sender-key-1");
+        var second = new KeyId("sender-key-1");
+
+        Assert.Equal(first, second);
+        Assert.Equal(first.GetHashCode(), second.GetHashCode());
+    }
+    
     /// <summary>
     /// Defines the test method FrameworkVersion_Constructor_StoresMajorAndMinor.
     /// </summary>
@@ -343,7 +439,7 @@ public sealed class PrimitiveTests
     [Fact]
     public void ReadOnlyMemory_Slice_ReturnsRequestedBytes()
     {
-        var memory = new MercuryReadOnlyMemory(new byte[] { 10, 20, 30, 40, 50 });
+        var memory = new MercuryReadOnlyMemory([10, 20, 30, 40, 50]);
 
         var slice = memory.Slice(1, 3);
 
@@ -356,7 +452,7 @@ public sealed class PrimitiveTests
     [Fact]
     public void ReadOnlyMemory_Slice_WithZeroLength_ReturnsEmpty()
     {
-        var memory = new MercuryReadOnlyMemory(new byte[] { 10, 20, 30 });
+        var memory = new MercuryReadOnlyMemory([10, 20, 30]);
 
         var slice = memory.Slice(1, 0);
 
@@ -376,7 +472,7 @@ public sealed class PrimitiveTests
     [InlineData(2, 2)]
     public void ReadOnlyMemory_Slice_InvalidRange_Throws(int start, int length)
     {
-        var memory = new MercuryReadOnlyMemory(new byte[] { 1, 2, 3 });
+        var memory = new MercuryReadOnlyMemory([1, 2, 3]);
 
         Assert.Throws<ArgumentOutOfRangeException>(() => memory.Slice(start, length));
     }

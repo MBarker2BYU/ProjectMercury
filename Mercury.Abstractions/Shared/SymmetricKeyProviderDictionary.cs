@@ -4,7 +4,7 @@
 // Created        : 07-12-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-12-2026
+// Last Modified On : 07-23-2026
 // ***********************************************************************
 // <copyright file="SymmetricKeyProviderDictionary.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -46,23 +46,20 @@ public sealed class SymmetricKeyProviderDictionary : ISymmetricKeyProvider
     public SymmetricKeyProviderDictionary(IDictionary<KeyId, byte[]> keys)
     {
         if (keys == null)
-        {
             throw new ArgumentNullException(nameof(keys));
-        }
 
         m_Keys =
             new ConcurrentDictionary<KeyId, byte[]>();
 
         foreach (var keyPair in keys)
         {
-            if (keyPair.Value == null ||
-                keyPair.Value.Length == 0)
-            {
+            if (keyPair.Key.IsEmpty)
+                throw new ArgumentException("A symmetric key identifier cannot be empty.", nameof(keys));
+            
+            if (keyPair.Value == null || keyPair.Value.Length == 0)
                 throw new ArgumentException($"The symmetric key for KeyId '{keyPair.Key}' cannot be null or empty.", nameof(keys));
-            }
-
-            m_Keys[keyPair.Key] =
-                (byte[])keyPair.Value.Clone();
+            
+            m_Keys[keyPair.Key] = (byte[])keyPair.Value.Clone();
         }
     }
 

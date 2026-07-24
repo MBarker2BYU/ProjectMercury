@@ -55,6 +55,7 @@
             picReceivedFile.Location = new Point(12, 43);
             picReceivedFile.Name = "picReceivedFile";
             picReceivedFile.Size = new Size(977, 555);
+            picReceivedFile.SizeMode = PictureBoxSizeMode.StretchImage;
             picReceivedFile.TabIndex = 1;
             picReceivedFile.TabStop = false;
             // 

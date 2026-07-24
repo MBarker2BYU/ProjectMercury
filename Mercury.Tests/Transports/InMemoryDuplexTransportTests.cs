@@ -210,4 +210,21 @@ public sealed class InMemoryDuplexTransportTests
         Assert.Equal(new byte[] { 1 }, (await bravoOne.ReceiveAsync()).ToArray());
         Assert.Equal(new byte[] { 2 }, (await bravoTwo.ReceiveAsync()).ToArray());
     }
+
+    /// <summary>
+    /// Defines the test method
+    /// SendAsync_FrameExceedsMaximum_ThrowsInvalidOperationException.
+    /// </summary>
+    [Fact]
+    public async Task SendAsync_FrameExceedsMaximum_ThrowsInvalidOperationException()
+    {
+        var (alpha, _) = InMemoryDuplexTransport.CreateConnectedPair();
+
+        var oversizedFrame = new byte[(8 * 1024 * 1024) + 1];
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => alpha.SendAsync(new MercuryMemory(oversizedFrame)));
+
+        Assert.Contains("Frame is too large", exception.Message);
+    }
 }

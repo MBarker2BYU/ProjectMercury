@@ -1,10 +1,10 @@
 ﻿// ***********************************************************************
-// Assembly       : Mercury.Providers.AesGcm
+// Assembly     : Mercury.Providers.AesGcm
 // Author         : Matthew D. Barker
 // Created        : 07-11-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-12-2026
+// Last Modified On : 07-23-2026
 // ***********************************************************************
 // <copyright file="AesGcmCryptoProvider.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -13,14 +13,13 @@
 // </copyright>
 // ***********************************************************************
 
+using System.Security.Cryptography;
 using Mercury.Abstractions.Cryptograph;
 using Mercury.Abstractions.Enums;
 using Mercury.Abstractions.Envelope;
 using Mercury.Abstractions.Primitives;
 using Mercury.Abstractions.Services;
 using Mercury.Abstractions.Shared;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Mercury.Provider.AesGcm;
 
@@ -32,18 +31,19 @@ namespace Mercury.Provider.AesGcm;
 public sealed class AesGcmCryptoProvider : ICryptoProvider
 {
     /// <summary>
-    /// The algorithm name
+    /// The algorithm name.
     /// </summary>
     private const string ALGORITHM_NAME = "aes-gcm-256";
+
     /// <summary>
-    /// The algorithm identifier
+    /// The algorithm identifier.
     /// </summary>
     private static readonly AlgorithmId sm_AlgorithmId = new(ALGORITHM_NAME);
 
     /// <summary>
     /// The shared authenticated payload format.
     /// </summary>
-    private static readonly AuthenticatedPayloadFormat sm_PayloadFormat = new (12, 16);
+    private static readonly AuthenticatedPayloadFormat sm_PayloadFormat = new(12, 16);
 
     /// <summary>
     /// The symmetric key provider.
@@ -51,7 +51,8 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
     private readonly ISymmetricKeyProvider m_Keys;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AesGcmCryptoProvider"/> class.
+    /// Initializes a new instance of the
+    /// <see cref="AesGcmCryptoProvider"/> class.
     /// </summary>
     /// <param name="keys">
     /// The symmetric key provider.
@@ -59,8 +60,11 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="keys"/> is null.
     /// </exception>
-    public AesGcmCryptoProvider(ISymmetricKeyProvider keys) => m_Keys = keys
-            ?? throw new ArgumentNullException(nameof(keys));
+    public AesGcmCryptoProvider(ISymmetricKeyProvider keys)
+    {
+        m_Keys = keys
+                 ?? throw new ArgumentNullException(nameof(keys));
+    }
 
     /// <summary>
     /// Gets the provider name.
@@ -79,8 +83,7 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
     /// <returns>
     /// A task containing the crypto provider result.
     /// </returns>
-    public async Task<ICryptoProviderResult> SealAsync(ISealRequest request,
-        IEnvelopeService envelopeService, CancellationToken cancellationToken = default)
+    public async Task<ICryptoProviderResult> SealAsync(ISealRequest request, IEnvelopeService envelopeService, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -102,15 +105,13 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
 
         if (request.CryptoContext.SenderKeyId.IsEmpty)
         {
-            return envelopeService.BuildCryptoProviderResult(
-                false, ReadOnlyMemory.Empty, null,
+            return envelopeService.BuildCryptoProviderResult(false, ReadOnlyMemory.Empty, null,
                 FailureReason.Custom, "The sender key identifier cannot be empty.");
         }
 
         if (request.CryptoContext.RecipientKeyId.IsEmpty)
         {
-            return envelopeService.BuildCryptoProviderResult(
-                false, ReadOnlyMemory.Empty, null,
+            return envelopeService.BuildCryptoProviderResult(false, ReadOnlyMemory.Empty, null,
                 FailureReason.Custom, "The recipient key identifier cannot be empty.");
         }
 
@@ -126,41 +127,40 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
 
             ValidateKeySize(key);
 
-            var nonce =
-                RandomNumberGenerator.GetBytes(sm_PayloadFormat.NonceSize);
+            var nonce = RandomNumberGenerator.GetBytes(sm_PayloadFormat.NonceSize);
 
             var authenticationTag = new byte[sm_PayloadFormat.TagSize];
 
             var sourcePayload = request.Payload.ToArray();
 
-            var ciphertext =
-                new byte[sourcePayload.Length];
+            var ciphertext = new byte[sourcePayload.Length];
 
             var replayToken = RandomNumberGenerator.GetBytes(16);
+
             var replayTokenMemory = new ReadOnlyMemory(replayToken);
 
-            var additionalAuthenticatedData = BuildAdditionalAuthenticatedData(request.CryptoContext.SenderKeyId, 
-                request.CryptoContext.RecipientKeyId, sm_AlgorithmId, replayTokenMemory);
-
-            using (var aesGcm =
-                   new System.Security.Cryptography.AesGcm(key, sm_PayloadFormat.TagSize))
-            {
-                aesGcm.Encrypt(nonce, sourcePayload,
-                    ciphertext, authenticationTag, additionalAuthenticatedData);
-            }
-            
-            var header =
-                envelopeService.BuildEnvelopeHeader(new KeyId(Guid.NewGuid().ToString("N")), DateTimeOffset.UtcNow, 
-                    request.CryptoContext.SenderKeyId, request.CryptoContext.RecipientKeyId, sm_AlgorithmId, AlgorithmId.Empty,
+            /*
+             * The header and footer must exist before encryption because
+             * their complete contents are authenticated as additional data.
+             */
+            var header = envelopeService.BuildEnvelopeHeader(new KeyId(Guid.NewGuid()
+                            .ToString("N")), DateTimeOffset.UtcNow, request.CryptoContext.SenderKeyId,
+                    request.CryptoContext.RecipientKeyId, sm_AlgorithmId, AlgorithmId.Empty,
                     replayTokenMemory, request.HeaderMeta.Clone());
 
-            var footer =
-                envelopeService.BuildEnvelopeFooter(request.FooterMeta.Clone());
+            var footer = envelopeService.BuildEnvelopeFooter(request.FooterMeta.Clone());
+
+            var additionalAuthenticatedData = AuthenticatedEnvelopeData.Build(FrameworkVersion.V1.Major, 
+                FrameworkVersion.V1.Minor, header, footer);
+
+            using (var aesGcm = new System.Security.Cryptography.AesGcm(key, sm_PayloadFormat.TagSize))
+            {
+                aesGcm.Encrypt(nonce, sourcePayload, ciphertext, authenticationTag, additionalAuthenticatedData);
+            }
 
             var protectedPayload = sm_PayloadFormat.Pack(nonce, authenticationTag, ciphertext);
 
-            return envelopeService.PackEnvelope(header, new ReadOnlyMemory(protectedPayload),
-                footer);
+            return envelopeService.PackEnvelope(header, new ReadOnlyMemory(protectedPayload), footer);
         }
         catch (OperationCanceledException)
         {
@@ -174,9 +174,7 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
         finally
         {
             if (key != null)
-            {
-                CryptographicOperations.ZeroMemory(key);
-            }
+                CryptographicOperations.ZeroMemory(key);    
         }
     }
 
@@ -191,8 +189,7 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
     /// <returns>
     /// A task containing the crypto provider result.
     /// </returns>
-    public async Task<ICryptoProviderResult> OpenAsync(IOpenRequest request,
-        IEnvelopeService envelopeService, CancellationToken cancellationToken = default)
+    public async Task<ICryptoProviderResult> OpenAsync(IOpenRequest request, IEnvelopeService envelopeService, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -208,12 +205,10 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
         {
             ValidateEnvelope(secureEnvelope);
 
-            if (!string.Equals(secureEnvelope.Header.Encryption.Value,
-                    Name, StringComparison.Ordinal))
+            if (!string.Equals(secureEnvelope.Header.Encryption.Value, Name, StringComparison.Ordinal))
             {
-                return envelopeService.BuildCryptoProviderResult(false,
-                    ReadOnlyMemory.Empty, secureEnvelope, FailureReason.AuthenticationFailed,
-                    "The secure envelope was not created with the AES-GCM-256 provider.");
+                return envelopeService.BuildCryptoProviderResult(false, ReadOnlyMemory.Empty, secureEnvelope,
+                    FailureReason.AuthenticationFailed, "The secure envelope was not created with the AES-GCM-256 provider.");
             }
 
             var keyMemory = await m_Keys
@@ -226,7 +221,7 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
 
             var payload = DecryptPayload(key, secureEnvelope);
 
-            return envelopeService.BuildCryptoProviderResult(true, new ReadOnlyMemory(payload),
+            return envelopeService.BuildCryptoProviderResult(true, new ReadOnlyMemory(payload), 
                 secureEnvelope, FailureReason.None);
         }
         catch (OperationCanceledException)
@@ -235,25 +230,18 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
         }
         catch (CryptographicException)
         {
-            return envelopeService.BuildCryptoProviderResult(false,
-                ReadOnlyMemory.Empty, secureEnvelope, FailureReason.AuthenticationFailed,
-                "AES-GCM authentication failed.");
+            return envelopeService.BuildCryptoProviderResult(false, ReadOnlyMemory.Empty, secureEnvelope,
+                FailureReason.AuthenticationFailed, "AES-GCM authentication failed.");
         }
         catch (Exception exception)
         {
-            return envelopeService.BuildCryptoProviderResult(
-                false,
-                ReadOnlyMemory.Empty,
-                secureEnvelope,
-                FailureReason.InternalError,
-                exception.Message);
+            return envelopeService.BuildCryptoProviderResult(false, ReadOnlyMemory.Empty, secureEnvelope,
+                FailureReason.InternalError, exception.Message);
         }
         finally
         {
             if (key != null)
-            {
                 CryptographicOperations.ZeroMemory(key);
-            }
         }
     }
 
@@ -265,22 +253,17 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
     /// <returns>The opened payload.</returns>
     private static byte[] DecryptPayload(byte[] key, ISecureEnvelope secureEnvelope)
     {
-        sm_PayloadFormat.Unpack(secureEnvelope.Payload, out var nonce,
+        sm_PayloadFormat.Unpack(secureEnvelope.Payload, out var nonce, 
             out var authenticationTag, out var ciphertext);
 
-        var payload =
-            new byte[ciphertext.Length];
+        var payload = new byte[ciphertext.Length];
 
-        var additionalAuthenticatedData =
-            BuildAdditionalAuthenticatedData(
-                secureEnvelope.Header.SenderKeyId,
-                secureEnvelope.Header.RecipientKeyId,
-                secureEnvelope.Header.Encryption,
-                secureEnvelope.Header.ReplayToken);
+        var additionalAuthenticatedData = AuthenticatedEnvelopeData.Build(secureEnvelope.Version.Major,
+                secureEnvelope.Version.Minor, secureEnvelope.Header, secureEnvelope.Footer);
 
         using var aesGcm = new System.Security.Cryptography.AesGcm(key, sm_PayloadFormat.TagSize);
-        aesGcm.Decrypt(nonce, ciphertext, authenticationTag, payload,
-            additionalAuthenticatedData);
+
+        aesGcm.Decrypt(nonce, ciphertext, authenticationTag, payload, additionalAuthenticatedData);
 
         return payload;
     }
@@ -294,69 +277,34 @@ public sealed class AesGcmCryptoProvider : ICryptoProvider
         ArgumentNullException.ThrowIfNull(secureEnvelope);
 
         if (secureEnvelope.Payload.IsEmpty)
-        {
             throw new InvalidOperationException("The secure envelope payload is empty.");
-        }
+        
 
         if (secureEnvelope.Header.SenderKeyId.IsEmpty)
-        {
             throw new InvalidOperationException("The sender key identifier is missing.");
-        }
+        
 
         if (secureEnvelope.Header.RecipientKeyId.IsEmpty)
-        {
             throw new InvalidOperationException("The recipient key identifier is missing.");
-        }
+        
 
         if (secureEnvelope.Header.Encryption.IsEmpty)
-        {
             throw new InvalidOperationException("The encryption algorithm identifier is missing.");
-        }
+        
 
         if (secureEnvelope.Header.ReplayToken.IsEmpty)
-        {
             throw new InvalidOperationException("The replay token is missing.");
-        }
     }
 
     /// <summary>
     /// Validates the AES key size.
     /// </summary>
     /// <param name="key">The AES key.</param>
-    private static void ValidateKeySize(
-        byte[] key)
+    private static void ValidateKeySize(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);
 
         if (key.Length != 32)
-        {
-            throw new CryptographicException(
-                $"AES-GCM-256 requires a 32-byte key. Actual: {key.Length} bytes.");
-        }
-    }
-
-    /// <summary>
-    /// Builds the additional authenticated data.
-    /// </summary>
-    /// <param name="senderKeyId">The sender key identifier.</param>
-    /// <param name="recipientKeyId">The recipient key identifier.</param>
-    /// <param name="encryption">The encryption.</param>
-    /// <param name="replayToken">The replay token.</param>
-    /// <returns>System.Byte[].</returns>
-    /// <exception cref="ArgumentException">Replay token cannot be empty. - replayToken</exception>
-    private static byte[] BuildAdditionalAuthenticatedData(KeyId senderKeyId, KeyId recipientKeyId, AlgorithmId encryption, ReadOnlyMemory replayToken) 
-    {
-        if (replayToken.IsEmpty)
-        {
-            throw new ArgumentException("Replay token cannot be empty.", nameof(replayToken));
-        }
-
-        var replayTokenValue =
-            Convert.ToBase64String(replayToken.ToArray());
-
-        var value =
-            $"{senderKeyId.Value}|{recipientKeyId.Value}|{encryption.Value}|{replayTokenValue}";
-
-        return Encoding.UTF8.GetBytes(value);
+            throw new CryptographicException($"AES-GCM-256 requires a 32-byte key. Actual: {key.Length} bytes.");
     }
 }
