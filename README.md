@@ -747,7 +747,7 @@ Planned documentation set:
 /docs/Mercury_Requirements.docx
 /docs/Mercury_Design.docx
 /docs/Mercury_Threat_Model.docx
-/docs/Mercury_Test_Plan.docx
+/docs/Mercury_Test_Plan_and_Report.docx
 /docs/Mercury_User_Manual.docx
 /docs/Mercury_Final_Report.docx
 ```
