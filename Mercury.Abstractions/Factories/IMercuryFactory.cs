@@ -43,6 +43,8 @@ public interface IMercuryFactory
     /// <returns>IMercuryClientDependencies.</returns>
     IMercuryClientDependencies BuildDependencies(KeyId clientId, ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport);
 
+#if LEGACY_LOOPBACK_TESTS
+
     /// <summary>
     /// Builds the dependencies with a passthrough crypto provider
     /// </summary>
@@ -57,6 +59,8 @@ public interface IMercuryFactory
     /// </summary>
     /// <returns>IMercuryClient.</returns>
     IMercuryClient BuildClient(KeyId clientId);
+
+#endif
 
     /// <summary>
     /// Builds the client.

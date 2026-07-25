@@ -18,6 +18,7 @@ using Mercury.Core.Factories;
 using Mercury.Tests.Support;
 using System.Security.Cryptography;
 using Mercury.Abstractions.Primitives;
+
 using MercuryMemory = Mercury.Abstractions.Primitives.ReadOnlyMemory;
 
 namespace Mercury.Tests.Pipeline;
@@ -37,21 +38,6 @@ public sealed class MercuryFactoryTests
     /// <value>The alpha client identifier.</value>
     public static KeyId AlphaClientId()
         => ALPHA;
-        
-    
-
-    /// <summary>
-    /// Defines the test method BuildDependencies_NullProvider_ThrowsArgumentNullException.
-    /// </summary>
-    [Fact]
-    public void BuildDependencies_NullProvider_ThrowsArgumentNullException()
-    {
-        Assert.Throws<ArgumentNullException>(
-            () => MercuryFactory.Instance.BuildDependencies(
-                null!,
-                EnvelopeCodec.Binary,
-                new QueueTransport()));
-    }
 
     /// <summary>
     /// Defines the test method BuildDependencies_NullTransport_ThrowsArgumentNullException.

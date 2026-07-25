@@ -76,6 +76,8 @@ public sealed class MercuryFactory : IMercuryFactory
     public IMercuryClientDependencies BuildDependencies(KeyId clientId, ICryptoProvider cryptoProvider, EnvelopeCodec envelopeCodec, ITransport transport)
         => new MercuryClientDependencies(clientId, cryptoProvider, envelopeCodec, transport);
 
+#if LEGACY_LOOPBACK_TESTS
+
     /// <summary>
     /// Builds the dependencies with a passthrough crypto provider
     /// </summary>
@@ -83,7 +85,7 @@ public sealed class MercuryFactory : IMercuryFactory
     /// <param name="envelopeCodec">The envelope codec.</param>
     /// <param name="transport">The transport.</param>
     /// <returns>IMercuryClientDependencies.</returns>
-    [Obsolete("Remove prior to release", false)]
+    [Obsolete("Legacy pipeline API for diagnostic testing only. Remove before release.", false)]
     public IMercuryClientDependencies BuildDependencies(KeyId clientId, EnvelopeCodec envelopeCodec, ITransport transport)
         => new MercuryClientDependencies(clientId, new PassThroughCryptoProvider(), envelopeCodec, transport);
 
@@ -91,13 +93,15 @@ public sealed class MercuryFactory : IMercuryFactory
     /// Builds the client.
     /// </summary>
     /// <returns>IMercuryClient.</returns>
-    [Obsolete("Remove prior to release", false)]
+    [Obsolete("Legacy pipeline API for diagnostic testing only. Remove before release.", false)]
     public IMercuryClient BuildClient(KeyId clientId)
     {
         var dependencies = BuildDependencies(clientId, new PassThroughCryptoProvider(), sm_EnvelopeCodec, new LoopbackTransport());
 
         return BuildClient(dependencies);
     }
+
+#endif
 
     /// <summary>
     /// Builds the client.
