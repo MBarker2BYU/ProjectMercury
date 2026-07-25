@@ -181,7 +181,7 @@
             mtbTitleBar.Dock = DockStyle.Top;
             mtbTitleBar.Location = new Point(3, 3);
             mtbTitleBar.Name = "mtbTitleBar";
-            mtbTitleBar.Size = new Size(1914, 40);
+            mtbTitleBar.Size = new Size(1920, 40);
             mtbTitleBar.TabIndex = 0;
             mtbTitleBar.Title = "";
             // 
@@ -233,7 +233,6 @@
             // pnlSystemStatus
             // 
             pnlSystemStatus.AlignTitle = ContentAlignment.TopLeft;
-            pnlSystemStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             pnlSystemStatus.BackColor = Color.FromArgb(0, 15, 28);
             pnlSystemStatus.BorderColor = Color.FromArgb(34, 61, 84);
             pnlSystemStatus.Controls.Add(lblSystemTime);
@@ -459,7 +458,6 @@
             // pnlSecurityStatus
             // 
             pnlSecurityStatus.AlignTitle = ContentAlignment.TopLeft;
-            pnlSecurityStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             pnlSecurityStatus.BackColor = Color.FromArgb(0, 15, 28);
             pnlSecurityStatus.BorderColor = Color.FromArgb(34, 61, 84);
             pnlSecurityStatus.Controls.Add(pnlTamperStatus);
@@ -802,7 +800,6 @@
             // pnlExchangeFlow
             // 
             pnlExchangeFlow.AlignTitle = ContentAlignment.TopLeft;
-            pnlExchangeFlow.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pnlExchangeFlow.BackColor = Color.FromArgb(0, 15, 28);
             pnlExchangeFlow.BorderColor = Color.FromArgb(34, 61, 84);
             pnlExchangeFlow.Controls.Add(lblFlowMercuryReceive);
@@ -1004,7 +1001,6 @@
             // pnlSendData
             // 
             pnlSendData.AlignTitle = ContentAlignment.TopLeft;
-            pnlSendData.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pnlSendData.BackColor = Color.FromArgb(0, 15, 28);
             pnlSendData.BorderColor = Color.FromArgb(34, 61, 84);
             pnlSendData.Controls.Add(btnSendFile);
@@ -1077,7 +1073,6 @@
             // pnlEventLog
             // 
             pnlEventLog.AlignTitle = ContentAlignment.TopLeft;
-            pnlEventLog.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             pnlEventLog.BackColor = Color.FromArgb(0, 15, 28);
             pnlEventLog.BorderColor = Color.FromArgb(34, 61, 84);
             pnlEventLog.Controls.Add(btnClearLog);
@@ -1108,7 +1103,6 @@
             // lblEventLog
             // 
             lblEventLog.AlignTitle = ContentAlignment.TopLeft;
-            lblEventLog.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             lblEventLog.BackColor = Color.FromArgb(0, 15, 28);
             lblEventLog.BorderColor = Color.FromArgb(34, 61, 84);
             lblEventLog.Controls.Add(rtbEventLog);
@@ -1137,7 +1131,6 @@
             // pnlEnvelopeViewer
             // 
             pnlEnvelopeViewer.AlignTitle = ContentAlignment.TopLeft;
-            pnlEnvelopeViewer.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             pnlEnvelopeViewer.BackColor = Color.FromArgb(0, 15, 28);
             pnlEnvelopeViewer.BorderColor = Color.FromArgb(34, 61, 84);
             pnlEnvelopeViewer.Controls.Add(lblRawPayloadValue);
@@ -1318,7 +1311,6 @@
             // pnlHexPreview
             // 
             pnlHexPreview.AlignTitle = ContentAlignment.TopLeft;
-            pnlHexPreview.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             pnlHexPreview.BackColor = Color.FromArgb(0, 15, 28);
             pnlHexPreview.BorderColor = Color.FromArgb(34, 61, 84);
             pnlHexPreview.Controls.Add(rtbHexPreview);
@@ -1415,7 +1407,6 @@
             // pnlReceivedData
             // 
             pnlReceivedData.AlignTitle = ContentAlignment.TopLeft;
-            pnlReceivedData.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pnlReceivedData.BackColor = Color.FromArgb(0, 15, 28);
             pnlReceivedData.BorderColor = Color.FromArgb(34, 61, 84);
             pnlReceivedData.Controls.Add(lblReceivePayload);
@@ -1469,8 +1460,10 @@
             // 
             // MainWindow
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            AutoScroll = true;
+            AutoScrollMinSize = new Size(1920, 1080);
             BackColor = Color.FromArgb(0, 12, 25);
             ClientSize = new Size(1920, 1080);
             Controls.Add(pnlReceivedData);
@@ -1485,6 +1478,8 @@
             Controls.Add(pnlHeaderLogo);
             Controls.Add(mtbTitleBar);
             FormBorderStyle = FormBorderStyle.None;
+            MaximizeBox = false;
+            MaximumSize = new Size(1920, 1080);
             Name = "MainWindow";
             Padding = new Padding(3);
             StartPosition = FormStartPosition.CenterScreen;

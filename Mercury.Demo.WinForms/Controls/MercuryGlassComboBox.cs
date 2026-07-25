@@ -24,7 +24,7 @@ namespace Mercury.Demo.WinForms.Controls;
 /// Displays a custom glass-style drop-down list.
 /// </summary>
 [DefaultEvent(nameof(SelectedIndexChanged))]
-public sealed partial class MercuryGlassComboBox : UserControl
+public sealed partial class MercuryGlassComboBox : Control
 {
     private const int HOVER_ALPHA_INCREASE = 20;
     private const int OPEN_ALPHA_INCREASE = 35;
@@ -63,7 +63,7 @@ public sealed partial class MercuryGlassComboBox : UserControl
             true);
 
         DoubleBuffered = true;
-
+        
         BackColor = Color.FromArgb(42, 42, 46);
         ForeColor = Color.FromArgb(225, 232, 238);
 

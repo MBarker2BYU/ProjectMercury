@@ -270,7 +270,7 @@ namespace Mercury.Demo.WinForms
         {
             lblReceiveResult.Text = @$"FAILED: {message}";
             lblReceiveResult.ForeColor = MercuryTheme.FailureColor;
-            lblReceiveResult.BackColor = Color.FromArgb( 255, MercuryTheme.FailureColor);
+            lblReceiveResult.BackColor = Color.FromArgb(255, MercuryTheme.FailureColor);
 
             MessageBox.Show(this, message, @"Mercury Demo",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -285,9 +285,9 @@ namespace Mercury.Demo.WinForms
             return txtSendPayload.Text;
         }
 
-        
 
-        
+
+
 
         private void DisplaySuccessfulSecurityState()
         {
@@ -341,7 +341,7 @@ namespace Mercury.Demo.WinForms
         {
             txtReceivePayload.Text =
                 recoveredPayload;
-            
+
             ApplyEnvelopeDisplay(envelope);
 
             SetReceiveResult(
@@ -354,12 +354,12 @@ namespace Mercury.Demo.WinForms
 
         internal void DisplaySuccessfulFile(string fileName, ReadOnlyMemory payload, DemoEnvelopeDisplay envelope)
         {
-           
+
             txtReceivePayload.Text =
                 @$"{fileName}{Environment.NewLine}" +
                 @$"{FormatFileSize(payload.Length)} received";
 
-            
+
 
             ApplyEnvelopeDisplay(envelope);
 
@@ -403,8 +403,8 @@ namespace Mercury.Demo.WinForms
             lblRawPayloadValue.Text =
                 envelope.RawPayloadVisible;
 
-           rtbHexPreview.Text =
-                envelope.HexPreview;
+            rtbHexPreview.Text =
+                 envelope.HexPreview;
 
             rtbHexPreview.ForeColor =
                 MercuryTheme.SuccessColor;
@@ -424,7 +424,7 @@ namespace Mercury.Demo.WinForms
      DemoAttackMode attackMode)
         {
             txtReceivePayload.Clear();
-            
+
             ClearEnvelopeDisplay();
 
             SetReceiveResult($"FAILED | {failureMessage}", MercuryTheme.FailureColor);
@@ -607,7 +607,7 @@ namespace Mercury.Demo.WinForms
 
             lblFlowMercuryReceive.ForeColor = MercuryTheme.ForeColor;
 
-            lblValidateEnveleope.Text =@"VALIDATE ENVELOPE";
+            lblValidateEnveleope.Text = @"VALIDATE ENVELOPE";
 
             lblFlowMercuryReceive.Text = @"MERCURY RECEIVE SIDE";
         }
@@ -624,7 +624,7 @@ namespace Mercury.Demo.WinForms
             lblProtectedSizeValue.Text = @"-";
             lblFrameSizeValue.Text = @"-";
             lblRawPayloadValue.Text = @"-";
-            
+
             rtbHexPreview.Clear();
         }
 
@@ -789,7 +789,7 @@ namespace Mercury.Demo.WinForms
         /// The m demo controller
         /// </summary>
         private readonly DemoController? m_DemoController;
-
+        
         /// <summary>
         /// Gets the event log.
         /// </summary>
