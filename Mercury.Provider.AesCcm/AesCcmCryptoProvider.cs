@@ -1,13 +1,13 @@
 ﻿// ***********************************************************************
-// Assembly     : Mercury.Providers.AesCcm
-// Author         : Kim K. Brown
+// Assembly     : Mercury.Provider.AesCcm
+// Authors       : Matthew D. Barker / Kim K. Brown
 // Created        : 07-18-2026
 //
 // Last Modified By : Kim K. Brown
 // Last Modified On : 07-18-2026
 // ***********************************************************************
 // <copyright file="AesCcmCryptoProvider.cs">
-//     Copyright (c) Kim K. Brown. All rights reserved.
+//     Copyright (c) Matthew D. Barker. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
 // </copyright>

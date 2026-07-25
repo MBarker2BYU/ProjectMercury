@@ -1,13 +1,13 @@
 ﻿// ***********************************************************************
-// Assembly     : Mercury.Providers.AesGcm
-// Author         : Kim Brown
+// Assembly     : Mercury.Transport.FileDrop
+// Authors       : Matthew D. Barker / Kim K. Brown
 // Created        : 07-16-2026
 //
-// Last Modified By : Kim Brown
+// Last Modified By : Kim K. Brown
 // Last Modified On : 07-16-2026
 // ***********************************************************************
 // <copyright file="FileDropTransport.cs">
-//     Copyright (c) Kim Brown. All rights reserved.
+//     Copyright (c) Matthew D. Barker. All rights reserved.
 //     Submitted in partial fulfillment of CSE499 Senior Capstone Project
 //     at Brigham Young University-Idaho.
 // </copyright>

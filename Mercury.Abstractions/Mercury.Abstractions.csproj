@@ -4,4 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+	<Target Name="CopyDllToSolution"
+	        AfterTargets="Build"
+	        Condition="'$(OS)' == 'Windows_NT' And '$(SolutionDir)' != ''">
+		<Exec Command="if not exist &quot;$(SolutionDir)Dlls\$(Configuration)&quot; mkdir &quot;$(SolutionDir)Dlls\$(Configuration)&quot;&#xD;&#xA;copy /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)Dlls\$(Configuration)\&quot;" />
+	</Target>
+
 </Project>

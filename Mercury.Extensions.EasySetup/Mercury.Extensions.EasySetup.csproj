@@ -6,9 +6,22 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Mercury.Abstractions\Mercury.Abstractions.csproj" />
-    <ProjectReference Include="..\Mercury.Core\Mercury.Core.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<Reference Include="Mercury.Abstractions">
+			<HintPath>..\Dlls\$(Configuration)\Mercury.Abstractions.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
+
+		<Reference Include="Mercury.Core">
+			<HintPath>..\Dlls\$(Configuration)\Mercury.Core.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
+	</ItemGroup>
+
+	<Target Name="CopyDllToSolution"
+	        AfterTargets="Build"
+	        Condition="'$(OS)' == 'Windows_NT' And '$(SolutionDir)' != ''">
+		<Exec Command="if not exist &quot;$(SolutionDir)Dlls\$(Configuration)&quot; mkdir &quot;$(SolutionDir)Dlls\$(Configuration)&quot;&#xD;&#xA;copy /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)Dlls\$(Configuration)\&quot;" />
+	</Target>
 
 </Project>

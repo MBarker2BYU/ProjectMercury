@@ -9,7 +9,66 @@
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 	</PropertyGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<ProjectReference Include="..\Mercury.Abstractions\Mercury.Abstractions.csproj" />
+		<ProjectReference Include="..\Mercury.Core\Mercury.Core.csproj" />
+		<ProjectReference Include="..\Mercury.Extensions.EasySetup\Mercury.Extensions.EasySetup.csproj" />
+		<ProjectReference Include="..\Mercury.Provider.AesCcm\Mercury.Provider.AesCcm.csproj" />
+		<ProjectReference Include="..\Mercury.Provider.AesGcm\Mercury.Provider.AesGcm.csproj" />
+		<ProjectReference Include="..\Mercury.Provider.ChaCha20\Mercury.Provider.ChaCha20.csproj" />
+		<ProjectReference Include="..\Mercury.Transport.FileDrop\Mercury.Transport.FileDrop.csproj" />
+		<ProjectReference Include="..\Mercury.Transport.InMemory\Mercury.Transport.InMemory.csproj" />
+		<ProjectReference Include="..\Mercury.Transport.Tcp\Mercury.Transport.Tcp.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<Reference Include="Mercury.Abstractions">
+			<HintPath>..\Dlls\Release\Mercury.Abstractions.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
+
+		<Reference Include="Mercury.Core">
+			<HintPath>..\Dlls\Release\Mercury.Core.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
+
+		<Reference Include="Mercury.Core">
+			<HintPath>..\Dlls\Release\Mercury.Extensions.EasySetup.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
+
+		<Reference Include="Mercury.Core">
+			<HintPath>..\Dlls\Release\Mercury.Provider.AesCcm.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
+
+		<Reference Include="Mercury.Core">
+			<HintPath>..\Dlls\Release\Mercury.Provider.AesGcm.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
+
+		<Reference Include="Mercury.Core">
+			<HintPath>..\Dlls\Release\Mercury.Provider.ChaCha20.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
+
+		<Reference Include="Mercury.Core">
+			<HintPath>..\Dlls\Release\Mercury.Transport.FileDrop.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
+
+		<Reference Include="Mercury.Core">
+			<HintPath>..\Dlls\Release\Mercury.Transport.InMemory.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
+
+		<Reference Include="Mercury.Core">
+			<HintPath>..\Dlls\Release\Mercury.Transport.Tcp.dll</HintPath>
+			<Private>true</Private>
+		</Reference>
+	</ItemGroup>
+
+	<!--<ItemGroup>
 	  <ProjectReference Include="..\Mercury.Abstractions\Mercury.Abstractions.csproj" />
 	  <ProjectReference Include="..\Mercury.Core\Mercury.Core.csproj" />
 	  <ProjectReference Include="..\Mercury.Extensions.EasySetup\Mercury.Extensions.EasySetup.csproj" />
@@ -17,7 +76,7 @@
 	  <ProjectReference Include="..\Mercury.Provider.ChaCha20\Mercury.Provider.ChaCha20.csproj" />
 	  <ProjectReference Include="..\Mercury.Transport.InMemory\Mercury.Transport.InMemory.csproj" />
 	  <ProjectReference Include="..\Mercury.Transport.Tcp\Mercury.Transport.Tcp.csproj" />
-	</ItemGroup>
+	</ItemGroup>-->
 
 	<ItemGroup>
 	  <Compile Update="Properties\Resources.Designer.cs">
