@@ -338,14 +338,14 @@ The solution is organized into separate projects:
 | Mercury.Core | Main communications pipeline, validation, replay protection, client logic, and coordination. |
 | Mercury.Provider.AesGcm | AES-GCM authenticated-encryption provider. |
 | Mercury.Provider.ChaCha20 | ChaCha20-Poly1305 authenticated-encryption provider. |
+| Mercury.Provider.AesCcm | AES-CCM authenticated-encryption provider contributed by Kim K. Brown. Included in the solution and repository but not integrated into the RC 1.2 demo applications. |
 | Mercury.Transport.InMemory | In-memory transport for demonstrations and automated tests. |
 | Mercury.Transport.Tcp | Framed TCP transport implementation. |
-| Mercury.Transport.FileDrop | File-based transport plugin. |
+| Mercury.Transport.FileDrop | File-based transport plugin contributed by Kim K. Brown. Included in the solution and repository but not integrated into the RC 1.2 demo applications. |
 | Mercury.Demo.Console | Cross-platform console demonstration application. |
 | Mercury.Demo.WinForms | Windows graphical demonstration application. |
 | Mercury.Tests | Automated xUnit tests validating framework behavior. |
 
-AES-CCM remains pending and is not claimed as a completed RC 1.2 provider.
 
 ---
 
@@ -459,7 +459,6 @@ Mercury RC 1.2 includes two operational authenticated-encryption providers:
 
 Both providers implement the same Mercury cryptographic-provider contract and can be selected without changing the core client, codec, or transport pipeline.
 
-AES-CCM remains pending and is not claimed as a completed RC 1.2 provider.
 
 Authenticated encryption provides:
 
@@ -543,11 +542,12 @@ Replay protection is scoped to the replay protector instance and its stored stat
 
 Mercury treats transports as untrusted delivery mechanisms.
 
-The current solution includes:
+The RC 1.2 demo applications include:
 
 - In-memory transport for tests and demonstrations
 - Framed TCP transport
-- FileDrop transport plugin
+
+A FileDrop transport contributed by Kim K. Brown is included in the solution and GitHub repository but is not integrated into the RC 1.2 demo applications.
 
 The transport layer is intentionally separated from the security layer. This allows the same security pipeline to be used with different transports.
 
@@ -572,7 +572,6 @@ Mercury RC 1.2 demonstrates:
 - ChaCha20-Poly1305 authenticated encryption
 - Binary and JSON SecureEnvelope encoding
 - In-memory and TCP transport
-- FileDrop transport integration
 - Sender and recipient key context
 - Wrong-key rejection
 - Protected-payload tamper rejection
@@ -677,18 +676,15 @@ Mercury RC 1.2 is feature-complete for the defined CSE499 scope.
 
 Latest verification:
 
-- 330 automated tests discovered
-- 328 tests passed
-- 2 AES-CCM tests skipped
+- 365 automated tests passed
 - 0 tests failed
+- 0 tests skipped
 - WinForms demonstration verified
 - AES-GCM verified
 - ChaCha20-Poly1305 verified
 - Binary and JSON codecs verified
 - In-memory and TCP transport scenarios verified
-- Tamper and replay demonstrations verified
-
-The two skipped tests are associated with the pending AES-CCM provider and are not failures in the completed RC 1.2 providers.
+- Tamper, replay, and wrong-key demonstrations verified
 
 ---
 
@@ -709,8 +705,6 @@ Known limitations include:
 - Process-local in-memory replay protection
 - No production-scale fuzz testing or long-duration stress certification
 - Demo-focused user interfaces
-- AES-CCM provider remains pending
-- FileDrop recovery and production hardening remain limited compared with the primary in-memory and TCP paths
 
 These limitations are documented intentionally so the project does not overclaim its current capabilities.
 
@@ -753,6 +747,14 @@ Planned documentation set:
 The README provides the project overview, release status, build instructions, test instructions, and operating summary. The formal documents provide the detailed academic requirements, architecture, threat model, test evidence, user guidance, and final project analysis.
 
 ---
+
+
+## Contributor Recognition
+
+Kim K. Brown contributed to the implementation of the AES-CCM cryptographic provider and the FileDrop transport module, including corresponding tests.
+
+These modules remain included in the solution and GitHub repository but are not integrated into the RC 1.2 demo applications.
+
 
 ## Copyright, Confidentiality, and Academic Use
 
