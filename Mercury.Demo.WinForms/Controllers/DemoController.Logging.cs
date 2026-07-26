@@ -89,7 +89,8 @@ internal sealed partial class DemoController
     /// Appends the log.
     /// </summary>
     /// <param name="logEntry">The log entry.</param>
-    public void AppendLog(DemoLogEntry logEntry)
+    /// <param name="timestamp"></param>
+    public void AppendLog(DemoLogEntry logEntry, DateTimeOffset? timestamp = null)
     {
         if (m_View.InvokeRequired)
         {
@@ -121,7 +122,7 @@ internal sealed partial class DemoController
 
         eventLog.SelectionColor = MercuryTheme.MutedColor;
 
-        eventLog.AppendText($"{logEntry.Timestamp:HH:mm:ss.fff}  ");
+        eventLog.AppendText(timestamp == null ? $"{logEntry.Timestamp:HH:mm:ss.fff}  " : $"{timestamp:HH:mm:ss.fff}  ");
 
         eventLog.SelectionColor = levelColor;
 

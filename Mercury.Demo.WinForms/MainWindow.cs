@@ -5,7 +5,7 @@
 // Created        : 07-22-2026
 //
 // Last Modified By : Matthew D. Barker
-// Last Modified On : 07-22-2026
+// Last Modified On : 07-25-2026
 // ***********************************************************************
 // <copyright file="MainWindow.cs">
 //     Copyright (c) Matthew D. Barker. All rights reserved.
@@ -14,23 +14,23 @@
 // </copyright>
 // ***********************************************************************
 
+using Mercury.Abstractions.Primitives;
 using Mercury.Demo.WinForms.Controllers;
 using Mercury.Demo.WinForms.Controls;
 using Mercury.Demo.WinForms.Demo;
-using Mercury.Demo.WinForms.Presentation;
-using System.Drawing.Drawing2D;
-using System.Text;
-using Mercury.Abstractions;
-using Mercury.Abstractions.Envelope;
-using Mercury.Abstractions.Primitives;
 using Mercury.Demo.WinForms.Enums;
+using Mercury.Demo.WinForms.Presentation;
+using Microsoft.VisualBasic.Logging;
+using System.Diagnostics;
+using System.Drawing.Drawing2D;
+using System.Globalization;
+using static System.Windows.Forms.LinkLabel;
 
 namespace Mercury.Demo.WinForms
 {
     /// <summary>
     /// Class MainWindow.
-    /// Implements the <see cref="System.Windows.Forms.Form" />
-    /// </summary>
+    /// Implements the <see cref="System.Windows.Forms.Form" /></summary>
     /// <seealso cref="System.Windows.Forms.Form" />
     public partial class MainWindow : Form
     {
@@ -284,10 +284,6 @@ namespace Mercury.Demo.WinForms
         {
             return txtSendPayload.Text;
         }
-
-
-
-
 
         private void DisplaySuccessfulSecurityState()
         {
@@ -727,6 +723,111 @@ namespace Mercury.Demo.WinForms
             RenderBorder(e.Graphics);
         }
 
+        /// <summary>
+        /// Raises the <see cref="E:System.Windows.Forms.Form.DpiChanged" /> event.
+        /// </summary>
+        /// <param name="e">An <see cref="T:System.Windows.Forms.DpiChangedEventArgs" /> that contains the event data.</param>
+        protected override void OnDpiChanged(DpiChangedEventArgs e)
+        {
+            base.OnDpiChanged(e);
+
+            BeginInvoke(ReloadLog);
+        }
+
+        private void ReloadLog()
+        {
+            if(rtbEventLog.IsDisposed)
+                return;
+
+            var logEntries = rtbEventLog.Lines;
+
+            rtbEventLog.SuspendLayout();
+            rtbEventLog.Clear();
+
+            foreach (var logEntry in logEntries)
+            {
+                if (string.IsNullOrWhiteSpace(logEntry))
+                {
+                    rtbEventLog.AppendText(logEntry);
+                    continue;
+                }
+
+                var result = ParseLogEntry(logEntry);
+
+                if (result is { logEntryType: not null, entry: not null })
+                        m_DemoController?.AppendLog(new DemoLogEntry(result.logEntryType, result.entry), result.timestamp);
+            }
+
+            rtbEventLog.ResumeLayout();
+            rtbEventLog.ScrollToCaret();
+        }
+
+        /// <summary>
+        /// Parses the log entry.
+        /// </summary>
+        /// <param name="logEntry">The log entry.</param>
+        /// <returns>(System.Nullable&lt;System.DateTimeOffset&gt; timestamp, System.String logEntryType, System.String entry).</returns>
+        private (DateTimeOffset? timestamp, string? logEntryType, string? entry) ParseLogEntry(string logEntry)
+        {
+            if (string.IsNullOrWhiteSpace(logEntry))
+                return (null, null, null);
+
+            if (!logEntry.Contains('[') || !logEntry.Contains(']'))
+                return (null, null, logEntry);
+
+            var levelStart = logEntry.IndexOf('[', 0);
+            var levelEnd = logEntry.IndexOf(']', levelStart + 1);
+
+            var ts = logEntry[..levelStart].Trim();
+            var timestamp = ParseTimestamp(ts);
+            
+            var level = logEntry[(levelStart + 1)..levelEnd];
+            var message = logEntry[(levelEnd + 1)..].Trim();
+
+            return (timestamp, level, message);
+        }
+
+        /// <summary>
+        /// Parses the timestamp.
+        /// </summary>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <returns>System.Nullable&lt;System.DateTimeOffset&gt;.</returns>
+        private DateTimeOffset? ParseTimestamp(string timestamp)
+        {
+            // Format: 20:05:53.324
+            if (string.IsNullOrWhiteSpace(timestamp))
+                return null;
+
+            // Try the most common high-precision format first
+            if (TimeSpan.TryParseExact(timestamp, @"hh\:mm\:ss\.fff",
+                    CultureInfo.InvariantCulture,
+                    out TimeSpan time))
+            {
+                // Combine with today's date (or any base date you prefer)
+                var today = DateTime.Today;
+                var dt = today.Add(time);
+
+                return new DateTimeOffset(dt);
+            }
+
+            // Fallback – try a couple of other common variations
+            string[] formats = {
+                @"hh\:mm\:ss\.fff",
+                @"h\:mm\:ss\.fff",
+                @"hh\:mm\:ss",
+                @"h\:mm\:ss"
+            };
+
+            if (TimeSpan.TryParseExact(timestamp, formats,
+                    CultureInfo.InvariantCulture,
+                    out time))
+            {
+                return new DateTimeOffset(DateTime.Today.Add(time));
+            }
+
+            return null; // could not parse
+        }
+
         #endregion
 
         #region Static
@@ -789,13 +890,13 @@ namespace Mercury.Demo.WinForms
         /// The m demo controller
         /// </summary>
         private readonly DemoController? m_DemoController;
-        
+
         /// <summary>
         /// Gets the event log.
         /// </summary>
         /// <value>The event log.</value>
         internal RichTextBox EventLog { get; }
-
+        
         #endregion
     }
 }
