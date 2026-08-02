@@ -113,6 +113,7 @@ partial class MercuryTitleBar
         m_CloseButton.Font = new Font("Segoe UI", 9F);
         m_CloseButton.ForeColor = Color.FromArgb(225, 232, 238);
         m_CloseButton.Image = Properties.Resources.Close;
+        m_CloseButton.ImageAlign = ContentAlignment.MiddleLeft;
         m_CloseButton.Location = new Point(854, 4);
         m_CloseButton.Name = "m_CloseButton";
         m_CloseButton.Padding = new Padding(10, 0, 10, 0);

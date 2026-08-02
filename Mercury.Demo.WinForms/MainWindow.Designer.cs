@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             mtbTitleBar = new Mercury.Demo.WinForms.Controls.MercuryTitleBar();
             pnlHeaderLogo = new Mercury.Demo.WinForms.Controls.MercuryGlassPanel();
             lblMotto = new Label();
@@ -1045,7 +1046,7 @@
             txtSendPayload.BackColor = Color.FromArgb(0, 15, 28);
             txtSendPayload.BorderColor = Color.FromArgb(34, 61, 84);
             txtSendPayload.CornerStyle = WinForms.Controls.Enums.CornerStyle.Squared;
-            txtSendPayload.Font = new Font("Segoe UI", 9F);
+            txtSendPayload.Font = new Font("Segoe UI", 11.25F);
             txtSendPayload.ForeColor = Color.FromArgb(225, 232, 238);
             txtSendPayload.Location = new Point(19, 52);
             txtSendPayload.MinimumSize = new Size(50, 32);
@@ -1054,6 +1055,7 @@
             txtSendPayload.Padding = new Padding(10, 6, 10, 6);
             txtSendPayload.Size = new Size(558, 316);
             txtSendPayload.TabIndex = 2;
+            txtSendPayload.Text = resources.GetString("txtSendPayload.Text");
             // 
             // btnSend
             // 
@@ -1447,7 +1449,7 @@
             txtReceivePayload.BackColor = Color.FromArgb(0, 15, 28);
             txtReceivePayload.BorderColor = Color.FromArgb(34, 61, 84);
             txtReceivePayload.CornerStyle = WinForms.Controls.Enums.CornerStyle.Squared;
-            txtReceivePayload.Font = new Font("Segoe UI", 9F);
+            txtReceivePayload.Font = new Font("Segoe UI", 11.25F);
             txtReceivePayload.ForeColor = Color.FromArgb(225, 232, 238);
             txtReceivePayload.Location = new Point(19, 52);
             txtReceivePayload.MinimumSize = new Size(50, 32);

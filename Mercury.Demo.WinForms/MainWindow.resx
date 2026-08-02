@@ -117,4 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="txtSendPayload.Text" xml:space="preserve">
+    <value>TOP SECRET // EYES ONLY // MERCURY CONTROL
+
+AUTHORIZED PERSONNEL ONLY. This transmission contains protected operational data for controlled demonstration. Do not copy, forward, archive, or disclose outside approved channels. Validate sender identity, recipient authorization, envelope integrity, replay status, and key context before release. Mismatch, tamper event, replay attempt, or wrong-key condition requires immediate rejection, logging, and incident response.
+
+END OF CONTROLLED TRANSMISSION!</value>
+  </data>
 </root>

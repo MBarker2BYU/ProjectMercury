@@ -742,7 +742,7 @@ Planned documentation set:
 - [Mercury Threat Model](Docs/Mercury_Threat_Model.pdf)
 - [Mercury Test Plan](Docs/Mercury_Test_Plan_and_Report.pdf)
 - [Mercury User Manual](Docs/Mercury_User_Manual.pdf)
-- [Mercury Final Report](Docs/Mercury_Final_Report.pdf)
+- [Mercury Final Report](Docs/Mercury_Final_Project_Report.pdf)
 
 The README provides the project overview, release status, build instructions, test instructions, and operating summary. The formal documents provide the detailed academic requirements, architecture, threat model, test evidence, user guidance, and final project analysis.
 
