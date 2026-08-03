@@ -17,6 +17,10 @@
 | :--- | :--- | :--- |
 | **Mercury RC 1.2** | **1.2.0-rc.1** | **CSE499 Release Candidate** |
 
+## Final Project Presentation
+
+[Watch the Mercury CSE499 Final Project Presentation](https://www.youtube.com/watch?v=WH4le9u4RpQ)
+
 ## Team Quotes
 
 | Team Member | Quote |
